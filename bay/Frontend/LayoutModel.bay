@@ -1,0 +1,56 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend;
+
+use Runtime.Serializer;
+use Runtime.Web.BaseLayoutModel;
+use Runtime.Web.RenderContainer;
+use BayLang.Constructor.Frontend.CoreUI;
+use BayLang.Constructor.Frontend.DefaultLayout;
+
+
+class LayoutModel extends BaseLayoutModel
+{
+	/**
+	 * Create model
+	 */
+	void constructor(Dict params = null)
+	{
+		parent(params);
+	}
+	
+	
+	/**
+	 * Returns layout class name
+	 */
+	string getLayoutClassName()
+	{
+		if (this.layout_name == "default") return classof DefaultLayout;
+		return parent();
+	}
+	
+	
+	/**
+	 * Returns Core UI
+	 */
+	string getCoreUI() => classof CoreUI;
+	
+	
+	/**
+	 * Init layout
+	 */
+	async void init(RenderContainer container)
+	{
+	}
+	
+	
+	/**
+	 * Process frontend data
+	 */
+	void processFrontendData(Serializer serializer, Map data)
+	{
+		parent(serializer, data);
+	}
+}

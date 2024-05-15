@@ -1,0 +1,40 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend;
+
+use Runtime.Web.BaseRoute;
+use Runtime.Web.RouteInfo;
+
+
+class Routes extends BaseRoute
+{
+	/**
+	 * Returns layout name
+	 */
+	string getLayoutName() => "default";
+	
+	
+	/**
+	 * Returns routes
+	 */
+	pure Collection<RouteInfo> getRoutes()
+	{
+		return
+		[
+			/*new RouteInfo
+			{
+				"uri": "/",
+				"name": "app:page:index",
+				"model": "BayLang.Constructor.Frontend.Main.IndexPageModel",
+			},
+			new RouteInfo
+			{
+				"uri": "/frame/",
+				"name": "app:frame:index",
+				"model": "BayLang.Constructor.Frontend.Frame.PageModel",
+			},*/
+		];
+	}
+}

@@ -1,0 +1,298 @@
+<!--
+ *  BayLang Constructor
+-->
+
+<class name="BayLang.Constructor.Frontend.Main.IndexPage">
+
+<use name="Runtime.Math" />
+<use name="Runtime.Web.BaseModel" />
+<use name="Runtime.Web.RenderProvider" />
+<use name="BayLang.Constructor.Frontend.Main.Box" component="true" />
+<use name="BayLang.Constructor.Frontend.Main.Structure" component="true" />
+
+
+<style>
+.index_page{
+	display: flex;
+	flex-direction: column;
+	height: 100vh;
+}
+.index_page__menu{
+	display: flex;
+	justify-content: flex-start;
+	padding: 10px;
+	gap: 20px;
+	border-bottom: 1px var(--widget-color-border) solid;
+}
+.index_page__menu_item{
+	cursor: pointer;
+	user-select: none;
+}
+.index_page__menu_item_gap{
+	flex: 1;
+}
+.index_page__content{
+	display: flex;
+	flex: 1;
+	height: calc(100vh - 40px);
+}
+.index_page__frame{
+	display: flex;
+	position: relative;
+	padding: 10px;
+	justify-content: stretch;
+    align-items: stretch;
+	flex: 1;
+}
+.index_page__frame iframe{
+	border-style: none;
+	overflow: visible;
+	width: 100%;
+}
+.index_page__property{
+	display: flex;
+	width: 300px;
+	border-left: 1px var(--widget-color-border) solid;
+}
+.index_page__property.hide{
+	display: none;
+}
+.index_page__property_menu{
+}
+.index_page__property_wrap{
+	flex: 1;
+}
+.index_page__property_tab{
+	display: none;
+	flex-wrap: wrap;
+	flex-direction: column;
+	justify-content: stretch;
+    align-items: stretch;
+	height: 100%;
+}
+.index_page__property_tab.selected{
+	display: flex;
+}
+.index_page__property_title{
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	border-bottom: 1px var(--widget-color-border) solid;
+	height: 32px;
+}
+.index_page__property_content{
+	padding: 10px;
+	flex: 1;
+	overflow-y: auto;
+}
+.index_page__property_menu_button{
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 32px;
+	width: 32px;
+	cursor: pointer;
+	user-select: none;
+}
+.index_page__property_menu_button.selected{
+	background-color: var(--widget-color-primary);
+	color: var(--widget-color-primary-text);
+}
+</style>
+
+
+<template name="renderProperty">
+	<div class="index_page__property"
+		class={{ this.model.property_visible ? "show" : "hide" }}>
+		<div class="index_page__property_menu">
+			%for (int i=0; i<this.model.property_buttons.count(); i++)
+			{
+				%set Dict button = this.model.property_buttons.get(i);
+				%set string button_key = button.get("key");
+				<div class="index_page__property_menu_button"
+					class={{ this.model.property_buttons_selected == button_key ? "selected" : "" }}
+					@event:onClick={{
+						void () use (button_key)
+						{
+							this.model.property_buttons_selected = button_key
+						}
+					}}
+				>
+					{{ button.get("icon") }}
+				</div>
+			}
+		</div>
+		<div class="index_page__property_wrap">
+			%for (int i=0; i<this.model.property_buttons.count(); i++)
+			{
+				%set Dict button = this.model.property_buttons.get(i);
+				%set string button_key = button.get("key");
+				<div class="index_page__property_tab" data-key={{ button_key }}
+					class={{ this.model.property_buttons_selected == button_key ? "selected" : "" }}
+				>
+					<div class="index_page__property_title">
+						{{ button.get("label") }}
+					</div>
+					<div class="index_page__property_content">
+						%if (button_key == "hierarchy")
+						{
+							<Structure @ref="structure" model={{ this.model.structure }} />
+						}
+					</div>
+				</div>
+			}
+		</div>
+	</div>
+</template>
+
+
+<template>
+	<div class="index_page">
+		<div class="index_page__menu">
+			<div class="index_page__menu_item">Save</div>
+			<div class="index_page__menu_item">Export</div>
+			<div class="index_page__menu_item_gap"></div>
+			<div class="index_page__menu_item"
+				@event:onClick={{ this.toggleProperty }}>Property</div>
+		</div>
+		<div class="index_page__content">
+			<div class="index_page__frame">
+				<iframe @ref="iframe"></iframe>
+			</div>
+			%render this.renderProperty();
+		</div>
+	</div>
+</template>
+
+
+<script>
+
+var page_layout = null;
+var render_provider = null;
+var core_ui_root = null;
+var style_element = null;
+
+
+/**
+ * Mounted
+ */
+void onMounted()
+{
+	var iframe = this.getRef("iframe");
+	iframe.src="/frame/";
+	
+	/* iframe loaded */
+	iframe.addEventListener("load", void () use (iframe) {
+		
+		var iframe_window = iframe.contentWindow;
+		var iframe_document = iframe.contentDocument;
+		
+		/* Mouse events */
+		iframe_document.addEventListener("click", this.onMouseClick);
+		/*iframe_document.addEventListener("mousemove", this.onMouseMove);*/
+		
+		/* Create box */
+		var app_widget_box = iframe_document.createElement("div");
+		app_widget_box.classList.add("app_widget_box");
+		iframe_document.body.append(app_widget_box);
+		
+		/* Start app box */
+		RenderProvider render_provider = @.provider(classof RenderProvider);
+		render_provider.startApp({
+			"element": app_widget_box,
+			"component": classof Box,
+			"props": {
+				"model": this.model,
+			},
+		});
+		
+		/* Setup iframe */
+		this.model.iframe = iframe;
+		
+		/* Reload items */
+		this.model.structure.reloadItems();
+	});
+}
+
+
+/**
+ * Mouse click
+ */
+void onMouseClick(var e)
+{
+	var elem = e.target;
+	var vnode = null;
+	
+	#ifcode JAVASCRIPT then
+	vnode = elem.__vnode;
+	#endif
+	
+	if (not rtl::exists(vnode)) return;
+	
+	var component = vnode.component or vnode.ctx;
+	if (not rtl::exists(component)) return;
+	
+	this.model.updateCurrentWidget(component.ctx.model);
+}
+
+
+/**
+ * Mouse move
+ */
+void onMouseMove(var e)
+{
+	var elem = e.target;
+	var vnode = null;
+	
+	#ifcode JAVASCRIPT then
+	vnode = elem.__vnode;
+	#endif
+	
+	if (not rtl::exists(vnode)) return;
+	
+	var component = vnode.component or vnode.ctx;
+	if (not rtl::exists(component)) return;
+	
+	var widget = component.ctx.getRef("widget");
+	if (not rtl::exists(widget)) return;
+}
+
+
+/**
+ * Refresh CSS
+ */
+void refreshCSS()
+{
+	Collection components = this.layout.getComponents();
+	string css = this.model.layout::getCss(components);
+	this.style_element.innerHTML = css;
+}
+
+
+/**
+ * Toggle property
+ */
+void toggleProperty(var e)
+{
+	this.model.property_visible = not this.model.property_visible;
+	RenderProvider::nextTick(void (){ this.model.updateCurrentWidgetBox(); });
+	e.preventDefault();
+	e.stopPropagation();
+	return false;
+}
+
+
+/**
+ * Select property
+ */
+void selectPropertyButton(int i)
+{
+	this.model.property_buttons_selected = i;
+}
+
+
+</script>
+
+
+</class>

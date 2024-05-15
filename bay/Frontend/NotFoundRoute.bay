@@ -1,0 +1,43 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend;
+
+use Runtime.BaseStruct;
+use Runtime.Web.BaseRoute;
+use Runtime.Web.RenderContainer;
+use Bayrell.CloudOS.Frontend.NotFoundPage;
+use Bayrell.Helper;
+
+
+class NotFoundRoute extends BaseRoute
+{
+	
+	/**
+	 * Returns layout name
+	 */
+	string getLayoutName() => "default";
+	
+	
+	/**
+	 * Action index
+	 */
+	async void actionIndex()
+	{
+		/* Set page model */
+		this.setPageModel(null);
+		
+		/* Set title */
+		this.setPageTitle("Страница не найдена");
+		
+		/* Render page */
+		this.render(classof NotFoundPage);
+		
+		/* Set http code */
+		RenderContainer container = this.container;
+		container <= response <= http_code <= 404;
+	}
+	
+	
+}

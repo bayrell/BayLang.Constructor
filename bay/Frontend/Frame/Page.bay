@@ -1,0 +1,21 @@
+<!--
+ *  BayLang Constructor
+-->
+
+<class name="BayLang.Constructor.Frontend.Frame.Page">
+
+
+<style>
+</style>
+
+
+<template>
+    Page
+</template>
+
+
+<script>
+</script>
+
+
+</class>

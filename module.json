@@ -1,0 +1,32 @@
+{
+	"name": "BayLang.Constructor",
+	"assets":
+	[
+		"Frontend/Frame/Page.bay",
+		"Frontend/Frame/PageModel.bay",
+		"Frontend/Main/Box.bay",
+		"Frontend/Main/IndexPage.bay",
+		"Frontend/Main/IndexPageModel.bay",
+		"Frontend/Main/Structure.bay",
+		"Frontend/Main/StructureModel.bay",
+		"Frontend/DefaultLayout.bay",
+		"Frontend/LayoutModel.bay",
+		"Frontend/NotFoundPage.bay",
+		"Frontend/WebApp.bay",
+		"Frontend/ModuleDescription.bay"
+	],
+	"groups": [
+		"admin"
+	],
+	"src": "./bay",
+	"dest":
+	{
+		"php": "./php",
+		"es6": "./es6",
+		"nodejs": "./nodejs"
+	},
+	"allow":
+	[
+		"\\.bay$"
+	]
+}

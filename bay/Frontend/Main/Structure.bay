@@ -1,0 +1,297 @@
+<!--
+ *  BayLang Constructor
+-->
+
+<class name="BayLang.Constructor.Frontend.Main.Structure">
+
+<use name="Runtime.Math" />
+<use name="Runtime.Web.BaseModel" />
+<use name="Runtime.Web.RenderListModel" />
+<use name="Runtime.Web.RenderProvider" />
+<use name="Runtime.Widget.ContextMenu.ContextMenuModel" />
+
+
+<style>
+.index_page_structure{
+	position: relative;
+	height: 100%;
+}
+.index_page_structure__items{
+	padding-left: 20px;
+}
+.index_page_structure__item{
+}
+.index_page_structure__item span{
+	display: inline-block;
+	padding: 5px;
+	cursor: pointer;
+	user-select: none;
+}
+.index_page_structure__item.selected span{
+	background-color: var(--widget-color-primary);
+    color: var(--widget-color-primary-text);
+}
+.index_page_structure > .index_page_structure__items{
+	padding-left: 0px;
+}
+.index_page_structure__box{
+	position: absolute;
+	border-style: solid;
+	border-width: 0;
+	border-color: transparent
+}
+.index_page_structure__box--into{
+	background-color: rgba(255, 0, 0, 0.5);
+	pointer-events: none;
+}
+.index_page_structure__box--top{
+	border-top-width: 1px;
+	border-top-color: red;
+}
+.index_page_structure__box--left{
+	border-left-width: 1px;
+	border-left-color: red;
+}
+.index_page_structure__box--bottom{
+	border-bottom-width: 1px;
+	border-bottom-color: red;
+}
+.index_page_structure__box--right{
+	border-right-width: 1px;
+	border-right-color: red;
+}
+</style>
+
+
+<template name="renderStruct" args="Collection items, string level">
+	%if (items != null and items.count() > 0)
+	{
+		%set string current_widget_path = this.model.parent_widget.getCurrentWidgetPath();
+		<div class="index_page_structure__items"
+			data-key={{ "item" ~ level }}
+			@key={{ "item" ~ level }}
+		>
+		%for (int i=0; i<items.count(); i++)
+		{
+			%set Dict item = items.get(i);
+			%set string item_model_path = item.get("model_path_str");
+			%set string item_widget_name = item.get("widget_name");
+			<div class="index_page_structure__item"
+				class={{ current_widget_path == item_model_path ? "selected" : "" }}
+				data-key={{ "item" ~ level ~ "_" ~ i ~ "_" ~ item_widget_name }}
+				@key={{ "item" ~ level ~ "_" ~ i ~ "_" ~ item_widget_name }}
+				@event:onMousemove={{
+					void (var e) use (item)
+					{
+						this.onMouseMoveItem(e, item);
+					}
+				}}
+			>
+				<span
+					@event:onContextmenu={{
+						void (var e) use (item)
+						{
+							this.onContextMenuItem(e, item);
+						}
+					}}
+					@event:onMousedown={{
+						void (var e) use (item)
+						{
+							this.onMouseDown(e, item);
+						}
+					}}
+				>{{ item_widget_name }}</span>
+			</div>
+			%render this.renderStruct(item.get("items"), level ~ "_" ~ i);
+		}
+		</div>
+	}
+</template>
+
+
+<template name="renderStructBox">
+	%set var drag_dest_box = this.model.drag_dest_box;
+	%set string drag_dest_kind = this.model.drag_dest_kind;
+	%if (drag_dest_box != null and this.model.is_drag)
+	{
+		%set Dict box = null;
+		%if (drag_dest_kind == "top" or drag_dest_kind == "bottom")
+		{
+			<div class="index_page_structure__box index_page_structure__box--top"
+				style={{ drag_dest_box.get(drag_dest_kind) }}
+			></div>
+		}
+		%else
+		{
+			<div class="index_page_structure__box index_page_structure__box--into"
+				style={{ drag_dest_box.get("box") }}
+			></div>
+		}
+	}
+</template>
+
+
+<template>
+	<div class="index_page_structure"
+		@event:onMouseup={{
+			void (var e)
+			{
+				this.onMouseUpStructure(e);
+			}
+		}}
+		@event:onMousemove={{
+			void (var e)
+			{
+				this.onMouseMoveStructure(e);
+			}
+		}}
+	>
+		%render this.renderWidget(this.model.getWidget("context_menu"));
+		%render this.renderStructBox();
+		<div class="index_page_structure__content" @ref="content">
+			%render this.renderStruct(this.model.items, "");
+		</div>
+	</div>
+</template>
+
+
+<script>
+
+/**
+ * Returns items
+ */
+Collection<BaseModel> getItems(BaseModel widget)
+{
+	if (not widget) return [];
+	
+	string widget_class_name = widget::getClassName();
+	if (rtl::is_instanceof(widget_class_name, classof RenderListModel))
+	{
+		BaseModel page_layout = this.model.getFrameLayout();
+		return widget.items.map(
+			BaseModel (Collection model_path) use (page_layout) =>
+				page_layout.model(model_path)
+		);
+	}
+	
+	return [];
+}
+
+
+/**
+ * Find span item
+ */
+void findSpanItem(var elem)
+{
+	if (elem.tagName == "SPAN") return elem;
+	return elem.childNodes.item(0);
+}
+
+
+/**
+ * Mouse down
+ */
+void onMouseDown(var e, Dict item)
+{
+	if (e.button != 0) return;
+	
+	this.model.context_menu.hide();
+	this.model.onSelectItem(item);
+	
+	/* Set start drag item */
+	var target = this.findSpanItem(e.target);
+	this.model.setStartDragItem(e.target, item, {
+		"x": e.layerX,
+		"y": e.layerY,
+	});
+}
+
+
+/**
+ * Mouse click item
+ */
+void onContextMenuItem(var e, Dict item)
+{
+	this.model.onItemContextMenu(e, item);
+	e.preventDefault();
+}
+
+
+/**
+ * Check start drag
+ */
+bool checkStartDrag(var e)
+{
+	if (
+		this.model.is_drag == false and
+		this.model.drag_start_point != null and
+		Math.abs(e.layerY - this.model.drag_start_point.get("y") < 5)
+	)
+	{
+		this.model.startDrag();
+		return true;
+	}
+	return false;
+}
+
+
+/**
+ * Mouse move item
+ */
+void onMouseMoveItem(var e, Dict item)
+{
+	if (not this.model.is_drag)
+	{
+		if (not this.checkStartDrag(e))
+		{
+			return;
+		}
+	}
+	
+	var target = this.findSpanItem(e.target);
+	int top = target.offsetTop;
+	int bottom = target.offsetTop + target.clientHeight;
+	int center = (top + bottom) / 2;
+	
+	string kind = "top";
+	if (e.layerY >= center)
+	{
+		kind = "into";
+	}
+	
+	this.model.setDragDestElement(target, item, kind);
+	e.preventDefault();
+}
+
+
+/**
+ * Mouse up
+ */
+void onMouseUpStructure(var e)
+{
+	this.model.stopDrag();
+}
+
+
+/**
+ * Mouse move
+ */
+void onMouseMoveStructure(var e)
+{
+	var elem = this.getRef("content");
+	this.checkStartDrag(e);
+	if (this.model.is_drag)
+	{
+		if (e.layerY > elem.clientHeight)
+		{
+			this.model.setDragDestElement(elem, null, "bottom");
+			e.preventDefault();
+			return false;
+		}
+	}
+}
+
+</script>
+
+
+</class>
