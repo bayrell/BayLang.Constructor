@@ -1,0 +1,31 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Modules;
+
+use Runtime.Widget.Crud.CrudPageModel;
+use BayLang.Constructor.Frontend.Modules.ModulesTableModel;
+
+
+class ModulesPageModel extends CrudPageModel
+{
+	/**
+	 * Init widget settings
+	 */
+	void initWidget(Dict params)
+	{
+		parent(params);
+		
+		string route_name = this.layout.route.name;
+		if (route_name == "baylang:index")
+		{
+			this.setAction("index");
+			
+			/* Create table widget */
+			ModulesTableModel table = this.addWidget(classof ModulesTableModel);
+			this.render_list.addItem(table);
+		}
+	}
+	
+}

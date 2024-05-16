@@ -1,0 +1,63 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Modules;
+
+use Runtime.Widget.Input;
+use Runtime.Widget.Crud.CrudApiStorage;
+use Runtime.Widget.Form.FormModel;
+use BayLang.Constructor.Frontend.Modules.ModulesFormModel;
+
+
+class ModulesFormModel extends FormModel
+{
+	/**
+	 * Create data storage
+	 */
+	CrudApiStorage createDataStorage() => new CrudApiStorage{
+		"layout": this.layout,
+		"class_name": "admin.constructor.modules",
+		"primary_keys": ["file_name"],
+		"save_fields": [
+			"module_name"
+		],
+	};
+	
+	
+	/**
+	 * Init widget settings
+	 */
+	void initWidget(Dict params)
+	{
+		parent(params);
+		
+		/* Field name */
+		this.addField({
+			"name": "module_name",
+			"label": "Module name",
+			"component": classof Input,
+		});
+	}
+	
+	
+	/**
+	 * Get page title
+	 */
+	string getPageTitle(string action = "")
+	{
+		if (action == "add")
+		{
+			return "Add module";
+		}
+		if (action == "edit")
+		{
+			return "Edit module " ~ this.storage.item.get("module_name");
+		}
+		if (action == "delete")
+		{
+			return "Delete module " ~ this.storage.item.get("module_name");
+		}
+		return "";
+	}
+}

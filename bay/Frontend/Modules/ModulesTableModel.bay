@@ -1,0 +1,59 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Modules;
+
+use Runtime.Widget.Label;
+use Runtime.Widget.Crud.CrudApiStorage;
+use Runtime.Widget.Table.TableDialogModel;
+use BayLang.Constructor.Frontend.Modules.ModulesFormModel;
+
+
+class ModulesTableModel extends TableDialogModel
+{
+	/**
+	 * Create data storage
+	 */
+	CrudApiStorage createDataStorage() => new CrudApiStorage{
+		"layout": this.layout,
+		"class_name": "admin.constructor.modules",
+		"primary_keys": ["file_name"],
+	};
+	
+	
+	/**
+	 * Create form
+	 */
+	ModulesFormModel createForm() => this.addWidget(classof ModulesFormModel);
+	
+	
+	/**
+	 * Init widget settings
+	 */
+	void initWidget(Dict params)
+	{
+		parent(params);
+		
+		/* Row number */
+		this.addField({
+			"name": "row_number",
+		});
+		
+		/* Field module name */
+		this.addField({
+			"name": "module_name",
+			"label": "Module name",
+			"component": classof Label,
+		});
+		
+		/* Field row buttons */
+		this.addField({
+			"name": "row_buttons",
+			"model": this.row_buttons,
+		});
+		
+		/* Add style */
+		this.styles.add("border");
+	}
+}

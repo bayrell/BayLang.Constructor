@@ -9,14 +9,14 @@
 		"Frontend/Main/IndexPageModel.bay",
 		"Frontend/Main/Structure.bay",
 		"Frontend/Main/StructureModel.bay",
+		"Frontend/Modules/ModulesFormModel.bay",
+		"Frontend/Modules/ModulesPageModel.bay",
+		"Frontend/Modules/ModulesTableModel.bay",
 		"Frontend/DefaultLayout.bay",
 		"Frontend/LayoutModel.bay",
 		"Frontend/NotFoundPage.bay",
 		"Frontend/WebApp.bay",
 		"Frontend/ModuleDescription.bay"
-	],
-	"groups": [
-		"admin"
 	],
 	"src": "./bay",
 	"dest":

@@ -23,10 +23,21 @@ class Routes extends BaseRoute
 	{
 		return
 		[
-			/*new RouteInfo
+			new RouteInfo
 			{
 				"uri": "/",
-				"name": "app:page:index",
+				"name": "baylang:index",
+				"model": "BayLang.Constructor.Frontend.Modules.ModulesPageModel",
+			},
+			/*
+			{
+				"uri": "/module/{module}/",
+				"name": "baylang:module",
+				"model": "BayLang.Constructor.Frontend.Main.IndexPageModel",
+			},
+			{
+				"uri": "/module/{module}/widget/{widget}/",
+				"name": "baylang:module:widget",
 				"model": "BayLang.Constructor.Frontend.Main.IndexPageModel",
 			},
 			new RouteInfo
