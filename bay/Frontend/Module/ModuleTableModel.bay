@@ -4,6 +4,7 @@
 
 namespace BayLang.Constructor.Frontend.Modules;
 
+use Runtime.Widget.ButtonModel;
 use Runtime.Widget.Label;
 use Runtime.Widget.Crud.CrudApiStorage;
 use Runtime.Widget.Table.TableDialogModel;
@@ -53,7 +54,24 @@ class ModulesTableModel extends TableDialogModel
 			"model": this.row_buttons,
 		});
 		
+		/* Open button */
+		ButtonModel open_button = this.row_buttons.addWidget(
+			classof ButtonModel,
+			{
+				"widget_name": "open_button",
+				"content": "Open",
+				"href": string (Dict data)
+				{
+					int row_number = data.get("row_number");
+					Dict item = this.getItemByRowNumber(row_number);
+					return this.layout.url("baylang:module", {"file_name":item.get("file_name")});
+				}
+			},
+			"edit_button"
+		);
+		
 		/* Add style */
 		this.styles.add("border");
+		this.row_buttons.styles.add("no-gap");
 	}
 }

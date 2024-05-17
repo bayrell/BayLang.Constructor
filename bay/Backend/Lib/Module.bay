@@ -1,0 +1,141 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Backend.Lib;
+
+use Runtime.fs;
+use Runtime.BaseObject;
+use BayLang.Constructor.Backend.Lib.Project;
+
+
+class Module extends BaseObject
+{
+	Project project = null;
+	string module_path = "";
+	Dict module_info = null;
+	
+	
+	/**
+	 * Constructor
+	 */
+	void constructor(Project project)
+	{
+		parent();
+		this.project = project;
+	}
+	
+	
+	/**
+	 * Read project from folder
+	 */
+	static Module readModule(Project project, string module_path)
+	{
+		Module module = new Module(project);
+		module.initFromFile(module_path);
+		if (not module.exists()) return null;
+		return module;
+	}
+	
+	
+	/**
+	 * Init module from file
+	 */
+	void initFromFile(string module_path)
+	{
+		this.module_info = null;
+		string file_name = rs::basename(module_path);
+		
+		if (file_name == "") return;
+		if (file_name[0] == ".") return;
+		
+		string module_json_path = module_path ~ "/" ~ "module.json";
+		if (not(await fs::isFile(module_json_path))) return;
+		
+		/* Read file */
+		string content = await fs::readFile(module_json_path);
+		Dict module_info = rtl::json_decode(content);
+		
+		/* Init module */
+		this.init(module_path, module_info);
+	}
+	
+	
+	/**
+	 * Init module
+	 */
+	void init(string module_path, Dict module_info)
+	{
+		this.module_info = null;
+		
+		if (not module_info) return;
+		if (not module_info.has("name")) return;
+		
+		this.module_path = module_path;
+		this.module_info = module_info;
+	}
+	
+	
+	/**
+	 * Returns true if project is exists
+	 */
+	void exists() => this.module_info != null;
+	
+	
+	/**
+	 * Convert to Dict
+	 */
+	Map toMap() => {
+		"file_name": this.getFileName(),
+		"module_name": this.getModuleName(),
+	};
+	Map intersect(Collection fields = null) => this.toMap().intersect(fields);
+	
+	
+	/**
+	 * Returns primary key
+	 */
+	Map getPrimaryKey() => {
+		"file_name": this.getFileName(),
+	};
+	
+	
+	/**
+	 * Returns project file_name
+	 */
+	string getPath() => this.exists() ? this.module_path : "";
+	
+	
+	/**
+	 * Returns module name
+	 */
+	string getName() => this.exists() ? this.project_info.get("name") : "";
+	
+	
+	/**
+	 * Rename module
+	 */
+	void rename(string new_module_name)
+	{
+		return;
+		
+		if (not this.exists()) return;
+		
+		string new_file_name = rs::lower(new_module_name);
+		string old_file_name = this.file_name;
+		
+		/* Set new module name */
+		this.module_info.set("name", new_module_name);
+		
+		/* Save file */
+		string module_path = "/data/projects/" ~ old_file_name;
+		string module_json_path = module_path ~ "/" ~ "module.json";
+		string content = rtl::json_encode(this.module_info, rtl::JSON_PRETTY);
+		await fs::saveFile(module_json_path, content);
+		
+		/* Rename folder */
+		#ifcode PHP then
+		rename($module_path, "/data/projects/" . $new_file_name);
+		#endif
+	}
+}

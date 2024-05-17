@@ -2,13 +2,13 @@
  *  BayLang Constructor
  */
 
-namespace BayLang.Constructor.Frontend.Modules;
+namespace BayLang.Constructor.Frontend.Project;
 
 use Runtime.Widget.Crud.CrudPageModel;
-use BayLang.Constructor.Frontend.Modules.ModulesTableModel;
+use BayLang.Constructor.Frontend.Project.ProjectTableModel;
 
 
-class ModulesPageModel extends CrudPageModel
+class ProjectPageModel extends CrudPageModel
 {
 	/**
 	 * Init widget settings
@@ -23,9 +23,8 @@ class ModulesPageModel extends CrudPageModel
 			this.setAction("index");
 			
 			/* Create table widget */
-			ModulesTableModel table = this.addWidget(classof ModulesTableModel);
+			ProjectTableModel table = this.addWidget(classof ProjectTableModel);
 			this.render_list.addItem(table);
 		}
 	}
-	
 }

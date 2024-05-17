@@ -1,0 +1,156 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Backend.Api;
+
+use Runtime.fs;
+use Runtime.Exceptions.ApiError;
+use Runtime.Exceptions.ItemNotFound;
+use Runtime.Exceptions.RuntimeException;
+use Runtime.Web.Annotations.ApiMethod;
+use Runtime.Widget.Crud.CrudApi;
+use Runtime.Widget.Crud.Rules.CrudRule;
+use Runtime.Widget.Crud.Rules.Required;
+use BayLang.Constructor.Backend.Lib.Project;
+
+
+class ProjectCrudApi extends CrudApi
+{
+	/**
+	 * Returns api name
+	 */
+	pure string getApiName() => "admin.constructor.project::crud";
+	
+	
+	/**
+	 * Returns item fields
+	 */
+	Vector getItemFields() =>
+	[
+		"id",
+		"name",
+		"description"
+	];
+	
+	
+	/**
+	 * Returns save fields
+	 */
+	Vector getSaveFields() => [
+		"name",
+		"description"
+	];
+	
+	
+	/**
+	 * Returns rules
+	 */
+	Vector<CrudRule> getRules() =>
+	[
+		new Required{ "name": "id" },
+		new Required{ "name": "name" },
+	];
+	
+	
+	/**
+	 * Convert item
+	 */
+	Map convertItem(Collection fields, Project item)
+	{
+		return {
+			"id": item.getID(),
+			"name": item.getName(),
+			"description": item.getDescription(),
+		};
+	}
+	
+	
+	/**
+	 * Returns item primary key
+	 */
+	Map getItemPrimaryKey(Project item) => {
+		"id": item.getID(),
+	};
+	
+	
+	/**
+	 * Search items
+	 */
+	async void searchItems()
+	{
+		this.page = 1;
+		this.items = await Project::readProjects("/data/constructor/projects");
+	}
+	
+	
+	/**
+	 * Find item by primary key
+	 */
+	async void findItem(Dict pk)
+	{
+		if (pk == null) return;
+		
+		string project_id = pk.get("id");
+		this.item = await Project::readProject(
+			fs::join(["/data/constructor/projects", project_id])
+		);
+	}
+	
+	
+	/**
+	 * Create new relation
+	 */
+	async var newRelation()
+	{
+		throw new ApiError(new RuntimeException("Method not allowed"));
+	}
+	
+	
+	/**
+	 * Update item
+	 */
+	async void updateItem(Map update_data)
+	{
+		if (update_data.has("name"))
+		{
+			this.item.setName(update_data.get("name"));
+		}
+		if (update_data.has("description"))
+		{
+			this.item.setDescription(update_data.get("description"));
+		}
+		
+		await this.item.saveInfo();
+	}
+	
+	
+	/**
+	 * Action search
+	 */
+	@ApiMethod
+	async void actionSearch()
+	{
+		await parent();
+	}
+	
+	
+	/**
+	 * Action save
+	 */
+	@ApiMethod
+	async void actionSave()
+	{
+		await parent();
+	}
+	
+	
+	/**
+	 * Action delete
+	 */
+	@ApiMethod
+	async void actionDelete()
+	{
+		throw new ApiError(new RuntimeException("Method not allowed"));
+	}
+}

@@ -27,22 +27,36 @@ class Routes extends BaseRoute
 			{
 				"uri": "/",
 				"name": "baylang:index",
-				"model": "BayLang.Constructor.Frontend.Modules.ModulesPageModel",
+				"model": "BayLang.Constructor.Frontend.Project.ProjectPageModel",
+			},
+			new RouteInfo
+			{
+				"uri": "/project/{project_id}/modules",
+				"name": "baylang:project:modules",
+				"model": "BayLang.Constructor.Frontend.Module.ModulePageModel",
+			},
+			new RouteInfo
+			{
+				"uri": "/project/{project_id}/module/{module_id}",
+				"name": "baylang:project:module",
+				"model": "BayLang.Constructor.Frontend.Module.ModulePageModel",
 			},
 			/*
+			new RouteInfo
 			{
-				"uri": "/module/{module}/",
+				"uri": "/module/{file_name}",
 				"name": "baylang:module",
-				"model": "BayLang.Constructor.Frontend.Main.IndexPageModel",
+				"model": "BayLang.Constructor.Frontend.Module.ModulePageModel",
 			},
+			new RouteInfo
 			{
-				"uri": "/module/{module}/widget/{widget}/",
+				"uri": "/module/{module}/widget/{widget}",
 				"name": "baylang:module:widget",
 				"model": "BayLang.Constructor.Frontend.Main.IndexPageModel",
 			},
 			new RouteInfo
 			{
-				"uri": "/frame/",
+				"uri": "/frame",
 				"name": "app:frame:index",
 				"model": "BayLang.Constructor.Frontend.Frame.PageModel",
 			},*/

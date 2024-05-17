@@ -1,0 +1,79 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Project;
+
+use Runtime.Widget.Input;
+use Runtime.Widget.TextArea;
+use Runtime.Widget.Crud.CrudApiStorage;
+use Runtime.Widget.Form.FormModel;
+
+
+class ProjectFormModel extends FormModel
+{
+	/**
+	 * Create data storage
+	 */
+	CrudApiStorage createDataStorage() => new CrudApiStorage{
+		"layout": this.layout,
+		"class_name": "admin.constructor.project",
+		"primary_keys": ["id"],
+		"save_fields": [
+			"id",
+			"name",
+			"description",
+		],
+	};
+	
+	
+	/**
+	 * Init widget settings
+	 */
+	void initWidget(Dict params)
+	{
+		parent(params);
+		
+		/* Field id */
+		this.addField({
+			"name": "id",
+			"label": "ID",
+			"component": classof Input,
+		});
+		
+		/* Field name */
+		this.addField({
+			"name": "name",
+			"label": "Name",
+			"component": classof Input,
+		});
+		
+		/* Field description */
+		this.addField({
+			"name": "description",
+			"label": "Description",
+			"component": classof TextArea,
+		});
+	}
+	
+	
+	/**
+	 * Get page title
+	 */
+	string getPageTitle(string action = "")
+	{
+		if (action == "add")
+		{
+			return "Add project";
+		}
+		if (action == "edit")
+		{
+			return "Edit project " ~ this.storage.item.get("id");
+		}
+		if (action == "delete")
+		{
+			return "Delete project " ~ this.storage.item.get("id");
+		}
+		return "";
+	}
+}
