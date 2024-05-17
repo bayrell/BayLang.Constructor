@@ -83,25 +83,7 @@ class Module extends BaseObject
 	
 	
 	/**
-	 * Convert to Dict
-	 */
-	Map toMap() => {
-		"file_name": this.getFileName(),
-		"module_name": this.getModuleName(),
-	};
-	Map intersect(Collection fields = null) => this.toMap().intersect(fields);
-	
-	
-	/**
-	 * Returns primary key
-	 */
-	Map getPrimaryKey() => {
-		"file_name": this.getFileName(),
-	};
-	
-	
-	/**
-	 * Returns project file_name
+	 * Returns module path
 	 */
 	string getPath() => this.exists() ? this.module_path : "";
 	
@@ -109,7 +91,7 @@ class Module extends BaseObject
 	/**
 	 * Returns module name
 	 */
-	string getName() => this.exists() ? this.project_info.get("name") : "";
+	string getName() => this.exists() ? this.module_info.get("name") : "";
 	
 	
 	/**

@@ -2,13 +2,13 @@
  *  BayLang Constructor
  */
 
-namespace BayLang.Constructor.Frontend.Modules;
+namespace BayLang.Constructor.Frontend.Module;
 
 use Runtime.Widget.Crud.CrudPageModel;
-use BayLang.Constructor.Frontend.Modules.ModulesTableModel;
+use BayLang.Constructor.Frontend.Module.ModuleTableModel;
 
 
-class ModulesPageModel extends CrudPageModel
+class ModulePageModel extends CrudPageModel
 {
 	/**
 	 * Init widget settings
@@ -18,12 +18,19 @@ class ModulesPageModel extends CrudPageModel
 		parent(params);
 		
 		string route_name = this.layout.route.name;
-		if (route_name == "baylang:index")
+		if (route_name == "baylang:project:modules")
 		{
 			this.setAction("index");
 			
 			/* Create table widget */
-			ModulesTableModel table = this.addWidget(classof ModulesTableModel);
+			ModuleTableModel table = this.addWidget(
+				classof ModuleTableModel,
+				{
+					"foreign_key": {
+						"project_id": this.layout.route.matches.get("project_id")
+					},
+				}
+			);
 			this.render_list.addItem(table);
 		}
 	}

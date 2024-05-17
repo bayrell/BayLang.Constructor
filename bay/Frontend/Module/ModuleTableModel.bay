@@ -2,31 +2,31 @@
  *  BayLang Constructor
  */
 
-namespace BayLang.Constructor.Frontend.Modules;
+namespace BayLang.Constructor.Frontend.Module;
 
 use Runtime.Widget.ButtonModel;
 use Runtime.Widget.Label;
 use Runtime.Widget.Crud.CrudApiStorage;
 use Runtime.Widget.Table.TableDialogModel;
-use BayLang.Constructor.Frontend.Modules.ModulesFormModel;
+use BayLang.Constructor.Frontend.Module.ModuleFormModel;
 
 
-class ModulesTableModel extends TableDialogModel
+class ModuleTableModel extends TableDialogModel
 {
 	/**
 	 * Create data storage
 	 */
 	CrudApiStorage createDataStorage() => new CrudApiStorage{
 		"layout": this.layout,
-		"class_name": "admin.constructor.modules",
-		"primary_keys": ["file_name"],
+		"class_name": "admin.constructor.module",
+		"primary_keys": ["id"],
 	};
 	
 	
 	/**
 	 * Create form
 	 */
-	ModulesFormModel createForm() => this.addWidget(classof ModulesFormModel);
+	ModuleFormModel createForm() => this.addWidget(classof ModuleFormModel);
 	
 	
 	/**
@@ -41,10 +41,10 @@ class ModulesTableModel extends TableDialogModel
 			"name": "row_number",
 		});
 		
-		/* Field module name */
+		/* Field id */
 		this.addField({
-			"name": "module_name",
-			"label": "Module name",
+			"name": "id",
+			"label": "ID",
 			"component": classof Label,
 		});
 		
@@ -64,11 +64,19 @@ class ModulesTableModel extends TableDialogModel
 				{
 					int row_number = data.get("row_number");
 					Dict item = this.getItemByRowNumber(row_number);
-					return this.layout.url("baylang:module", {"file_name":item.get("file_name")});
+					return this.layout.url(
+						"baylang:project:module",
+						{
+							"project_id": this.storage.foreign_value,
+							"module_id": item.get("id")
+						}
+					);
 				}
 			},
 			"edit_button"
 		);
+		this.row_buttons.removeItemByName("edit_button");
+		this.row_buttons.removeItemByName("delete_button");
 		
 		/* Add style */
 		this.styles.add("border");

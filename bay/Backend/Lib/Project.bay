@@ -91,6 +91,12 @@ class Project extends BaseObject
 	
 	
 	/**
+	 * Returns project path
+	 */
+	string getPath() => this.exists() ? this.project_path : "";
+	
+	
+	/**
 	 * Returns project file_name
 	 */
 	string getID() => this.exists() ? rs::basename(this.project_path) : "";

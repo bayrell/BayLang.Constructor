@@ -2,25 +2,25 @@
  *  BayLang Constructor
  */
 
-namespace BayLang.Constructor.Frontend.Modules;
+namespace BayLang.Constructor.Frontend.Module;
 
 use Runtime.Widget.Input;
 use Runtime.Widget.Crud.CrudApiStorage;
 use Runtime.Widget.Form.FormModel;
-use BayLang.Constructor.Frontend.Modules.ModulesFormModel;
+use BayLang.Constructor.Frontend.Module.ModuleFormModel;
 
 
-class ModulesFormModel extends FormModel
+class ModuleFormModel extends FormModel
 {
 	/**
 	 * Create data storage
 	 */
 	CrudApiStorage createDataStorage() => new CrudApiStorage{
 		"layout": this.layout,
-		"class_name": "admin.constructor.modules",
-		"primary_keys": ["file_name"],
+		"class_name": "admin.constructor.module",
+		"primary_keys": ["id"],
 		"save_fields": [
-			"module_name"
+			"id",
 		],
 	};
 	
@@ -34,8 +34,8 @@ class ModulesFormModel extends FormModel
 		
 		/* Field name */
 		this.addField({
-			"name": "module_name",
-			"label": "Module name",
+			"name": "id",
+			"label": "ID",
 			"component": classof Input,
 		});
 	}
