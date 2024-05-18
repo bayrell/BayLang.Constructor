@@ -80,7 +80,9 @@ class ProjectCrudApi extends CrudApi
 	async void searchItems()
 	{
 		this.page = 1;
-		this.items = await Project::readProjects("/data/constructor/projects");
+		this.items = await Project::readProjects(
+			fs::join([@.env("constructor_path"), "projects"])
+		);
 	}
 	
 	

@@ -1,0 +1,72 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Console.Commands;
+
+use Runtime.io;
+use Runtime.fs;
+use Runtime.Console.BaseCommand;
+use Runtime.Console.CommandsList;
+use BayLang.Constructor.Backend.Lib.Project;
+
+
+class BuildCache extends BaseCommand
+{
+	/**
+	 * Returns name
+	 */
+	static string getName() => "build:cache";
+	
+	
+	/**
+	 * Returns description
+	 */
+	static string getDescription() => "Build cache";
+	
+	
+	/**
+	 * Run task
+	 */
+	async static int run()
+	{
+		string project_id = @.cli_args.get(2);
+		
+		/* Projects list */
+		if (@.cli_args.count() <= 2)
+		{
+			Collection<Project> projects = await Project::readProjects(
+				fs::join([@.env("constructor_path"), "projects"])
+			);
+			
+			io::print("Projects:");
+			for (int i=0; i<projects.count(); i++)
+			{
+				Project project = projects.get(i);
+				io::print( io::color("yellow", project.getID()) ~ " - " ~ project.getName() );
+			}
+		}
+		
+		/* Build project cache */
+		else
+		{
+			Project project = Project::readProject(
+				fs::join([@.env("constructor_path"), "projects", project_id])
+			);
+			
+			if (not project)
+			{
+				io::print_error("Project " ~ project_id ~ " not found");
+				return static::UNKNOWN_ERROR;
+			}
+			
+			io::print("Build project cache");
+			io::print("Project: " ~ project.getID());
+			io::print("OK");
+		}
+		
+		return static::SUCCESS;
+	}
+	
+	
+}

@@ -21,6 +21,8 @@ class Project extends BaseObject
 	 */
 	async static Collection<Project> readProjects(string projects_path)
 	{
+		if (not(await fs::isFolder(projects_path))) return [];
+		
 		Vector<string> result = [];
 		Collection<string> items = await fs::listDir(projects_path);
 		for (int i=0; i<items.count(); i++)

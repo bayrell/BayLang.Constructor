@@ -1,0 +1,43 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Console;
+
+use Runtime.Console.Annotations.ConsoleCommand;
+
+
+static class ModuleDescription
+{
+	/**
+	 * Returns module name
+	 * @return string
+	 */
+	pure string getModuleName() => "BayLang.Constructor.Console";
+	
+	
+	/**
+	 * Returns module name
+	 * @return string
+	 */
+	pure string getModuleVersion() => "0.0.1";
+	
+	
+	/**
+	 * Returns required modules
+	 * @return Dict<string>
+	 */
+	pure Dict<string> requiredModules() =>
+	{
+		"Runtime.Console": ">=0.12",
+	};
+	
+	
+	/**
+	 * Returns enities
+	 */
+	pure Collection<Dict> entities() =>
+	[
+		new ConsoleCommand("BayLang.Constructor.Console.Commands.BuildCache"),
+	];
+}
