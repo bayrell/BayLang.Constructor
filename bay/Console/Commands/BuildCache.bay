@@ -8,7 +8,8 @@ use Runtime.io;
 use Runtime.fs;
 use Runtime.Console.BaseCommand;
 use Runtime.Console.CommandsList;
-use BayLang.Constructor.Backend.Lib.Project;
+use BayLang.Helper.Module;
+use BayLang.Helper.Project;
 
 
 class BuildCache extends BaseCommand
@@ -62,6 +63,10 @@ class BuildCache extends BaseCommand
 			
 			io::print("Build project cache");
 			io::print("Project: " ~ project.getID());
+			
+			await project.readModules();
+			await project.buildCache();
+			
 			io::print("OK");
 		}
 		

@@ -12,8 +12,8 @@ use Runtime.Web.Annotations.ApiMethod;
 use Runtime.Widget.Crud.CrudApi;
 use Runtime.Widget.Crud.Rules.CrudRule;
 use Runtime.Widget.Crud.Rules.Required;
-use BayLang.Constructor.Backend.Lib.Module;
-use BayLang.Constructor.Backend.Lib.Project;
+use BayLang.Helper.Module;
+use BayLang.Helper.Project;
 
 
 class ModuleCrudApi extends CrudApi
