@@ -1,0 +1,63 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Widget;
+
+use Runtime.Widget.Input;
+use Runtime.Widget.TextArea;
+use Runtime.Widget.Crud.CrudApiStorage;
+use Runtime.Widget.Form.FormModel;
+
+
+class WidgetFormModel extends FormModel
+{
+	/**
+	 * Create data storage
+	 */
+	CrudApiStorage createDataStorage() => new CrudApiStorage{
+		"layout": this.layout,
+		"class_name": "admin.constructor.widget",
+		"primary_keys": ["id"],
+		"save_fields": [
+			"name",
+		],
+	};
+	
+	
+	/**
+	 * Init widget settings
+	 */
+	void initWidget(Dict params)
+	{
+		parent(params);
+		
+		/* Field name */
+		this.addField({
+			"name": "name",
+			"label": "Name",
+			"component": classof Input,
+		});
+	}
+	
+	
+	/**
+	 * Get page title
+	 */
+	string getPageTitle(string action = "")
+	{
+		if (action == "add")
+		{
+			return "Add widget";
+		}
+		if (action == "edit")
+		{
+			return "Edit widget " ~ this.storage.item.get("name");
+		}
+		if (action == "delete")
+		{
+			return "Delete widget " ~ this.storage.item.get("name");
+		}
+		return "";
+	}
+}

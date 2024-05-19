@@ -1,0 +1,99 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Route;
+
+use Runtime.Widget.ButtonModel;
+use Runtime.Widget.Label;
+use Runtime.Widget.Crud.CrudApiStorage;
+use Runtime.Widget.Table.TableDialogModel;
+use BayLang.Constructor.Frontend.Route.RouteFormModel;
+
+
+class RouteTableModel extends TableDialogModel
+{
+	/**
+	 * Create data storage
+	 */
+	CrudApiStorage createDataStorage() => new CrudApiStorage{
+		"layout": this.layout,
+		"class_name": "admin.constructor.route",
+		"primary_keys": ["id"],
+	};
+	
+	
+	/**
+	 * Create form
+	 */
+	RouteFormModel createForm() => this.addWidget(classof RouteFormModel);
+	
+	
+	/**
+	 * Init widget settings
+	 */
+	void initWidget(Dict params)
+	{
+		parent(params);
+		
+		/* Row number */
+		this.addField({
+			"name": "row_number",
+		});
+		
+		/* Field name */
+		this.addField({
+			"name": "name",
+			"label": "Name",
+			"component": classof Label,
+		});
+		
+		/* Field url */
+		this.addField({
+			"name": "url",
+			"label": "URL",
+			"component": classof Label,
+		});
+		
+		/* Field url */
+		this.addField({
+			"name": "model",
+			"label": "Model",
+			"component": classof Label,
+		});
+		
+		/* Field row buttons */
+		this.addField({
+			"name": "row_buttons",
+			"model": this.row_buttons,
+		});
+		
+		/* Open button */
+		ButtonModel open_button = this.row_buttons.addWidget(
+			classof ButtonModel,
+			{
+				"widget_name": "open_button",
+				"content": "Open",
+				"href": string (Dict data)
+				{
+					int row_number = data.get("row_number");
+					Dict item = this.getItemByRowNumber(row_number);
+					return this.layout.url(
+						"baylang:project:route",
+						{
+							"project_id": this.storage.foreign_value,
+							"route_name": item.get("name")
+						}
+					);
+				}
+			},
+			"edit_button"
+		);
+		this.row_buttons.removeItemByName("edit_button");
+		this.row_buttons.removeItemByName("delete_button");
+		
+		/* Add style */
+		this.styles.add("border");
+		this.row_buttons.styles.add("no-gap");
+	}
+}

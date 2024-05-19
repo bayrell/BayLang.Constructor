@@ -1,0 +1,79 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Route;
+
+use Runtime.Widget.Input;
+use Runtime.Widget.TextArea;
+use Runtime.Widget.Crud.CrudApiStorage;
+use Runtime.Widget.Form.FormModel;
+
+
+class RouteFormModel extends FormModel
+{
+	/**
+	 * Create data storage
+	 */
+	CrudApiStorage createDataStorage() => new CrudApiStorage{
+		"layout": this.layout,
+		"class_name": "admin.constructor.route",
+		"primary_keys": ["id"],
+		"save_fields": [
+			"id",
+			"name",
+			"description",
+		],
+	};
+	
+	
+	/**
+	 * Init widget settings
+	 */
+	void initWidget(Dict params)
+	{
+		parent(params);
+		
+		/* Field name */
+		this.addField({
+			"name": "name",
+			"label": "Name",
+			"component": classof Input,
+		});
+		
+		/* Field url */
+		this.addField({
+			"name": "uri",
+			"label": "URL",
+			"component": classof Input,
+		});
+		
+		/* Field url */
+		this.addField({
+			"name": "model",
+			"label": "Model",
+			"component": classof Input,
+		});
+	}
+	
+	
+	/**
+	 * Get page title
+	 */
+	string getPageTitle(string action = "")
+	{
+		if (action == "add")
+		{
+			return "Add route";
+		}
+		if (action == "edit")
+		{
+			return "Edit route " ~ this.storage.item.get("name");
+		}
+		if (action == "delete")
+		{
+			return "Delete route " ~ this.storage.item.get("name");
+		}
+		return "";
+	}
+}
