@@ -2,13 +2,9 @@
 	"name": "BayLang.Constructor",
 	"assets":
 	[
-		"Frontend/Frame/Page.bay",
-		"Frontend/Frame/PageModel.bay",
-		"Frontend/Main/Box.bay",
-		"Frontend/Main/IndexPage.bay",
-		"Frontend/Main/IndexPageModel.bay",
-		"Frontend/Main/Structure.bay",
-		"Frontend/Main/StructureModel.bay",
+		"Frontend/Blocks/Menu.bay",
+		"Frontend/Blocks/MenuModel.bay",
+		"Frontend/Layout/DefaultLayout.bay",
 		"Frontend/Module/ModuleFormModel.bay",
 		"Frontend/Module/ModulePageModel.bay",
 		"Frontend/Module/ModuleTableModel.bay",

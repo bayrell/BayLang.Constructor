@@ -11,6 +11,8 @@ use Runtime.Unit.UnitTest;
 use Runtime.Web.Annotations.Api;
 use Runtime.Web.Annotations.RemoteClass;
 use Runtime.Web.Annotations.Route;
+use Runtime.Web.Annotations.SetupLayout;
+use Runtime.Web.Annotations.WidgetModelFactory;
 
 
 static class ModuleDescription
@@ -50,8 +52,17 @@ static class ModuleDescription
 	 */
 	pure Collection<Dict> entities() =>
 	[
+		new SetupLayout({
+			"names": {
+				"baylang": "BayLang.Constructor.Frontend.Layout.DefaultLayout",
+			},
+		}),
+		
 		#ifdef BACKEND then
+		
+		new WidgetModelFactory("BayLang.Constructor.Frontend.Blocks.MenuModel"),
 		new Route("BayLang.Constructor.Frontend.Routes"),
+		
 		#endif
 	];
 }

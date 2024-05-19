@@ -78,13 +78,13 @@ class RouteTableModel extends TableDialogModel
 				{
 					int row_number = data.get("row_number");
 					Dict item = this.getItemByRowNumber(row_number);
-					return this.layout.url(
-						"baylang:project:route",
+					string url = this.layout.url(
+						"baylang:project:open",
 						{
 							"project_id": this.storage.foreign_value,
-							"route_name": item.get("name")
 						}
 					);
+					return url ~ item.get("url");
 				}
 			},
 			"edit_button"

@@ -13,7 +13,7 @@ class Routes extends BaseRoute
 	/**
 	 * Returns layout name
 	 */
-	string getLayoutName() => "default";
+	static string getLayoutName() => "baylang";
 	
 	
 	/**
@@ -49,8 +49,8 @@ class Routes extends BaseRoute
 			},
 			new RouteInfo
 			{
-				"uri": "/project/{project_id}/route/{route_name}",
-				"name": "baylang:project:route",
+				"uri": "/project/{project_id}/open",
+				"name": "baylang:project:open",
 				"model": "BayLang.Constructor.Frontend.Route.RoutePageModel",
 			},
 			new RouteInfo
@@ -61,7 +61,7 @@ class Routes extends BaseRoute
 			},
 			new RouteInfo
 			{
-				"uri": "/project/{project_id}/widget/{widget_name}",
+				"uri": "/project/{project_id}/open/widget.php",
 				"name": "baylang:project:widget",
 				"model": "BayLang.Constructor.Frontend.Widget.WidgetPageModel",
 			},
