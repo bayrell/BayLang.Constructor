@@ -4,12 +4,35 @@
 
 <class name="BayLang.Constructor.WidgetDebug.WidgetPage">
 
+<style global="true">
+body, html {
+	font-family: var(--widget-font-family);
+	font-size: var(--widget-font-size);
+	line-height: var(--widget-line-height);
+	width: 100%;
+	padding: 0;
+	margin: 0;
+}
+</style>
 
 <template>
 	<div class="widget">
 		Debug widget {{ this.model.current_widget }}
 	</div>
 </template>
+
+
+<script>
+
+/**
+ * Mounted
+ */
+void onMounted()
+{
+	window.parent.app_layout.getPageModel().appLoaded();
+}
+
+</script>
 
 
 </class>

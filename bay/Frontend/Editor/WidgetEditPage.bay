@@ -1,0 +1,161 @@
+<!--
+ *  BayLang Constructor
+-->
+
+<class name="BayLang.Constructor.Frontend.Editor.WidgetEditPage">
+
+<use name="BayLang.Constructor.Frontend.CSS" component="true" />
+
+
+<style>
+.index_page{
+	display: flex;
+	flex-direction: column;
+	height: 100vh;
+}
+.index_page__menu{
+	display: flex;
+	justify-content: flex-start;
+	padding: 10px;
+	gap: 20px;
+	border-bottom: 1px var(--widget-color-border) solid;
+}
+.index_page__menu_item{
+	cursor: pointer;
+	user-select: none;
+}
+.index_page__menu_item_gap{
+	flex: 1;
+}
+.index_page__content{
+	display: flex;
+	flex: 1;
+	height: calc(100vh - 40px);
+}
+.index_page__frame{
+	display: flex;
+	position: relative;
+	padding: 10px;
+	justify-content: stretch;
+	align-items: stretch;
+	flex: 1;
+}
+.index_page__frame iframe{
+	border-style: none;
+	overflow: visible;
+	width: 100%;
+}
+.index_page__property{
+	display: flex;
+	width: 300px;
+	border-left: 1px var(--widget-color-border) solid;
+}
+.index_page__property.hide{
+	display: none;
+}
+.index_page__property_menu{
+}
+.index_page__property_wrap{
+	flex: 1;
+}
+.index_page__property_tab{
+	display: none;
+	flex-wrap: wrap;
+	flex-direction: column;
+	justify-content: stretch;
+	align-items: stretch;
+	height: 100%;
+}
+.index_page__property_tab.selected{
+	display: flex;
+}
+.index_page__property_title{
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	border-bottom: 1px var(--widget-color-border) solid;
+	height: 32px;
+}
+.index_page__property_content{
+	padding: 10px;
+	flex: 1;
+	overflow-y: auto;
+}
+.index_page__property_menu_button{
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 32px;
+	width: 32px;
+	cursor: pointer;
+	user-select: none;
+}
+.index_page__property_menu_button.selected{
+	background-color: var(--widget-color-primary);
+	color: var(--widget-color-primary-text);
+}
+</style>
+
+
+<template name="renderProperty">
+	<div class="index_page__property"
+		class={{ this.model.property_visible ? "show" : "hide" }}>
+	</div>
+</template>
+
+<template>
+	<div class="index_page">
+		<div class="index_page__menu">
+			<div class="index_page__menu_item">Save</div>
+			<div class="index_page__menu_item">Export</div>
+			<div>
+				{{ not this.model.app_loaded ? "Loading..." : "Loaded" }}
+			</div>
+			<div class="index_page__menu_item_gap"></div>
+			<div class="index_page__menu_item"
+				@event:onClick={{ this.toggleProperty }}>Property</div>
+		</div>
+		<div class="index_page__content">
+			<div class="index_page__frame">
+				<iframe @ref="iframe"></iframe>
+			</div>
+			%render this.renderProperty();
+		</div>
+	</div>
+</template>
+
+
+<script>
+
+/**
+ * Toggle property
+ */
+void toggleProperty(var e)
+{
+	this.model.property_visible = not this.model.property_visible;
+	e.preventDefault();
+	e.stopPropagation();
+	return false;
+}
+
+
+/**
+ * Mounted
+ */
+void onMounted()
+{
+	var iframe = this.getRef("iframe");
+	iframe.src = this.model.getWidgetFramePage();
+	
+	var iframe_window = iframe.contentWindow;
+	var iframe_document = iframe.contentDocument;
+	
+	/* Setup iframe */
+	this.model.iframe = iframe;
+}
+
+</script>
+
+
+</class>

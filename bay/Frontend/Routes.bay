@@ -61,9 +61,9 @@ class Routes extends BaseRoute
 			},
 			new RouteInfo
 			{
-				"uri": "/project/{project_id}/open/widget.php",
+				"uri": "/project/{project_id}/widget/{widget_name}",
 				"name": "baylang:project:widget",
-				"model": "BayLang.Constructor.Frontend.Widget.WidgetPageModel",
+				"model": "BayLang.Constructor.Frontend.Editor.WidgetEditPageModel",
 			},
 			new RouteInfo
 			{

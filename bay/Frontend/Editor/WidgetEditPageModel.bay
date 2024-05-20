@@ -1,0 +1,50 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Editor;
+
+use Runtime.lib;
+use Runtime.Web.BasePageModel;
+use BayLang.Constructor.Frontend.Editor.WidgetEditPage;
+
+
+class WidgetEditPageModel extends BasePageModel
+{
+	string component = classof WidgetEditPage;
+	string project_id = "";
+	string current_widget = "";
+	bool app_loaded = false;
+	bool property_visible = false;
+	var iframe = null;
+	
+	
+	/**
+	 * Init widget settings
+	 */
+	void initWidget(Dict params)
+	{
+		parent(params);
+		this.layout.setLayoutName("default");
+		this.project_id = this.layout.route.matches.get("project_id");
+		this.current_widget = this.layout.route.matches.get("widget_name");
+	}
+	
+	
+	/**
+	 * Returns widget frame page
+	 */
+	string getWidgetFramePage() =>
+		"/project/" ~ this.project_id ~
+		"/open/widget.php?widget_name=" ~ this.current_widget
+	;
+	
+	
+	/**
+	 * App loaded
+	 */
+	void appLoaded()
+	{
+		this.app_loaded = true;
+	}
+}
