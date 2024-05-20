@@ -39,5 +39,6 @@ static class ModuleDescription
 	pure Collection<Dict> entities() =>
 	[
 		new ConsoleCommand("BayLang.Constructor.Console.Commands.BuildCache"),
+		new ConsoleCommand("BayLang.Constructor.Console.Commands.NginxUpdate"),
 	];
 }

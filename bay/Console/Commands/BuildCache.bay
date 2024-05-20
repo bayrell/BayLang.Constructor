@@ -17,7 +17,7 @@ class BuildCache extends BaseCommand
 	/**
 	 * Returns name
 	 */
-	static string getName() => "build:cache";
+	static string getName() => "build_cache";
 	
 	
 	/**
