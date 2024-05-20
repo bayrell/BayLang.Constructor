@@ -1,0 +1,13 @@
+<!--
+ *  Scripts
+-->
+
+<class name="BayLang.Constructor.WidgetDebug.Scripts">
+
+<use name="BayLang.Constructor.WidgetDebug.ModuleDescription" />
+
+<template>
+	<script type='text/javascript' id='baylang-js' src={{ this.layout.assets('baylang.js?ver=' ~ ModuleDescription::getModuleVersion()) }}></script>
+</template>
+
+</class>

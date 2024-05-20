@@ -23,6 +23,16 @@
 		"Frontend/WebApp.bay",
 		"Frontend/ModuleDescription.bay"
 	],
+	"groups": [
+		"baylang"
+	],
+	"modules":
+	[
+		{
+			"src": "widget",
+			"type": "module"
+		}
+	],
 	"src": "./bay",
 	"dest":
 	{
@@ -33,5 +43,9 @@
 	"allow":
 	[
 		"\\.bay$"
+	],
+	"exclude":
+	[
+		"^widget"
 	]
 }

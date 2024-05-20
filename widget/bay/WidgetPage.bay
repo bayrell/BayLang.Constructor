@@ -1,0 +1,15 @@
+<!--
+ *  BayLang Constructor
+-->
+
+<class name="BayLang.Constructor.WidgetDebug.WidgetPage">
+
+
+<template>
+	<div class="widget">
+		Debug widget {{ this.model.current_widget }}
+	</div>
+</template>
+
+
+</class>

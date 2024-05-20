@@ -1,0 +1,23 @@
+{
+	"name": "BayLang.Constructor.WidgetDebug",
+	"assets":
+	[
+		"WidgetPage.bay",
+		"WidgetPageModel.bay",
+		"ModuleDescription.bay"
+	],
+	"groups": [
+		"baylang"
+	],
+	"src": "./bay",
+	"dest":
+	{
+		"php": "./php",
+		"es6": "./es6",
+		"nodejs": "./nodejs"
+	},
+	"allow":
+	[
+		"\\.bay$"
+	]
+}

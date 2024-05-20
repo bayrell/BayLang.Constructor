@@ -1,0 +1,34 @@
+/*!
+ *  BayLang.Constructor.WidgetDebug
+ */
+
+namespace BayLang.Constructor.WidgetDebug;
+
+use Runtime.Web.BaseRoute;
+use Runtime.Web.RouteInfo;
+
+
+class Routes extends BaseRoute
+{
+	/**
+	 * Returns layout name
+	 */
+	static string getLayoutName() => "default";
+	
+	
+	/**
+	 * Returns routes
+	 */
+	pure Collection<RouteInfo> getRoutes()
+	{
+		return
+		[
+			new RouteInfo
+			{
+				"uri": "/widget.php",
+				"name": "baylang:widget:debug",
+				"model": "BayLang.Constructor.WidgetDebug.WidgetPageModel",
+			},
+		];
+	}
+}

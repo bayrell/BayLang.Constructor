@@ -1,0 +1,52 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.WidgetDebug;
+
+use Runtime.Web.Annotations.FooterComponents;
+use Runtime.Entity.Hook;
+use Runtime.Entity.Provider;
+use Runtime.Web.Annotations.Route;
+
+
+static class ModuleDescription
+{
+	/**
+	 * Returns module name
+	 * @return string
+	 */
+	pure string getModuleName() => "BayLang.Constructor.WidgetDebug";
+	
+	
+	/**
+	 * Returns module name
+	 * @return string
+	 */
+	pure string getModuleVersion() => "0.0.1";
+	
+	
+	/**
+	 * Returns required modules
+	 * @return Dict<string>
+	 */
+	pure Dict<string> requiredModules() =>
+	{
+	};
+	
+	
+	/**
+	 * Returns enities
+	 */
+	pure Collection<Dict> entities() =>
+	[
+		#ifdef BACKEND then
+		
+		new FooterComponents([
+			"BayLang.Constructor.WidgetDebug.Scripts",
+		]),
+		new Route("BayLang.Constructor.WidgetDebug.Routes"),
+		
+		#endif
+	];
+}

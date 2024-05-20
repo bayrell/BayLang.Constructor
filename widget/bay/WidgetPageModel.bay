@@ -1,0 +1,26 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.WidgetDebug;
+
+use Runtime.lib;
+use Runtime.Web.BasePageModel;
+use BayLang.Constructor.WidgetDebug.WidgetPage;
+
+
+class WidgetPageModel extends BasePageModel
+{
+	string component = classof WidgetPage;
+    string current_widget = "";
+    
+    
+    /**
+	 * Init widget settings
+	 */
+	void initWidget(Dict params)
+	{
+		parent(params);
+		this.current_widget = this.layout.request_query.get("widget_name");
+	}
+}
