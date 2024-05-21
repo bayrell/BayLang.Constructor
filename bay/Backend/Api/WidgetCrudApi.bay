@@ -85,7 +85,7 @@ class WidgetCrudApi extends CrudApi
 		
 		await this.project.readCache();
 		
-		Dict project_cache = this.project.getCache();
+		Dict project_cache = await this.project.getCache();
 		if (project_cache.has("modules"))
 		{
 			Collection<string> modules = project_cache.get("modules").keys();
@@ -120,7 +120,7 @@ class WidgetCrudApi extends CrudApi
 		string module_id = pk.get("id");
 		string project_id = this.post_data.get("project_id");
 		this.project = await Project::readProject(
-			fs::join(["/data/constructor/projects", project_id])
+			fs::join([@.env("constructor_path"), project_id])
 		);
 		
 		if (not this.project) return;

@@ -4,6 +4,9 @@
 
 <class name="BayLang.Constructor.WidgetDebug.WidgetPage">
 
+<use name="Runtime.Widget.Button" component="true" />
+
+
 <style global="true">
 body, html {
 	font-family: var(--widget-font-family);
@@ -15,9 +18,11 @@ body, html {
 }
 </style>
 
+
 <template>
 	<div class="widget">
 		Debug widget {{ this.model.current_widget }}
+		<div><Button @event:click={{ void (){ this.model.loadOpCodes(); } }}>Reload</Button></div>
 	</div>
 </template>
 
@@ -27,9 +32,9 @@ body, html {
 /**
  * Mounted
  */
-void onMounted()
+async void onMounted()
 {
-	window.parent.app_layout.getPageModel().appLoaded();
+	await this.model.loadOpCodes();
 }
 
 </script>

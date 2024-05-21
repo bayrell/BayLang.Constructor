@@ -41,6 +41,7 @@ static class ModuleDescription
 		new Api("BayLang.Constructor.Backend.Api.ModuleCrudApi"),
 		new Api("BayLang.Constructor.Backend.Api.ProjectCrudApi"),
 		new Api("BayLang.Constructor.Backend.Api.RouteCrudApi"),
+		new Api("BayLang.Constructor.Backend.Api.WidgetApi"),
 		new Api("BayLang.Constructor.Backend.Api.WidgetCrudApi"),
 	];
 }

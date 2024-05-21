@@ -1,0 +1,76 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.WidgetDebug;
+
+use Runtime.lib;
+use Runtime.Web.ApiResult;
+use Runtime.Web.BasePageModel;
+use BayLang.Constructor.WidgetDebug.WidgetPage;
+
+
+class WidgetPageModel extends BasePageModel
+{
+	string component = classof WidgetPage;
+    string current_widget = "";
+    
+    
+    /**
+	 * Init widget settings
+	 */
+	void initWidget(Dict params)
+	{
+		parent(params);
+		this.current_widget = this.layout.request_query.get("widget_name");
+	}
+	
+	
+	/**
+	 * Load op codes
+	 */
+	async void loadOpCodes()
+	{
+		ApiResult res = await this.layout.callApi({
+			"service": "constructor",
+			"api_name": "admin.constructor.widget",
+			"method_name": "getOpCode",
+			"data": {
+				"project_id": this.getProjectID(),
+				"current_widget": this.current_widget,
+			}
+		});
+		
+		if (res.isSuccess())
+		{
+		}
+		
+		log(res);
+		
+		this.sendAppLoaded();
+	}
+	
+	
+	/**
+	 * Send loaded
+	 */
+	void sendAppLoaded()
+	{
+		BasePageModel page_model = window.parent.app_layout.getPageModel();
+		string page_model_class_name = page_model::getClassName();
+		if (page_model_class_name != "BayLang.Constructor.Frontend.Editor.WidgetEditPageModel") return;
+		window.parent.app_layout.getPageModel().appLoaded();
+	}
+	
+	
+	/**
+	 * Returns project ID
+	 */
+	string getProjectID()
+	{
+		string route_prefix = @.env("ROUTE_PREFIX");
+		Collection<string> arr = rs::split("/", route_prefix);
+		arr = arr.filter(lib::equalNot(""));
+		return arr.get(1);
+	}
+}

@@ -1,0 +1,70 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Backend.Api;
+
+use Runtime.fs;
+use Runtime.Exceptions.ApiError;
+use Runtime.Exceptions.ItemNotFound;
+use Runtime.Exceptions.RuntimeException;
+use Runtime.Web.BaseApi;
+use Runtime.Web.Annotations.ApiMethod;
+use BayLang.Helper.Module;
+use BayLang.Helper.Project;
+use BayLang.Helper.Widget;
+use BayLang.OpCodes.BaseOpCode;
+
+
+class WidgetApi extends BaseApi
+{
+	/**
+	 * Returns api name
+	 */
+	pure string getApiName() => "admin.constructor.widget";
+	
+	
+	/**
+	 * Returns op code
+	 */
+	@ApiMethod
+	async void getOpCode()
+	{
+		string project_id = this.post_data.get("project_id");
+		string current_widget = this.post_data.get("current_widget");
+		
+		/* Find project */
+		Project project = await Project::readProject(
+			fs::join([@.env("constructor_path"), "projects", project_id])
+		);
+		if (not project)
+		{
+			throw new ApiError( new ItemNotFound(project_id, "Project") );
+			return;
+		}
+		
+		/* Find widget */
+		Widget widget = await project.getWidget(current_widget);
+		if (not widget)
+		{
+			throw new ApiError( new ItemNotFound(current_widget, "Widget") );
+			return;
+		}
+		
+		/* Load widget */
+		await widget.load();
+		
+		/* Get widget op code */
+		string model_content = await widget.getModelContent();
+		BaseOpCode component_op_code = await widget.getComponentOpCode();
+		
+		/* Success */
+		this.success({
+			"data": {
+				"model_content": model_content,
+				"component_op_code": component_op_code,
+			},
+		});
+	}
+	
+}

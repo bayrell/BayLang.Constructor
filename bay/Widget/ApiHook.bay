@@ -1,0 +1,44 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.WidgetDebug;
+
+use Runtime.Web.Hooks.AppHook as BaseAppHook;
+
+
+class ApiHook extends BaseAppHook
+{
+	/**
+	 * Register hooks
+	 */
+	void register_hooks()
+	{
+		this.register(static::CALL_API_BEFORE);
+	}
+	
+	
+	/**
+	 * Call api before
+	 */
+	void call_api_before(Map params)
+	{
+        Dict post_data = params.get("post_data");
+        string service = post_data.get("service");
+        string api_name = post_data.get("api_name");
+        string method_name = post_data.get("method_name");
+        
+        if (service != "constructor") return;
+        
+        Vector api_url_arr = [
+			"api",
+			"app",
+			api_name,
+			method_name,
+		];
+		api_url_arr = api_url_arr.filter( bool (string s) => s != "" );
+		string api_url = "/" ~ api_url_arr.join("/") ~ "/";
+        
+		params.set("api_url", api_url);
+	}
+}

@@ -95,7 +95,7 @@ class ProjectCrudApi extends CrudApi
 		
 		string project_id = pk.get("id");
 		this.item = await Project::readProject(
-			fs::join(["/data/constructor/projects", project_id])
+			fs::join([@.env("constructor_path"), "projects", project_id])
 		);
 	}
 	

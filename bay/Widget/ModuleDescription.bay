@@ -40,6 +40,8 @@ static class ModuleDescription
 	 */
 	pure Collection<Dict> entities() =>
 	[
+		new Hook("BayLang.Constructor.WidgetDebug.ApiHook"),
+		
 		#ifdef BACKEND then
 		
 		new FooterComponents([

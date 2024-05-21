@@ -2,6 +2,7 @@
 	"name": "BayLang.Constructor.WidgetDebug",
 	"assets":
 	[
+		"ApiHook.bay",
 		"WidgetPage.bay",
 		"WidgetPageModel.bay",
 		"ModuleDescription.bay"
@@ -9,12 +10,11 @@
 	"groups": [
 		"baylang"
 	],
-	"src": "./bay",
+	"src": "./",
 	"dest":
 	{
-		"php": "./php",
-		"es6": "./es6",
-		"nodejs": "./nodejs"
+		"php": "./../../php/WidgetDebug",
+		"es6": "./../../es6/WidgetDebug"
 	},
 	"allow":
 	[

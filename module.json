@@ -31,7 +31,7 @@
 	"modules":
 	[
 		{
-			"src": "widget",
+			"src": "bay/Widget",
 			"type": "module"
 		}
 	],

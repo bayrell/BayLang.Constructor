@@ -65,7 +65,8 @@ class BuildCache extends BaseCommand
 			io::print("Project: " ~ project.getID());
 			
 			await project.readModules();
-			await project.buildCache();
+			await project.loadModules();
+			await project.saveCache();
 			
 			io::print("OK");
 		}
