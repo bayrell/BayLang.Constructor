@@ -14,6 +14,7 @@ use Runtime.Widget.Crud.Rules.CrudRule;
 use Runtime.Widget.Crud.Rules.Required;
 use BayLang.Helper.Module;
 use BayLang.Helper.Project;
+use BayLang.Helper.Widget;
 
 
 class WidgetCrudApi extends CrudApi
@@ -83,27 +84,21 @@ class WidgetCrudApi extends CrudApi
 		);
 		if (not this.project) return;
 		
-		await this.project.readCache();
-		
-		Dict project_cache = await this.project.getCache();
-		if (project_cache.has("modules"))
+		if (this.project.modules != null)
 		{
-			Collection<string> modules = project_cache.get("modules").keys();
+			Collection<string> modules = this.project.modules.keys();
 			for (int i=0; i<modules.count(); i++)
 			{
 				string module_name = modules.get(i);
-				Map module_cache = project_cache.get("modules").get(module_name);
-				if (module_cache.has("widgets"))
-				{
-					this.items.appendItems(
-						module_cache.get("widgets").map(
-							Dict (string widget_name) use (module_name) => {
-								"name": widget_name,
-								"module": module_name,
-							}
-						)
-					);
-				}
+				Module module = this.project.modules.get(module_name);
+				this.items.appendItems(
+					module.getWidgets().map(
+						Dict (Widget widget) use (module_name) => {
+							"name": widget.name,
+							"module": module_name,
+						}
+					)
+				);
 			}
 			this.items = this.items.sort();
 		}
