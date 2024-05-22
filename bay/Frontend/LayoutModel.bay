@@ -49,7 +49,7 @@ class LayoutModel extends BaseLayoutModel
 	/**
 	 * Process frontend data
 	 */
-	void processFrontendData(Serializer serializer, Map data)
+	void serialize(Serializer serializer, Map data)
 	{
 		parent(serializer, data);
 	}
