@@ -13,10 +13,13 @@ use BayLang.Constructor.WidgetDebug.WidgetPage;
 class WidgetPageModel extends BasePageModel
 {
 	string component = classof WidgetPage;
-    string current_widget = "";
-    
-    
-    /**
+	string current_widget = "";
+	string model_content = "";
+	string component_content = "";
+	string component_op_code = "";
+	
+	
+	/**
 	 * Init widget settings
 	 */
 	void initWidget(Dict params)
@@ -43,9 +46,12 @@ class WidgetPageModel extends BasePageModel
 		
 		if (res.isSuccess())
 		{
+			this.component_content = res.data.get("component_content");
+			this.component_op_code = res.data.get("component_op_code");
+			this.model_content = res.data.get("model_content");
+			
+			log(this.component_op_code);
 		}
-		
-		log(res);
 		
 		this.sendAppLoaded();
 	}
