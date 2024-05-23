@@ -22,10 +22,10 @@ class WidgetPageModel extends BasePageModel
 	string current_widget = "";
 	string model_content = "";
 	string component_content = "";
-	string component_op_code = "";
+	var widget_component = null;
+	BaseOpCode component_op_code = null;
 	BaseModel widget_model = null;
 	TranslatorES6 translator = null;
-	int counter = 1;
 	
 	
 	/**
@@ -68,9 +68,6 @@ class WidgetPageModel extends BasePageModel
 				}
 			);
 			
-			/* Build render */
-			this.buildRender("render");
-			
 			/* App is loaded */
 			this.sendAppLoaded();
 		}
@@ -87,21 +84,6 @@ class WidgetPageModel extends BasePageModel
 		
 		OpDeclareFunction render = op_code_class.findFunction(render_name);
 		if (not render) return;
-		
-		/* Change render */
-		/*
-		render = rtl::setAttr(render, [
-			"expression", "items", 0,
-			"items", "items", 0,
-			"tag_name"
-		], "h2");
-		*/
-		render = rtl::setAttr(render, [
-			"expression", "items", 0,
-			"items", "items", 0,
-			"items", "items", 0,
-			"value"
-		], "Test");
 		
 		/* Reset translator */
 		TranslatorES6 t = TranslatorES6::reset(this.translator);
@@ -121,14 +103,28 @@ class WidgetPageModel extends BasePageModel
 		content = t.program::removeContext(content);
 		content = rs::trim(content);
 		
-		/* Get component name */
-		string component_name = this.widget_model.component;
-		var component_item = rtl::find_class(component_name);
+		this.widget_component.render = window.eval("fn_new = " + content + ";");
+		this.widget_component.reload();
+	}
+	
+	
+	/**
+	 * Update
+	 */
+	void updateText(string text)
+	{
+		string render_name = "render";
 		
-		/* Update render function */
-		#ifcode JAVASCRIPT then
-		component_item.methods["render"] = eval("fn_new = " + content + ";");
-		#endif
+		OpDeclareClass op_code_class = this.component_op_code.findClass();
+		OpDeclareFunction render = op_code_class.findFunction(render_name);
+		
+		/* Change render */
+		var a = render.expression.items.get(0);
+		a = a.items.items.get(0);
+		a = a.items.items.get(0);
+		a.value = text;
+		
+		this.buildRender("render");
 	}
 	
 	

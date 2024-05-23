@@ -21,7 +21,7 @@ body, html {
 
 <template>
 	<div class="widget_page">
-		%render this.renderWidget(this.model.widget_model);
+		%render this.renderWidget(this.model.widget_model, {"ref": "widget"});
 	</div>
 </template>
 
@@ -34,6 +34,9 @@ body, html {
 async void onMounted()
 {
 	await this.model.loadWidget();
+	this.nextTick(void (){
+		this.model.widget_component = this.getRef("widget");
+	});
 }
 
 </script>
