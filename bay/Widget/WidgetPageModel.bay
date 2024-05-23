@@ -6,7 +6,13 @@ namespace BayLang.Constructor.WidgetDebug;
 
 use Runtime.lib;
 use Runtime.Web.ApiResult;
+use Runtime.Web.BaseModel;
 use Runtime.Web.BasePageModel;
+use BayLang.SaveOpCode;
+use BayLang.LangES6.TranslatorES6;
+use BayLang.OpCodes.BaseOpCode;
+use BayLang.OpCodes.OpDeclareClass;
+use BayLang.OpCodes.OpDeclareFunction;
 use BayLang.Constructor.WidgetDebug.WidgetPage;
 
 
@@ -17,6 +23,9 @@ class WidgetPageModel extends BasePageModel
 	string model_content = "";
 	string component_content = "";
 	string component_op_code = "";
+	BaseModel widget_model = null;
+	TranslatorES6 translator = null;
+	int counter = 1;
 	
 	
 	/**
@@ -26,13 +35,14 @@ class WidgetPageModel extends BasePageModel
 	{
 		parent(params);
 		this.current_widget = this.layout.request_query.get("widget_name");
+		this.translator = new TranslatorES6();
 	}
 	
 	
 	/**
-	 * Load op codes
+	 * Load widget
 	 */
-	async void loadOpCodes()
+	async void loadWidget()
 	{
 		ApiResult res = await this.layout.callApi({
 			"service": "constructor",
@@ -50,10 +60,75 @@ class WidgetPageModel extends BasePageModel
 			this.component_op_code = res.data.get("component_op_code");
 			this.model_content = res.data.get("model_content");
 			
-			log(this.component_op_code);
+			/* Create widget model */
+			this.widget_model = this.addWidget(
+				this.current_widget,
+				{
+					"Widget_name": "current_widget",
+				}
+			);
+			
+			/* Build render */
+			this.buildRender("render");
+			
+			/* App is loaded */
+			this.sendAppLoaded();
 		}
+	}
+	
+	
+	/**
+	 * Build render function
+	 */
+	void buildRender(string render_name)
+	{
+		OpDeclareClass op_code_class = this.component_op_code.findClass();
+		if (not op_code_class) return;
 		
-		this.sendAppLoaded();
+		OpDeclareFunction render = op_code_class.findFunction(render_name);
+		if (not render) return;
+		
+		/* Change render */
+		/*
+		render = rtl::setAttr(render, [
+			"expression", "items", 0,
+			"items", "items", 0,
+			"tag_name"
+		], "h2");
+		*/
+		render = rtl::setAttr(render, [
+			"expression", "items", 0,
+			"items", "items", 0,
+			"items", "items", 0,
+			"value"
+		], "Test");
+		
+		/* Reset translator */
+		TranslatorES6 t = TranslatorES6::reset(this.translator);
+		
+		string content = "";
+		Collection<SaveOpCode> save_op_codes = t.save_op_codes;
+		int save_op_code_inc = t.save_op_code_inc;
+		
+		/* Translate expression */
+		list res = t.expression::OpDeclareFunction(t, render, false);
+		t = res.get(0);
+		
+		/* Output save op code */
+		string save = t::outputSaveOpCode(t, save_op_codes.count());
+		if (save != "") content ~= save;
+		content ~= res.get(1);
+		content = t.program::removeContext(content);
+		content = rs::trim(content);
+		
+		/* Get component name */
+		string component_name = this.widget_model.component;
+		var component_item = rtl::find_class(component_name);
+		
+		/* Update render function */
+		#ifcode JAVASCRIPT then
+		component_item.methods["render"] = eval("fn_new = " + content + ";");
+		#endif
 	}
 	
 	

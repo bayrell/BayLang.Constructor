@@ -20,9 +20,8 @@ body, html {
 
 
 <template>
-	<div class="widget">
-		Debug widget {{ this.model.current_widget }}
-		<div><Button @event:click={{ void (){ this.model.loadOpCodes(); } }}>Reload</Button></div>
+	<div class="widget_page">
+		%render this.renderWidget(this.model.widget_model);
 	</div>
 </template>
 
@@ -34,7 +33,7 @@ body, html {
  */
 async void onMounted()
 {
-	await this.model.loadOpCodes();
+	await this.model.loadWidget();
 }
 
 </script>

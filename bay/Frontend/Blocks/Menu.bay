@@ -30,7 +30,7 @@
 		<div class="menu__item">
 			<a href={{ this.layout.url("baylang:index") }} class="nolink">Projects</a>
 		</div>
-		%if (this.model.project_id != null)
+		%if (this.model.project_id)
 		{
 			<div class="menu__item" class={{ this.menuActive("baylang:project:modules") }}>
 				<a href={{
