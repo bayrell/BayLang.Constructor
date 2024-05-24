@@ -73,7 +73,8 @@ class ModuleTableModel extends TableDialogModel
 					);
 				}
 			},
-			"edit_button"
+			"edit_button",
+			"before"
 		);
 		this.row_buttons.removeItemByName("edit_button");
 		this.row_buttons.removeItemByName("delete_button");

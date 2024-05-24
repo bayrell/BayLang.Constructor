@@ -74,7 +74,8 @@ class ProjectTableModel extends TableDialogModel
 					return this.layout.url("baylang:project:modules", {"project_id":item.get("id")});
 				}
 			},
-			"edit_button"
+			"edit_button",
+			"before"
 		);
 		
 		/* Add style */
