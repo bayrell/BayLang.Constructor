@@ -5,6 +5,7 @@
 <class name="BayLang.Constructor.Frontend.Editor.WidgetEditPage">
 
 <use name="BayLang.Constructor.Frontend.CSS" component="true" />
+<use name="BayLang.Constructor.Frontend.Editor.WidgetProperty" component="true" />
 
 
 <style>
@@ -13,26 +14,26 @@
 	flex-direction: column;
 	height: 100vh;
 }
-.index_page__menu{
+.widget_edit_page__menu{
 	display: flex;
 	justify-content: flex-start;
 	padding: 10px;
 	gap: 20px;
 	border-bottom: 1px var(--widget-color-border) solid;
 }
-.index_page__menu_item{
+.widget_edit_page__menu_item{
 	cursor: pointer;
 	user-select: none;
 }
-.index_page__menu_item_gap{
+.widget_edit_page__menu_item_gap{
 	flex: 1;
 }
-.index_page__content{
+.widget_edit_page__content{
 	display: flex;
 	flex: 1;
-	height: calc(100vh - 40px);
+	height: calc(100vh - 41px);
 }
-.index_page__frame{
+.widget_edit_page__frame{
 	display: flex;
 	position: relative;
 	padding: 10px;
@@ -40,87 +41,31 @@
 	align-items: stretch;
 	flex: 1;
 }
-.index_page__frame iframe{
+.widget_edit_page__frame iframe{
 	border-style: none;
 	overflow: visible;
 	width: 100%;
 }
-.index_page__property{
-	display: flex;
-	width: 300px;
-	border-left: 1px var(--widget-color-border) solid;
-}
-.index_page__property.hide{
-	display: none;
-}
-.index_page__property_menu{
-}
-.index_page__property_wrap{
-	flex: 1;
-}
-.index_page__property_tab{
-	display: none;
-	flex-wrap: wrap;
-	flex-direction: column;
-	justify-content: stretch;
-	align-items: stretch;
-	height: 100%;
-}
-.index_page__property_tab.selected{
-	display: flex;
-}
-.index_page__property_title{
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	text-align: center;
-	border-bottom: 1px var(--widget-color-border) solid;
-	height: 32px;
-}
-.index_page__property_content{
-	padding: 10px;
-	flex: 1;
-	overflow-y: auto;
-}
-.index_page__property_menu_button{
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	height: 32px;
-	width: 32px;
-	cursor: pointer;
-	user-select: none;
-}
-.index_page__property_menu_button.selected{
-	background-color: var(--widget-color-primary);
-	color: var(--widget-color-primary-text);
-}
 </style>
 
 
-<template name="renderProperty">
-	<div class="index_page__property"
-		class={{ this.model.property_visible ? "show" : "hide" }}>
-	</div>
-</template>
-
 <template>
-	<div class="index_page">
-		<div class="index_page__menu">
-			<div class="index_page__menu_item">Save</div>
-			<div class="index_page__menu_item">Export</div>
+	<div class="widget_edit_page">
+		<div class="widget_edit_page__menu">
+			<div class="widget_edit_page__menu_item">Save</div>
+			<div class="widget_edit_page__menu_item">Export</div>
 			<div>
 				{{ not this.model.app_loaded ? "Loading..." : "Loaded" }}
 			</div>
-			<div class="index_page__menu_item_gap"></div>
-			<div class="index_page__menu_item"
+			<div class="widget_edit_page__menu_item_gap"></div>
+			<div class="widget_edit_page__menu_item"
 				@event:onClick={{ this.toggleProperty }}>Property</div>
 		</div>
-		<div class="index_page__content">
-			<div class="index_page__frame">
+		<div class="widget_edit_page__content">
+			<div class="widget_edit_page__frame">
 				<iframe @ref="iframe"></iframe>
 			</div>
-			%render this.renderProperty();
+			<WidgetProperty @model={{ this.model }} />
 		</div>
 	</div>
 </template>

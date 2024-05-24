@@ -6,6 +6,7 @@
 		"Frontend/Blocks/MenuModel.bay",
 		"Frontend/Editor/WidgetEditPage.bay",
 		"Frontend/Editor/WidgetEditPageModel.bay",
+		"Frontend/Editor/WidgetProperty.bay",
 		"Frontend/Layout/DefaultLayout.bay",
 		"Frontend/Module/ModuleFormModel.bay",
 		"Frontend/Module/ModulePageModel.bay",

@@ -29,7 +29,7 @@
 }
 .index_page_structure__item.selected span{
 	background-color: var(--widget-color-primary);
-    color: var(--widget-color-primary-text);
+	color: var(--widget-color-primary-text);
 }
 .index_page_structure > .index_page_structure__items{
 	padding-left: 0px;

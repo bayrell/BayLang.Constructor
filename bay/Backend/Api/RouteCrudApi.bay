@@ -85,20 +85,15 @@ class RouteCrudApi extends CrudApi
 		);
 		if (not this.project) return;
 		
-		await this.project.readCache();
-		
-		Dict project_cache = this.project.getCache();
-		if (project_cache.has("modules"))
+		if (this.project.modules != null)
 		{
-			Collection<string> modules = project_cache.get("modules").keys();
+			Collection<string> modules = this.project.modules.keys();
 			for (int i=0; i<modules.count(); i++)
 			{
 				string module_name = modules.get(i);
-				Map module_cache = project_cache.get("modules").get(module_name);
-				if (module_cache.has("routes"))
-				{
-					this.items.appendItems(module_cache.get("routes"));
-				}
+				Module module = this.project.modules.get(module_name);
+				if (not module.routes) continue;
+				this.items.appendItems(module.routes);
 			}
 			this.items = this.items.sort();
 		}
