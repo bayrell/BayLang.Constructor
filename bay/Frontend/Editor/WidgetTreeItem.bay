@@ -1,0 +1,75 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Editor;
+
+use Runtime.Widget.Tree.TreeItem;
+use BayLang.OpCodes.BaseOpCode;
+use BayLang.OpCodes.OpHtmlItems;
+use BayLang.OpCodes.OpHtmlTag;
+use BayLang.Constructor.Frontend.Editor.Helper;
+
+
+class WidgetTreeItem extends TreeItem
+{
+	BaseOpCode op_code = null;
+	
+	
+	/**
+	 * Returns true if can insert inside
+	 */
+	bool canDragInside()
+	{
+		if (not this.op_code) return false;
+		if (this.op_code.tag_name == "h1") return false;
+		if (this.op_code.tag_name == "h2") return false;
+		if (this.op_code.tag_name == "h3") return false;
+		if (this.op_code.tag_name == "h4") return false;
+		if (this.op_code.tag_name == "h5") return false;
+		if (this.op_code.tag_name == "p") return false;
+		if (this.op_code.tag_name == "span") return false;
+		return true;
+	}
+	
+	
+	/**
+	 * Add HTML Items
+	 */
+	void addHtmlItems(OpHtmlItems op_code_items)
+	{
+		for (int i=0; i<op_code_items.items.count(); i++)
+		{
+			this.addHtmlItem(op_code_items.items.get(i));
+		}
+	}
+	
+	
+	/**
+	 * Add HTML Item
+	 */
+	void addHtmlItem(BaseOpCode op_code)
+	{
+		if (rtl::is_instanceof(op_code, classof OpHtmlTag))
+		{
+			this.addHtmlTag(op_code);
+		}
+	}
+	
+	
+	/**
+	 * Add HTML Tag
+	 */
+	void addHtmlTag(OpHtmlTag op_code)
+	{
+		Collection<string> class_names = Helper::OpHtmlTagGetClassNames(op_code);
+		string key = class_names.get(0);
+		WidgetTreeItem new_item = this.newInstance({
+			"key": key,
+			"label": op_code.tag_name ~ "." ~ key,
+			"op_code": op_code,
+		});
+		this.addItem(new_item);
+		new_item.addHtmlItems(op_code.items);
+	}
+}

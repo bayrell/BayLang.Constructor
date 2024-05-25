@@ -5,12 +5,18 @@
 namespace BayLang.Constructor.Frontend.Editor;
 
 use Runtime.lib;
+use Runtime.Reference;
 use Runtime.Web.BaseModel;
 use Runtime.Web.BasePageModel;
 use Runtime.Widget.Tree.TreeItem;
 use Runtime.Widget.Tree.TreeModel;
 use BayLang.Constructor.Frontend.Editor.WidgetEditPage;
+use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
 use BayLang.Constructor.WidgetDebug.WidgetPageModel;
+use BayLang.OpCodes.BaseOpCode;
+use BayLang.OpCodes.OpDeclareClass;
+use BayLang.OpCodes.OpDeclareFunction;
+use BayLang.OpCodes.OpHtmlItems;
 
 
 class WidgetEditPageModel extends BasePageModel
@@ -34,6 +40,8 @@ class WidgetEditPageModel extends BasePageModel
 		this.current_widget = this.layout.route.matches.get("widget_name");
 		this.project_id = this.layout.route.matches.get("project_id");
 		this.tree = this.addWidget(classof TreeModel);
+		this.tree.events.add("canDrag", method this.canTreeDrop);
+		this.tree.events.add("dragElement", method this.dragElement);
 	}
 	
 	
@@ -61,43 +69,79 @@ class WidgetEditPageModel extends BasePageModel
 	
 	
 	/**
+	 * Load Tree items
+	 */
+	void loadTreeItems()
+	{
+		BaseOpCode component_op_code = this.getFramePageModel().component_op_code;
+		if (not component_op_code) return;
+		
+		OpDeclareClass op_code_class = component_op_code.findClass();
+		if (not op_code_class) return;
+		
+		string render_name = "render";
+		OpDeclareFunction op_code_render = op_code_class.findFunction(render_name);
+		if (not op_code_render) return;
+		
+		BaseOpCode op_code_expression = op_code_render.getExpression();
+		if (not op_code_expression) return;
+		if (not rtl::is_instanceof(op_code_expression, classof OpHtmlItems)) return;
+		
+		this.tree.root = new WidgetTreeItem();
+		this.tree.root.addHtmlItems(op_code_expression);
+	}
+	
+	
+	/**
+	 * Can Tree drop
+	 */
+	void canTreeDrop(
+		Collection<string> src, Collection<string> dest,
+		string kind, Reference<bool> result
+	)
+	{
+		if (dest.count() < 2 and (kind == "before" or kind == "after"))
+		{
+			result.setValue(false);
+		}
+	}
+	
+	
+	/**
+	 * Drag & Drop
+	 */
+	void dragElement(Dict params)
+	{
+		TreeItem dest_item = params.get("dest_item");
+		TreeItem dest_parent_item = params.get("dest_parent_item");
+		TreeItem kind = params.get("kind");
+		TreeItem src_item = params.get("src_item");
+		TreeItem src_parent_item = params.get("src_parent_item");
+		
+		/* Move item */
+		src_parent_item.op_code.items.removeItem(src_item.op_code);
+		if (kind == "into")
+		{
+			dest_parent_item.op_code.items.addItem(src_item.op_code, null, "before");
+		}
+		else
+		{
+			dest_parent_item.op_code.items.addItem(src_item.op_code, dest_item.op_code, kind);
+		}
+		
+		/* Build render */
+		this.getFramePageModel().buildRender("render");
+	}
+	
+	
+	/**
 	 * App loaded
 	 */
 	void appLoaded()
 	{
 		this.app_loaded = true;
 		
-		/* Load tree items */
-		WidgetPageModel page_model = this.getFramePageModel();
-		this.tree.root.items = [
-			new TreeItem{
-				"key": "1",
-				"label": "Item 1",
-				"items": [
-					new TreeItem{
-						"key": "1",
-						"label": "Item 1.1"
-					},
-					new TreeItem{
-						"key": "2",
-						"label": "Item 1.2"
-					},
-					new TreeItem{
-						"key": "3",
-						"label": "Item 1.3",
-						"can_drag_inside": false,
-					}
-				]
-			},
-			new TreeItem{
-				"key": "2",
-				"label": "Item 2",
-			},
-			new TreeItem{
-				"key": "3",
-				"label": "Item 3",
-				"can_drag_inside": false,
-			}
-		];
+		/* Load Tree items */
+		this.loadTreeItems();
 	}
 }

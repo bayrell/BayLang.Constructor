@@ -82,18 +82,22 @@ class WidgetPageModel extends BasePageModel
 		OpDeclareClass op_code_class = this.component_op_code.findClass();
 		if (not op_code_class) return;
 		
-		OpDeclareFunction render = op_code_class.findFunction(render_name);
-		if (not render) return;
+		OpDeclareFunction op_code_render = op_code_class.findFunction(render_name);
+		if (not op_code_render) return;
 		
 		/* Reset translator */
 		TranslatorES6 t = TranslatorES6::reset(this.translator);
+		if (this.component_op_code.uses != null)
+		{
+			t <= modules <= this.component_op_code.uses;
+		}
 		
 		string content = "";
 		Collection<SaveOpCode> save_op_codes = t.save_op_codes;
 		int save_op_code_inc = t.save_op_code_inc;
 		
 		/* Translate expression */
-		list res = t.expression::OpDeclareFunction(t, render, false);
+		list res = t.expression::OpDeclareFunction(t, op_code_render, false);
 		t = res.get(0);
 		
 		/* Output save op code */
@@ -102,7 +106,7 @@ class WidgetPageModel extends BasePageModel
 		content ~= res.get(1);
 		content = t.program::removeContext(content);
 		content = rs::trim(content);
-		
+		log(content);
 		this.widget_component.render = window.eval("fn_new = " + content + ";");
 		this.widget_component.reload();
 	}

@@ -1,0 +1,31 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Editor;
+
+use BayLang.OpCodes.OpHtmlAttribute;
+use BayLang.OpCodes.OpHtmlTag;
+use BayLang.OpCodes.OpString;
+
+
+class Helper
+{
+	/**
+	 * OpHtmlTag get class_names
+	 */
+	static Collection<string> OpHtmlTagGetClassNames(OpHtmlTag op_code) =>
+		op_code.attrs
+			.filter(
+				bool (OpHtmlAttribute op_code_attr)
+				{
+					if (op_code_attr.key != "class") return false;
+					if (not rtl::is_instanceof(op_code_attr.value, classof OpString)) return false;
+					return true;
+				}
+			)
+			.map(
+				string (OpHtmlAttribute op_code_attr) => op_code_attr.value.value
+			)
+		;
+}
