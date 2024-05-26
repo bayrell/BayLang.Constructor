@@ -42,6 +42,7 @@ class WidgetEditPageModel extends BasePageModel
 		this.tree = this.addWidget(classof TreeModel);
 		this.tree.events.add("canDrag", method this.canTreeDrop);
 		this.tree.events.add("dragElement", method this.dragElement);
+		this.tree.events.add("selectItem", method this.selectItem);
 	}
 	
 	
@@ -93,10 +94,19 @@ class WidgetEditPageModel extends BasePageModel
 	
 	
 	/**
+	 * Select item
+	 */
+	void selectItem(Collection<int> path, WidgetTreeItem item)
+	{
+		this.getFramePageModel().selectItem(path, item ? item.op_code : null);
+	}
+	
+	
+	/**
 	 * Can Tree drop
 	 */
 	void canTreeDrop(
-		Collection<string> src, Collection<string> dest,
+		Collection<int> src, Collection<int> dest,
 		string kind, Reference<bool> result
 	)
 	{

@@ -16,17 +16,114 @@ body, html {
 	padding: 0;
 	margin: 0;
 }
+.widget_box__item{
+	position: absolute;
+	border-style: none;
+	border-width: 0;
+	border-color: transparent
+}
+.widget_box__item--hover{
+	border-style: dashed;
+}
+.widget_box__item--current{
+	border-style: solid;
+}
+.widget_box__item--top{
+	border-top-width: 1px;
+	border-top-color: var(--widget-color-border);
+}
+.widget_box__item--left{
+	border-left-width: 1px;
+	border-left-color: var(--widget-color-border);
+}
+.widget_box__item--bottom{
+	border-bottom-width: 1px;
+	border-bottom-color: var(--widget-color-border);
+}
+.widget_box__item--right{
+	border-right-width: 1px;
+	border-right-color: var(--widget-color-border);
+}
 </style>
 
 
+<template name="renderSelectedBox">
+	%if (this.model.selected_box)
+	{
+		<div class="widget_box__item widget_box__item--top widget_box__item--current"
+			style={{ this.model.selected_box.get("top") }}></div>
+		<div class="widget_box__item widget_box__item--bottom widget_box__item--current"
+			style={{ this.model.selected_box.get("bottom") }}></div>
+		<div class="widget_box__item widget_box__item--left widget_box__item--current"
+			style={{ this.model.selected_box.get("left") }}></div>
+		<div class="widget_box__item widget_box__item--right widget_box__item--current"
+			style={{ this.model.selected_box.get("right") }}></div>
+	}
+</template>
+
+
 <template>
-	<div class="widget_page">
-		%render this.renderWidget(this.model.widget_model, {"ref": "widget"});
+	<div class="widget_page" @event:click={{ this.onClick }}>
+		%render this.renderWidget(this.model.widget_model, {"ref": "widget_component"});
+		%render this.renderSelectedBox();
 	</div>
 </template>
 
 
 <script>
+
+/**
+ * Returns widget
+ */
+Collection<int> getWidget(var elem)
+{
+	#ifcode JAVASCRIPT then
+	while (elem != null)
+	{
+		if (elem.classList.contains("debug_component"))
+		{
+			return elem;
+		}
+		if (elem.__vueParentComponent && elem.__vueParentComponent.vnode)
+		{
+			var elem_component = elem.__vueParentComponent.vnode.el;
+			if (elem_component == elem) return elem;
+		}
+		elem = elem.parentElement;
+	}
+	return elem;
+	#endif
+}
+
+
+/**
+ * Returns widget path
+ */
+Collection<int> getWidgetPath(var elem)
+{
+	#ifcode JAVASCRIPT then
+	if (!elem.__vnode) return null;
+	if (elem == elem.__vueParentComponent.vnode.el)
+	{
+		return elem.__vueParentComponent.vnode.component.ctx.data_widget_path;
+	}
+	return elem.getAttribute("data-widget-path");
+	#endif
+}
+
+
+/**
+ * Click
+ */
+void onClick(var e)
+{
+	var elem = e.target;
+	elem = this.getWidget(elem);
+	string path_str = this.getWidgetPath(elem);
+	Collection<int> path = rs::split(".", path_str);
+	this.model.sendSelectItem(path);
+}
+
 
 /**
  * Mounted
@@ -35,7 +132,8 @@ async void onMounted()
 {
 	await this.model.loadWidget();
 	this.nextTick(void (){
-		this.model.widget_component = this.getRef("widget");
+		this.model.widget_component = this.getRef("widget_component");
+		this.model.buildRender();
 	});
 }
 
