@@ -79,6 +79,9 @@
 void toggleProperty(var e)
 {
 	this.model.property_visible = not this.model.property_visible;
+	this.nextTick(void(){
+		this.model.getFramePageModel().updateSelectedBox();
+	});
 	e.preventDefault();
 	e.stopPropagation();
 	return false;

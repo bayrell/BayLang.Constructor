@@ -114,16 +114,8 @@ class WidgetPageModel extends BasePageModel
 				}
 				
 				/* Setup element */
-				if (elem)
-				{
-					this.selected_box = static::getBoxStyles(elem);
-					this.selected_elem = elem;
-				}
-				else
-				{
-					this.selected_box = null;
-					this.selected_elem = null;
-				}
+				this.selected_elem = elem;
+				this.updateSelectedBox();
 			}
 		);
 	}
@@ -256,6 +248,22 @@ class WidgetPageModel extends BasePageModel
 		
 		/* Add new component */
 		this.addComponent(component);
+	}
+	
+	
+	/**
+	 * Update box styles
+	 */
+	void updateSelectedBox()
+	{
+		if (this.selected_elem)
+		{
+			this.selected_box = static::getBoxStyles(this.selected_elem);
+		}
+		else
+		{
+			this.selected_box = null;
+		}
 	}
 	
 	
