@@ -4,6 +4,7 @@
 
 <class name="BayLang.Constructor.WidgetDebug.WidgetPage">
 
+<use name="Runtime.Web.BaseLayoutModel" />
 <use name="Runtime.Widget.Button" component="true" />
 
 
@@ -47,6 +48,19 @@ body, html {
 </style>
 
 
+<template name="renderStyle">
+	%if (this.model.widget_model and this.model.widget_model.component)
+	{
+		%set string component = this.model.widget_model.component;
+		%set Vector res = [];
+		%set Vector cache = {};
+		%set _ = BaseLayoutModel::_getRequiredComponents(res, cache, [component]);
+		%set string css = BaseLayoutModel::getCss(res);
+		<style>{{ css }}</style>
+	}
+</template>
+
+
 <template name="renderSelectedBox">
 	%if (this.model.selected_box)
 	{
@@ -64,6 +78,7 @@ body, html {
 
 <template>
 	<div class="widget_page" @event:click={{ this.onClick }}>
+		%render this.renderStyle(this.model.widget_model);
 		%render this.renderWidget(this.model.widget_model, {"ref": "widget_component"});
 		%render this.renderSelectedBox();
 	</div>
@@ -121,7 +136,7 @@ void onClick(var e)
 	elem = this.getWidget(elem);
 	string path_str = this.getWidgetPath(elem);
 	Collection<int> path = rs::split(".", path_str);
-	this.model.sendSelectItem(path);
+	this.model.sendSelectItem(path.slice(1));
 }
 
 

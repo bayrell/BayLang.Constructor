@@ -96,7 +96,7 @@ class WidgetPageModel extends BasePageModel
 		RenderProvider::nextTick(
 			void () use (path, op_code)
 			{
-				string path_str = rs::join(".", path);
+				string path_str = "0." ~ rs::join(".", path);
 				var component = this.components.get(path_str);
 				var elem;
 				

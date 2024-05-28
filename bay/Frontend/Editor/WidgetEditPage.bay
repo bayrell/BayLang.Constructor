@@ -17,13 +17,20 @@
 .widget_edit_page__menu{
 	display: flex;
 	justify-content: flex-start;
-	padding: 10px;
-	gap: 20px;
 	border-bottom: 1px var(--widget-color-border) solid;
 }
 .widget_edit_page__menu_item{
 	cursor: pointer;
 	user-select: none;
+	padding: 10px;
+}
+.widget_edit_page__menu_item--button{
+	text-align: center;
+	width: 40px;
+}
+.widget_edit_page__menu_item--selected{
+	background-color: var(--widget-color-primary);
+	color: var(--widget-color-primary-text);
 }
 .widget_edit_page__menu_item_gap{
 	flex: 1;
@@ -36,7 +43,7 @@
 .widget_edit_page__frame{
 	display: flex;
 	position: relative;
-	padding: 10px;
+	padding: 0px;
 	justify-content: stretch;
 	align-items: stretch;
 	flex: 1;
@@ -52,14 +59,26 @@
 <template>
 	<div class="widget_edit_page">
 		<div class="widget_edit_page__menu">
+			<a class="widget_edit_page__menu_item nolink"
+				href={{ this.layout.url(
+					"baylang:project:widgets",
+					{ "project_id": this.model.project_id }
+				) }}>Back</a>
 			<div class="widget_edit_page__menu_item">Save</div>
 			<div class="widget_edit_page__menu_item">Export</div>
-			<div>
+			<div class="widget_edit_page__menu_item">
 				{{ not this.model.app_loaded ? "Loading..." : "Loaded" }}
 			</div>
 			<div class="widget_edit_page__menu_item_gap"></div>
-			<div class="widget_edit_page__menu_item"
-				@event:onClick={{ this.toggleProperty }}>Property</div>
+			<div class="widget_edit_page__menu_item widget_edit_page__menu_item--button"
+				class={{
+					this.model.property_visible == "hierarchy"
+					? "widget_edit_page__menu_item--selected"
+					: ""
+				}}
+				@event:onClick={{
+					void(var e){ this.toggleProperty(e, "hierarchy"); }
+				}}>H</div>
 		</div>
 		<div class="widget_edit_page__content">
 			<div class="widget_edit_page__frame">
@@ -76,9 +95,16 @@
 /**
  * Toggle property
  */
-void toggleProperty(var e)
+void toggleProperty(var e, string name)
 {
-	this.model.property_visible = not this.model.property_visible;
+	if (this.model.property_visible != name)
+	{
+		this.model.property_visible = name;
+	}
+	else
+	{
+		this.model.property_visible = "";
+	}
 	this.nextTick(void(){
 		this.model.getFramePageModel().updateSelectedBox();
 	});

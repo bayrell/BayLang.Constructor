@@ -25,7 +25,7 @@ class WidgetEditPageModel extends BasePageModel
 	string project_id = "";
 	string current_widget = "";
 	bool app_loaded = false;
-	bool property_visible = true;
+	string property_visible = "";
 	var iframe = null;
 	TreeModel tree = null;
 	
@@ -87,9 +87,14 @@ class WidgetEditPageModel extends BasePageModel
 		BaseOpCode op_code_expression = op_code_render.getExpression();
 		if (not op_code_expression) return;
 		if (not rtl::is_instanceof(op_code_expression, classof OpHtmlItems)) return;
+		if (not op_code_expression.items.get(0)) return;
+		
+		BaseOpCode op_code = op_code_expression.items.get(0);
+		if (not rtl::is_instanceof(op_code.items, classof OpHtmlItems)) return;
 		
 		this.tree.root = new WidgetTreeItem();
-		this.tree.root.addHtmlItems(op_code_expression);
+		this.tree.root.op_code = op_code;
+		this.tree.root.addHtmlItems(op_code.items);
 	}
 	
 	
@@ -110,10 +115,10 @@ class WidgetEditPageModel extends BasePageModel
 		string kind, Reference<bool> result
 	)
 	{
-		if (dest.count() < 2 and (kind == "before" or kind == "after"))
+		/*if (dest.count() < 2 and (kind == "before" or kind == "after"))
 		{
 			result.setValue(false);
-		}
+		}*/
 	}
 	
 	

@@ -8,27 +8,17 @@
 <style>
 .widget_edit_page__property{
 	display: flex;
+	flex-wrap: wrap;
+	flex-direction: column;
+	justify-content: stretch;
+	align-items: stretch;
+	overflow: auto;
+	height: 100%;
 	width: 300px;
 	border-left: 1px var(--widget-color-border) solid;
 }
 .widget_edit_page__property.hide{
 	display: none;
-}
-.widget_edit_page__property_menu{
-}
-.widget_edit_page__property_wrap{
-	flex: 1;
-}
-.widget_edit_page__property_tab{
-	display: none;
-	flex-wrap: wrap;
-	flex-direction: column;
-	justify-content: stretch;
-	align-items: stretch;
-	height: 100%;
-}
-.widget_edit_page__property_tab.selected{
-	display: flex;
 }
 .widget_edit_page__property_title{
 	display: flex;
@@ -43,93 +33,44 @@
 	flex: 1;
 	overflow-y: auto;
 }
-.widget_edit_page__property_menu_button{
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	height: 32px;
-	width: 32px;
-	cursor: pointer;
-	user-select: none;
-}
-.widget_edit_page__property_menu_button.selected{
-	background-color: var(--widget-color-primary);
-	color: var(--widget-color-primary-text);
-}
 </style>
 
 
-<template name="renderMenu">
-	<div class="widget_edit_page__property_menu">
-		%for (int i=0; i<this.property_buttons.count(); i++)
-		{
-			%set Dict button = this.property_buttons.get(i);
-			%set string button_key = button.get("key");
-			<div class="widget_edit_page__property_menu_button"
-				class={{ this.property_buttons_selected == button_key ? "selected" : "" }}
-				@event:onClick={{
-					void () use (button_key)
-					{
-						this.property_buttons_selected = button_key
-					}
-				}}
-			>
-				{{ button.get("icon") }}
-			</div>
-		}
-	</div>
-</template>
-
-
-<template name="renderContent">
-	<div class="widget_edit_page__property_wrap">
-		%for (int i=0; i<this.property_buttons.count(); i++)
-		{
-			%set Dict button = this.property_buttons.get(i);
-			%set string button_key = button.get("key");
-			<div class="widget_edit_page__property_tab" data-key={{ button_key }}
-				class={{ this.property_buttons_selected == button_key ? "selected" : "" }}
-			>
-				<div class="widget_edit_page__property_title">
-					{{ button.get("label") }}
-				</div>
-				<div class="widget_edit_page__property_content">
-					%if (button_key == "hierarchy")
-					{
-					   %render this.renderWidget(this.model.tree);
-					}
-				</div>
-			</div>
-		}
-	</div>
+<template name="renderHierarchy">
+	%if (this.model.property_visible == "hierarchy")
+	{
+		%render this.renderWidget(this.model.tree);
+	}
 </template>
 
 
 <template>
 	<div class="widget_edit_page__property"
-		class={{ this.model.property_visible ? "show" : "hide" }}
+		class={{ this.model.property_visible != "" ? "show" : "hide" }}
 	>
-		%render this.renderMenu();
-		%render this.renderContent();
+		<div class="widget_edit_page__property_title">
+			{{ this.getTitle() }}
+		</div>
+		<div class="widget_edit_page__property_content">
+			%render this.renderHierarchy();
+		</div>
 	</div>
 </template>
 
 
 <script>
 
-string property_buttons_selected = "hierarchy";
-Collection property_buttons = [
+/**
+ * Returns title
+ */
+string getTitle()
+{
+	if (this.model.property_visible == "hierarchy")
 	{
-		"key": "hierarchy"
-		"icon": "H",
-		"label": "Hierarchy",
-	},
-	{
-		"key": "property"
-		"icon": "P",
-		"label": "Property",
-	},
-];
+		return "Hierarchy";
+	}
+	return "";
+}
 
 </script>
 
