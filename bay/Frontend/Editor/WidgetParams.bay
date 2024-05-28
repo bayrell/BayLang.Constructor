@@ -4,16 +4,50 @@
 
 <class name="BayLang.Constructor.Frontend.Editor.WidgetParams">
 
+<use name="Runtime.Widget.Input" component="true" />
+<use name="BayLang.Constructor.Frontend.Editor.WidgetItemParam" />
+
 
 <style>
+.widget_params__label{
+	margin-bottom: 5px;
+}
+.widget_params__row{
+	margin-bottom: 10px;
+}
 </style>
+
+
+<template name="renderWidgetName">
+	<div class="widget_params__row">
+		<div class="widget_params__label">Name</div>
+		<div class="widget_params__content">
+			<Input value={{ this.model.widget_name.value }}
+				@event:change={{ void (var e) { this.onChange(e, "widget_name") } }}
+			/>
+		</div>
+	</div>
+</template>
+
+
+<template name="renderClassName">
+	<div class="widget_params__row">
+		<div class="widget_params__label">Class</div>
+		<div class="widget_params__content">
+			<Input value={{ this.model.class_name.value }}
+				@event:change={{ void (var e) { this.onChange(e, "class_name") } }}
+			/>
+		</div>
+	</div>
+</template>
 
 
 <template>
 	<div class="widget_params">
-		%if (this.model.tree.selected_item)
+		%if (this.model.selected_item)
 		{
-			{{ this.model.tree.selected_item.label }}
+			%render this.renderWidgetName();
+			%render this.renderClassName();
 		}
 	</div>
 </template>
@@ -22,15 +56,19 @@
 <script>
 
 /**
- * Returns title
+ * On change
  */
-string getTitle()
+void onChange(var e, string name)
 {
-	if (this.model.menu_selected == "hierarchy")
+	WidgetItemParam item = null;
+	if (name == "widget_name") item = this.model.widget_name;
+	else if (name == "class_name") item = this.model.class_name;
+	
+	if (item)
 	{
-		return "Hierarchy";
+		item.value = e.target.value;
+		this.model.updateItem(item);
 	}
-	return "";
 }
 
 </script>

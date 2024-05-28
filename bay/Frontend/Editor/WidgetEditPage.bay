@@ -115,7 +115,8 @@ void toggleMenu(var e, string name)
 		this.model.menu_selected = "";
 	}
 	this.nextTick(void(){
-		this.model.getFramePageModel().updateSelectedBox();
+		var page_model = this.model.getFramePageModel();
+		if (page_model) page_model.updateSelectedBox();
 	});
 	e.preventDefault();
 	e.stopPropagation();

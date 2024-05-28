@@ -5,32 +5,22 @@
 namespace BayLang.Constructor.Frontend.Editor;
 
 use Runtime.BaseObject;
-use BayLang.Constructor.Frontend.Editor.WidgetEditPageModel;
-use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
-use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpHtmlAttribute;
-use BayLang.OpCodes.OpString;
 
 
 class WidgetItemParam extends BaseObject
 {
-	string key = "";
+	string name = "";
 	string value = "";
+	OpHtmlAttribute op_code = null;
 	
 	
 	/**
-	 * Update params
+	 * Constructor
 	 */
-	static void updateParams(WidgetEditPageModel model, WidgetTreeItem selected_item)
+	public void constructor(Dict params = null)
 	{
-		Collection<OpHtmlAttribute> attrs = selected_item.op_code.attrs;
-		
-		for (int i=0; i<attrs.count(); i++)
-		{
-			OpHtmlAttribute op_attr = attrs.get(i);
-			if (op_attr.value instanceof OpString)
-			{
-			}
-		}
+		parent();
+		this._assign_values(params);
 	}
 }

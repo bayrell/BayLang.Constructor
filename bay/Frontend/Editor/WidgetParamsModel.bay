@@ -1,0 +1,88 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Editor;
+
+use Runtime.BaseObject;
+use BayLang.Constructor.Frontend.Editor.WidgetEditPageModel;
+use BayLang.Constructor.Frontend.Editor.WidgetItemParam;
+use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
+use BayLang.OpCodes.BaseOpCode;
+use BayLang.OpCodes.OpHtmlAttribute;
+use BayLang.OpCodes.OpString;
+
+
+class WidgetParamsModel extends BaseObject
+{
+	WidgetEditPageModel page_model = null;
+	WidgetTreeItem selected_item = null;
+	WidgetItemParam class_name = new WidgetItemParam{ "name": "class_name" };
+	WidgetItemParam widget_name = new WidgetItemParam{ "name": "widget_name" };
+	Collection<WidgetItemParam> items = [];
+	
+	
+	/**
+	 * Constructor
+	 */
+	void constructor(WidgetEditPageModel model)
+	{
+		parent();
+		this.page_model = model;
+	}
+	
+	
+	/**
+	 * Select item
+	 */
+	void selectItem(WidgetTreeItem selected_item)
+	{
+		this.selected_item = selected_item;
+		Collection<OpHtmlAttribute> attrs = selected_item.op_code.attrs;
+		
+		this.items = [];
+		for (int i=0; i<attrs.count(); i++)
+		{
+			OpHtmlAttribute op_attr = attrs.get(i);
+			if (op_attr.value instanceof OpString)
+			{
+				if (op_attr.key == "class")
+				{
+					this.updateClass(op_attr);
+				}
+			}
+		}
+	}
+	
+	
+	/**
+	 * Update item
+	 */
+	void updateItem(WidgetItemParam item)
+	{
+		if (
+			item.op_code.key == "class" and
+			item.op_code.value instanceof OpString and
+			(item.name == "widget_name" or item.name == "class_name")
+		)
+		{
+			item.op_code.value.value = this.widget_name.value ~ " " ~ this.class_name.value;
+		}
+		this.page_model.updateRender();
+	}
+	
+	
+	/**
+	 * Update class
+	 */
+	void updateClass(OpHtmlAttribute op_attr)
+	{
+		string class_name = op_attr.value.value;
+		Collection<string> names = rs::split(" ", class_name);
+		names = names.filter(bool (string s) => s != "");
+		this.class_name.op_code = op_attr;
+		this.class_name.value = rs::join(" ", names.slice(1));
+		this.widget_name.op_code = op_attr;
+		this.widget_name.value = names.get(0);
+	}
+}

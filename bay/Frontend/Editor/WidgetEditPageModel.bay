@@ -5,14 +5,17 @@
 namespace BayLang.Constructor.Frontend.Editor;
 
 use Runtime.lib;
+use Runtime.Callback;
 use Runtime.Reference;
 use Runtime.Web.ApiResult;
 use Runtime.Web.BaseModel;
 use Runtime.Web.BasePageModel;
+use Runtime.Web.RenderProvider;
 use Runtime.Widget.Tree.TreeItem;
 use Runtime.Widget.Tree.TreeModel;
 use BayLang.Constructor.Frontend.Editor.WidgetEditPage;
 use BayLang.Constructor.Frontend.Editor.WidgetItemParam;
+use BayLang.Constructor.Frontend.Editor.WidgetParamsModel;
 use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
 use BayLang.Constructor.WidgetDebug.WidgetPageModel;
 use BayLang.LangES6.TranslatorES6;
@@ -37,21 +40,30 @@ class WidgetEditPageModel extends BasePageModel
 	TreeModel tree = null;
 	
 	/* Widget params */
-	Collection<WidgetItemParam> widget_params = [];
+	WidgetParamsModel widget_params = null;
 	
 	
 	/**
 	 * Returns iframe layout
 	 */
-	BaseModel getFrameLayout() =>
-		this.iframe ? this.iframe.contentWindow.app_layout : null;
+	BaseModel getFrameLayout()
+	{
+		if (not this.iframe) return null;
+		if (not this.iframe.contentWindow) return null;
+		if (not this.iframe.contentWindow.app_layout) return null;
+		return this.iframe.contentWindow.app_layout;
+	}
 	
 	
 	/**
 	 * Returns page model
 	 */
-	BaseModel getFramePageModel() =>
-		this.iframe ? this.iframe.contentWindow.app_layout.getPageModel() : null;
+	BaseModel getFramePageModel()
+	{
+		var app_layout = this.getFrameLayout();
+		if (not app_layout) return null;
+		return app_layout.getPageModel();
+	}
 	
 	
 	/**
@@ -72,11 +84,12 @@ class WidgetEditPageModel extends BasePageModel
 		this.layout.setLayoutName("default");
 		this.current_widget = this.layout.route.matches.get("widget_name");
 		this.project_id = this.layout.route.matches.get("project_id");
+		this.widget_params = new WidgetParamsModel(this);
 		this.translator = new TranslatorES6();
 		this.tree = this.addWidget(classof TreeModel);
-		this.tree.events.add("canDrag", method this.canTreeDrop);
-		this.tree.events.add("dragElement", method this.treeDragElement);
-		this.tree.events.add("selectItem", method this.treeSelectItem);
+		this.tree.events.add("canDrag", new Callback(this, "canTreeDrop"));
+		this.tree.events.add("dragElement", new Callback(this, "treeDragElement"));
+		this.tree.events.add("selectItem", new Callback(this, "treeSelectItem"));
 	}
 	
 	
@@ -175,6 +188,15 @@ class WidgetEditPageModel extends BasePageModel
 	
 	
 	/**
+	 * Update render
+	 */
+	void updateRender(string render_name = "render")
+	{
+		this.getFramePageModel().buildRender("render");
+	}
+	
+	
+	/**
 	 * Load Tree items
 	 */
 	void loadTreeItems()
@@ -202,9 +224,7 @@ class WidgetEditPageModel extends BasePageModel
 	void treeSelectItem(Collection<int> path, WidgetTreeItem item)
 	{
 		this.getFramePageModel().selectItem(path);
-		
-		/* Update selected item params */
-		WidgetItemParam::updateParams(this, item);
+		this.widget_params.selectItem(item);
 	}
 	
 	
@@ -246,6 +266,6 @@ class WidgetEditPageModel extends BasePageModel
 		}
 		
 		/* Build render */
-		this.getFramePageModel().buildRender("render");
+		this.updateRender();
 	}
 }

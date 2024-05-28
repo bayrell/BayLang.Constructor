@@ -10,6 +10,7 @@
 		"Frontend/Editor/WidgetItemParam.bay",
 		"Frontend/Editor/WidgetMenu.bay",
 		"Frontend/Editor/WidgetParams.bay",
+		"Frontend/Editor/WidgetParamsModel.bay",
 		"Frontend/Editor/WidgetTreeItem.bay",
 		"Frontend/Layout/DefaultLayout.bay",
 		"Frontend/Module/ModuleFormModel.bay",

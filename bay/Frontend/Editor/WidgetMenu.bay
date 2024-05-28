@@ -22,7 +22,7 @@
 .widget_menu.hide{
 	display: none;
 }
-.widget_menu_title{
+.widget_menu__title{
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -30,10 +30,13 @@
 	border-bottom: 1px var(--widget-color-border) solid;
 	height: 32px;
 }
-.widget_menu_content{
+.widget_menu__content{
 	padding: 10px;
 	flex: 1;
 	overflow-y: auto;
+}
+.widget_menu__item.hide{
+	display: none;
 }
 </style>
 
@@ -49,7 +52,7 @@
 <template name="renderParams">
 	%if (this.model.menu_selected == "params")
 	{
-		<WidgetParams @model={{ this.model }} />
+		<WidgetParams @model={{ this.model.widget_params }} />
 	}
 </template>
 
@@ -58,12 +61,20 @@
 	<div class="widget_menu"
 		class={{ this.model.menu_selected != "" ? "show" : "hide" }}
 	>
-		<div class="widget_menu_title">
+		<div class="widget_menu__title">
 			{{ this.getTitle() }}
 		</div>
-		<div class="widget_menu_content">
-			%render this.renderHierarchy();
-			%render this.renderParams();
+		<div class="widget_menu__content">
+			<div class="widget_menu__item"
+				class={{ this.model.menu_selected != "hierarchy" ? "hide" : "" }}
+			>
+				%render this.renderWidget(this.model.tree);
+			</div>
+			<div class="widget_menu__item"
+				class={{ this.model.menu_selected != "params" ? "hide" : "" }}
+			>
+				<WidgetParams @model={{ this.model.widget_params }} />
+			</div>
 		</div>
 	</div>
 </template>

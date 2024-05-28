@@ -85,31 +85,27 @@ class WidgetPageModel extends BasePageModel
 	void selectItem(Collection<int> path)
 	{
 		this.selected_path = path;
-		RenderProvider::nextTick(
-			void () use (path)
-			{
-				string widget_path_str = rs::join(".", this.convertTreeToWidgetPath(path));
-				var component = this.components.get(widget_path_str);
-				var elem;
-				
-				/* Setup component */
-				if (component)
-				{
-					#ifcode JAVASCRIPT then
-					elem = component.$el;
-					#endif
-				}
-				else
-				{
-					string selector = ".debug_component[data-widget-path=\"" ~ widget_path_str ~ "\"]";
-					elem = document.querySelector(selector);
-				}
-				
-				/* Setup element */
-				this.selected_elem = elem;
-				this.updateSelectedBox();
-			}
-		);
+		
+		string widget_path_str = rs::join(".", this.convertTreeToWidgetPath(path));
+		var component = this.components.get(widget_path_str);
+		var elem;
+		
+		/* Setup component */
+		if (component)
+		{
+			#ifcode JAVASCRIPT then
+			elem = component.$el;
+			#endif
+		}
+		else
+		{
+			string selector = ".debug_component[data-widget-path=\"" ~ widget_path_str ~ "\"]";
+			elem = document.querySelector(selector);
+		}
+		
+		/* Setup element */
+		this.selected_elem = elem;
+		this.updateSelectedBox();
 	}
 	
 	
@@ -142,6 +138,11 @@ class WidgetPageModel extends BasePageModel
 		/* log(content); */
 		this.widget_component.render = window.eval("fn_new = " + content + ";");
 		this.widget_component.reload();
+		
+		/* Update selected box */
+		RenderProvider::nextTick(void(){
+			this.updateSelectedBox();
+		});
 	}
 	
 	
