@@ -1,0 +1,39 @@
+<!--
+ *  BayLang Constructor
+-->
+
+<class name="BayLang.Constructor.Frontend.Editor.WidgetParams">
+
+
+<style>
+</style>
+
+
+<template>
+	<div class="widget_params">
+		%if (this.model.tree.selected_item)
+		{
+			{{ this.model.tree.selected_item.label }}
+		}
+	</div>
+</template>
+
+
+<script>
+
+/**
+ * Returns title
+ */
+string getTitle()
+{
+	if (this.model.menu_selected == "hierarchy")
+	{
+		return "Hierarchy";
+	}
+	return "";
+}
+
+</script>
+
+
+</class>

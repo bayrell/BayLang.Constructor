@@ -6,11 +6,10 @@ namespace BayLang.Constructor.WidgetDebug;
 
 use Runtime.lib;
 use Runtime.Web.ApiResult;
+use Runtime.Web.BaseLayoutModel;
 use Runtime.Web.BaseModel;
 use Runtime.Web.BasePageModel;
 use Runtime.Web.RenderProvider;
-use BayLang.SaveOpCode;
-use BayLang.LangES6.TranslatorES6;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpDeclareClass;
 use BayLang.OpCodes.OpDeclareFunction;
@@ -21,16 +20,11 @@ class WidgetPageModel extends BasePageModel
 {
 	string component = classof WidgetPage;
 	string current_widget = "";
-	string model_content = "";
-	string component_content = "";
 	var selected_box = null;
 	var selected_elem = null;
-	BaseOpCode selected_op_code = null;
 	Collection<int> selected_path = null;
 	var widget_component = null;
-	BaseOpCode component_op_code = null;
 	BaseModel widget_model = null;
-	TranslatorES6 translator = null;
 	Map components = {};
 	
 	 
@@ -40,8 +34,15 @@ class WidgetPageModel extends BasePageModel
 	void initWidget(Dict params)
 	{
 		parent(params);
+		
+		/* Create widget model */
 		this.current_widget = this.layout.request_query.get("widget_name");
-		this.translator = new TranslatorES6();
+		this.widget_model = this.addWidget(
+			this.current_widget,
+			{
+				"widget_name": "current_widget",
+			}
+		);
 		
 		/* Add event listeners */
 		RenderProvider provider = @.provider(classof RenderProvider);
@@ -52,52 +53,43 @@ class WidgetPageModel extends BasePageModel
 	
 	
 	/**
-	 * Load widget
+	 * Returns EditPageModel
 	 */
-	async void loadWidget()
+	BasePageModel getEditPageModel()
 	{
-		ApiResult res = await this.layout.callApi({
-			"service": "constructor",
-			"api_name": "admin.constructor.widget",
-			"method_name": "getOpCode",
-			"data": {
-				"project_id": this.getProjectID(),
-				"current_widget": this.current_widget,
-			}
-		});
-		
-		if (res.isSuccess())
+		BasePageModel page_model = window.parent.app_layout.getPageModel();
+		string page_model_class_name = page_model::getClassName();
+		if (page_model_class_name != "BayLang.Constructor.Frontend.Editor.WidgetEditPageModel")
 		{
-			this.component_content = res.data.get("component_content");
-			this.component_op_code = res.data.get("component_op_code");
-			this.model_content = res.data.get("model_content");
-			
-			/* Create widget model */
-			this.widget_model = this.addWidget(
-				this.current_widget,
-				{
-					"Widget_name": "current_widget",
-				}
-			);
-			
-			/* App is loaded */
-			this.sendAppLoaded();
+			return null;
 		}
+		return page_model;
 	}
+	
+	
+	/**
+	 * Convert tree_path to widget_path
+	 */
+	Collection<int> convertTreeToWidgetPath(Collection<int> path) => path.insertIm(0, 0);
+	
+	
+	/**
+	 * Convert widget_path to tree_path
+	 */
+	Collection<int> convertWidgetToTreePath(Collection<int> path) => path.slice(1);
 	
 	
 	/**
 	 * Select item
 	 */
-	void selectItem(Collection<int> path, BaseOpCode op_code)
+	void selectItem(Collection<int> path)
 	{
 		this.selected_path = path;
-		this.selected_op_code = op_code;
 		RenderProvider::nextTick(
-			void () use (path, op_code)
+			void () use (path)
 			{
-				string path_str = "0." ~ rs::join(".", path);
-				var component = this.components.get(path_str);
+				string widget_path_str = rs::join(".", this.convertTreeToWidgetPath(path));
+				var component = this.components.get(widget_path_str);
 				var elem;
 				
 				/* Setup component */
@@ -109,7 +101,7 @@ class WidgetPageModel extends BasePageModel
 				}
 				else
 				{
-					string selector = ".debug_component[data-widget-path=\"" ~ path_str ~ "\"]";
+					string selector = ".debug_component[data-widget-path=\"" ~ widget_path_str ~ "\"]";
 					elem = document.querySelector(selector);
 				}
 				
@@ -122,17 +114,17 @@ class WidgetPageModel extends BasePageModel
 	
 	
 	/**
-	 * Get render expression
+	 * Get CSS
 	 */
-	OpDeclareFunction getRenderOpCode(string render_name = "render")
+	string getCSS()
 	{
-		if (not this.component_op_code) return null;
-		
-		OpDeclareClass op_code_class = this.component_op_code.findClass();
-		if (not op_code_class) return null;
-		
-		OpDeclareFunction op_code_render = op_code_class.findFunction(render_name);
-		return op_code_render;
+		if (not this.widget_model) return "";
+		if (not this.widget_model.component) return "";
+		Vector res = [];
+		Vector cache = {};
+		string component = this.widget_model.component;
+		string css = BaseLayoutModel::_getRequiredComponents(res, cache, [component]);
+		return css;
 	}
 	
 	
@@ -141,49 +133,15 @@ class WidgetPageModel extends BasePageModel
 	 */
 	void buildRender(string render_name = "render")
 	{
-		OpDeclareFunction op_code_render = this.getRenderOpCode(render_name);
-		if (not op_code_render) return;
+		var page_model = this.getEditPageModel();
+		if (not page_model) return;
 		
-		/* Reset translator */
-		TranslatorES6 t = TranslatorES6::reset(this.translator);
-		if (this.component_op_code.uses != null)
-		{
-			t <= modules <= this.component_op_code.uses;
-		}
+		/* Get content */
+		string content = page_model.buildRenderContent("render");
 		
-		/* Enable debug */
-		t = t.setFlag("DEBUG_COMPONENT", true);
-		
-		/* Save op codes */
-		string content = "";
-		Collection<SaveOpCode> save_op_codes = t.save_op_codes;
-		int save_op_code_inc = t.save_op_code_inc;
-		
-		/* Translate expression */
-		list res = t.expression::OpDeclareFunction(t, op_code_render, false);
-		t = res.get(0);
-		
-		/* Output save op code */
-		string save = t::outputSaveOpCode(t, save_op_codes.count());
-		if (save != "") content ~= save;
-		content ~= res.get(1);
-		content = t.program::removeContext(content);
-		content = rs::trim(content);
 		/* log(content); */
 		this.widget_component.render = window.eval("fn_new = " + content + ";");
 		this.widget_component.reload();
-	}
-	
-	
-	/**
-	 * Send select item
-	 */
-	void sendSelectItem(Collection<int> path)
-	{
-		BasePageModel page_model = window.parent.app_layout.getPageModel();
-		string page_model_class_name = page_model::getClassName();
-		if (page_model_class_name != "BayLang.Constructor.Frontend.Editor.WidgetEditPageModel") return;
-		window.parent.app_layout.getPageModel().tree.selectItem(path);
 	}
 	
 	
@@ -192,10 +150,11 @@ class WidgetPageModel extends BasePageModel
 	 */
 	void sendAppLoaded()
 	{
-		BasePageModel page_model = window.parent.app_layout.getPageModel();
-		string page_model_class_name = page_model::getClassName();
-		if (page_model_class_name != "BayLang.Constructor.Frontend.Editor.WidgetEditPageModel") return;
-		window.parent.app_layout.getPageModel().appLoaded();
+		var page_model = this.getEditPageModel();
+		if (not page_model) return;
+		
+		/* Send app loaded */
+		page_model.appLoaded();
 	}
 	
 	
@@ -312,17 +271,5 @@ class WidgetPageModel extends BasePageModel
 		]));
 		
 		return box;
-	}
-	
-	
-	/**
-	 * Returns project ID
-	 */
-	string getProjectID()
-	{
-		string route_prefix = @.env("ROUTE_PREFIX");
-		Collection<string> arr = rs::split("/", route_prefix);
-		arr = arr.filter(lib::equalNot(""));
-		return arr.get(1);
 	}
 }

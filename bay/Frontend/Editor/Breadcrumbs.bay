@@ -1,0 +1,22 @@
+<!--
+ *  BayLang Constructor
+-->
+
+<class name="BayLang.Constructor.Frontend.Editor.Breadcrumbs">
+
+
+<style>
+</style>
+
+
+<template>
+	<div class="breadcrumbs">
+	</div>
+</template>
+
+
+<script>
+</script>
+
+
+</class>

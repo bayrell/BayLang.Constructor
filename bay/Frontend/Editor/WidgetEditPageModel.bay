@@ -6,17 +6,21 @@ namespace BayLang.Constructor.Frontend.Editor;
 
 use Runtime.lib;
 use Runtime.Reference;
+use Runtime.Web.ApiResult;
 use Runtime.Web.BaseModel;
 use Runtime.Web.BasePageModel;
 use Runtime.Widget.Tree.TreeItem;
 use Runtime.Widget.Tree.TreeModel;
 use BayLang.Constructor.Frontend.Editor.WidgetEditPage;
+use BayLang.Constructor.Frontend.Editor.WidgetItemParam;
 use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
 use BayLang.Constructor.WidgetDebug.WidgetPageModel;
+use BayLang.LangES6.TranslatorES6;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpDeclareClass;
 use BayLang.OpCodes.OpDeclareFunction;
 use BayLang.OpCodes.OpHtmlItems;
+use BayLang.SaveOpCode;
 
 
 class WidgetEditPageModel extends BasePageModel
@@ -24,26 +28,16 @@ class WidgetEditPageModel extends BasePageModel
 	string component = classof WidgetEditPage;
 	string project_id = "";
 	string current_widget = "";
+	string model_content = "";
+	string component_content = "";
+	string menu_selected = "";
 	bool app_loaded = false;
-	string property_visible = "";
 	var iframe = null;
+	BaseOpCode component_op_code = null;
 	TreeModel tree = null;
 	
-	
-	/**
-	 * Init widget settings
-	 */
-	void initWidget(Dict params)
-	{
-		parent(params);
-		this.layout.setLayoutName("default");
-		this.current_widget = this.layout.route.matches.get("widget_name");
-		this.project_id = this.layout.route.matches.get("project_id");
-		this.tree = this.addWidget(classof TreeModel);
-		this.tree.events.add("canDrag", method this.canTreeDrop);
-		this.tree.events.add("dragElement", method this.dragElement);
-		this.tree.events.add("selectItem", method this.selectItem);
-	}
+	/* Widget params */
+	Collection<WidgetItemParam> widget_params = [];
 	
 	
 	/**
@@ -70,27 +64,131 @@ class WidgetEditPageModel extends BasePageModel
 	
 	
 	/**
+	 * Init widget settings
+	 */
+	void initWidget(Dict params)
+	{
+		parent(params);
+		this.layout.setLayoutName("default");
+		this.current_widget = this.layout.route.matches.get("widget_name");
+		this.project_id = this.layout.route.matches.get("project_id");
+		this.translator = new TranslatorES6();
+		this.tree = this.addWidget(classof TreeModel);
+		this.tree.events.add("canDrag", method this.canTreeDrop);
+		this.tree.events.add("dragElement", method this.treeDragElement);
+		this.tree.events.add("selectItem", method this.treeSelectItem);
+	}
+	
+	
+	/**
+	 * Load widget op_code
+	 */
+	async void loadWidgetOpCode()
+	{
+		ApiResult res = await this.layout.callApi({
+			"api_name": "admin.constructor.widget",
+			"method_name": "getOpCode",
+			"data": {
+				"project_id": this.project_id,
+				"current_widget": this.current_widget,
+			}
+		});
+		
+		if (res.isSuccess())
+		{
+			this.app_loaded = true;
+			
+			/* Setup op code */
+			this.component_content = res.data.get("component_content");
+			this.component_op_code = res.data.get("component_op_code");
+			this.model_content = res.data.get("model_content");
+		
+			/* Load Tree items */
+			this.loadTreeItems();
+			
+			/* Load iframe page */
+			this.iframe.src = this.getWidgetFramePage();
+		}
+	}
+	
+	
+	/**
+	 * Iframe loaded
+	 */
+	void appLoaded()
+	{
+		this.app_loaded = true;
+	}
+	
+	
+	/**
+	 * Get render expression
+	 */
+	OpDeclareFunction getRenderOpCode(string render_name = "render")
+	{
+		if (not this.component_op_code) return null;
+		
+		OpDeclareClass op_code_class = this.component_op_code.findClass();
+		if (not op_code_class) return null;
+		
+		OpDeclareFunction op_code_render = op_code_class.findFunction(render_name);
+		return op_code_render;
+	}
+	
+	
+	/**
+	 * Build render function
+	 */
+	void buildRenderContent(string render_name = "render")
+	{
+		OpDeclareFunction op_code_render = this.getRenderOpCode(render_name);
+		if (not op_code_render) return;
+		
+		/* Reset translator */
+		TranslatorES6 t = TranslatorES6::reset(this.translator);
+		if (this.component_op_code.uses != null)
+		{
+			t <= modules <= this.component_op_code.uses;
+		}
+		
+		/* Enable debug */
+		t = t.setFlag("DEBUG_COMPONENT", true);
+		
+		/* Save op codes */
+		string content = "";
+		Collection<SaveOpCode> save_op_codes = t.save_op_codes;
+		int save_op_code_inc = t.save_op_code_inc;
+		
+		/* Translate expression */
+		list res = t.expression::OpDeclareFunction(t, op_code_render, false);
+		t = res.get(0);
+		
+		/* Output save op code */
+		string save = t::outputSaveOpCode(t, save_op_codes.count());
+		if (save != "") content ~= save;
+		content ~= res.get(1);
+		content = t.program::removeContext(content);
+		content = rs::trim(content);
+		
+		return content;
+	}
+	
+	
+	/**
 	 * Load Tree items
 	 */
 	void loadTreeItems()
 	{
-		BaseOpCode component_op_code = this.getFramePageModel().component_op_code;
-		if (not component_op_code) return;
-		
-		OpDeclareClass op_code_class = component_op_code.findClass();
-		if (not op_code_class) return;
-		
-		string render_name = "render";
-		OpDeclareFunction op_code_render = op_code_class.findFunction(render_name);
+		OpDeclareFunction op_code_render = this.getRenderOpCode("render");
 		if (not op_code_render) return;
 		
 		BaseOpCode op_code_expression = op_code_render.getExpression();
 		if (not op_code_expression) return;
-		if (not rtl::is_instanceof(op_code_expression, classof OpHtmlItems)) return;
+		if (not (op_code_expression instanceof OpHtmlItems)) return;
 		if (not op_code_expression.items.get(0)) return;
 		
 		BaseOpCode op_code = op_code_expression.items.get(0);
-		if (not rtl::is_instanceof(op_code.items, classof OpHtmlItems)) return;
+		if (not (op_code.items instanceof OpHtmlItems)) return;
 		
 		this.tree.root = new WidgetTreeItem();
 		this.tree.root.op_code = op_code;
@@ -101,9 +199,12 @@ class WidgetEditPageModel extends BasePageModel
 	/**
 	 * Select item
 	 */
-	void selectItem(Collection<int> path, WidgetTreeItem item)
+	void treeSelectItem(Collection<int> path, WidgetTreeItem item)
 	{
-		this.getFramePageModel().selectItem(path, item ? item.op_code : null);
+		this.getFramePageModel().selectItem(path);
+		
+		/* Update selected item params */
+		WidgetItemParam::updateParams(this, item);
 	}
 	
 	
@@ -125,7 +226,7 @@ class WidgetEditPageModel extends BasePageModel
 	/**
 	 * Drag & Drop
 	 */
-	void dragElement(Dict params)
+	void treeDragElement(Dict params)
 	{
 		TreeItem dest_item = params.get("dest_item");
 		TreeItem dest_parent_item = params.get("dest_parent_item");
@@ -146,17 +247,5 @@ class WidgetEditPageModel extends BasePageModel
 		
 		/* Build render */
 		this.getFramePageModel().buildRender("render");
-	}
-	
-	
-	/**
-	 * App loaded
-	 */
-	void appLoaded()
-	{
-		this.app_loaded = true;
-		
-		/* Load Tree items */
-		this.loadTreeItems();
 	}
 }

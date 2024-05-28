@@ -49,15 +49,7 @@ body, html {
 
 
 <template name="renderStyle">
-	%if (this.model.widget_model and this.model.widget_model.component)
-	{
-		%set string component = this.model.widget_model.component;
-		%set Vector res = [];
-		%set Vector cache = {};
-		%set _ = BaseLayoutModel::_getRequiredComponents(res, cache, [component]);
-		%set string css = BaseLayoutModel::getCss(res);
-		<style>{{ css }}</style>
-	}
+	<style>{{ this.model.getCSS() }}</style>
 </template>
 
 
@@ -99,6 +91,11 @@ Collection<int> getWidget(var elem)
 		{
 			return elem;
 		}
+		if (elem.__vnode.component && elem.__vnode.component.vnode)
+		{
+			var elem_component = elem.__vnode.component.vnode.el;
+			if (elem_component == elem) return elem;
+		}
 		if (elem.__vueParentComponent && elem.__vueParentComponent.vnode)
 		{
 			var elem_component = elem.__vueParentComponent.vnode.el;
@@ -117,10 +114,21 @@ Collection<int> getWidget(var elem)
 Collection<int> getWidgetPath(var elem)
 {
 	#ifcode JAVASCRIPT then
+	if (!elem) return null;
 	if (!elem.__vnode) return null;
-	if (elem == elem.__vueParentComponent.vnode.el)
+	if (elem.__vnode.component && elem.__vnode.component.vnode)
 	{
-		return elem.__vueParentComponent.vnode.component.ctx.data_widget_path;
+		if (elem == elem.__vnode.component.vnode.el)
+		{
+			return elem.__vnode.component.ctx.data_widget_path;
+		}
+	}
+	if (elem.__vueParentComponent && elem.__vueParentComponent.vnode)
+	{
+		if (elem == elem.__vueParentComponent.vnode.el)
+		{
+			return elem.__vueParentComponent.vnode.component.ctx.data_widget_path;
+		}
 	}
 	return elem.getAttribute("data-widget-path");
 	#endif
@@ -134,9 +142,16 @@ void onClick(var e)
 {
 	var elem = e.target;
 	elem = this.getWidget(elem);
-	string path_str = this.getWidgetPath(elem);
-	Collection<int> path = rs::split(".", path_str);
-	this.model.sendSelectItem(path.slice(1));
+	if (not elem) return;
+	
+	var page_model = this.model.getEditPageModel();
+	if (not page_model) return;
+	
+	/* Send select item */
+	string widget_path_str = this.getWidgetPath(elem);
+	Collection<int> widget_path = rs::split(".", widget_path_str);
+	Collection<int> path = this.model.convertWidgetToTreePath(widget_path);
+	page_model.tree.selectItem(path);
 }
 
 
@@ -145,10 +160,10 @@ void onClick(var e)
  */
 async void onMounted()
 {
-	await this.model.loadWidget();
 	this.nextTick(void (){
 		this.model.widget_component = this.getRef("widget_component");
 		this.model.buildRender();
+		this.model.sendAppLoaded();
 	});
 }
 
