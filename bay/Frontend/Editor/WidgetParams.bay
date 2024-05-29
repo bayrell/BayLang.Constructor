@@ -5,6 +5,7 @@
 <class name="BayLang.Constructor.Frontend.Editor.WidgetParams">
 
 <use name="Runtime.Widget.Input" component="true" />
+<use name="Runtime.Widget.Tag" component="true" />
 <use name="BayLang.Constructor.Frontend.Editor.WidgetItemParam" />
 
 
@@ -23,7 +24,7 @@
 		<div class="widget_params__label">Name</div>
 		<div class="widget_params__content">
 			<Input value={{ this.model.widget_name.value }}
-				@event:change={{ void (var e) { this.onChange(e, "widget_name") } }}
+				@event:valueChange={{ void (var value) { this.onChange(value, "widget_name") } }}
 			/>
 		</div>
 	</div>
@@ -34,8 +35,8 @@
 	<div class="widget_params__row">
 		<div class="widget_params__label">Class</div>
 		<div class="widget_params__content">
-			<Input value={{ this.model.class_name.value }}
-				@event:change={{ void (var e) { this.onChange(e, "class_name") } }}
+			<Tag value={{ this.model.class_name.value }}
+				@event:valueChange={{ void (var value) { this.onChange(value, "class_name") } }}
 			/>
 		</div>
 	</div>
@@ -58,7 +59,7 @@
 /**
  * On change
  */
-void onChange(var e, string name)
+void onChange(var value, string name)
 {
 	WidgetItemParam item = null;
 	if (name == "widget_name") item = this.model.widget_name;
@@ -66,7 +67,7 @@ void onChange(var e, string name)
 	
 	if (item)
 	{
-		item.value = e.target.value;
+		item.value = value;
 		this.model.updateItem(item);
 	}
 }

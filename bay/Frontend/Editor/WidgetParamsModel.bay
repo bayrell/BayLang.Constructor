@@ -66,7 +66,9 @@ class WidgetParamsModel extends BaseObject
 			(item.name == "widget_name" or item.name == "class_name")
 		)
 		{
-			item.op_code.value.value = this.widget_name.value ~ " " ~ this.class_name.value;
+			item.op_code.value.value =
+				rs::join(" ", this.class_name.value.insertIm(0, this.widget_name.value))
+			;
 		}
 		this.page_model.updateRender();
 	}
@@ -81,7 +83,7 @@ class WidgetParamsModel extends BaseObject
 		Collection<string> names = rs::split(" ", class_name);
 		names = names.filter(bool (string s) => s != "");
 		this.class_name.op_code = op_attr;
-		this.class_name.value = rs::join(" ", names.slice(1));
+		this.class_name.value = names.slice(1);
 		this.widget_name.op_code = op_attr;
 		this.widget_name.value = names.get(0);
 	}
