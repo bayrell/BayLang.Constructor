@@ -111,7 +111,6 @@ class WidgetCSSModel extends BaseModel
 	}
 	
 	
-	
 	/**
 	 * Add style
 	 */
@@ -216,7 +215,7 @@ class WidgetCSSModel extends BaseModel
 		if (
 			item.op_code.key == "class" and
 			item.op_code.value instanceof OpString and
-			(item.name == "param_widget_name" or item.name == "param_class_name")
+			(item.name == "widget_name" or item.name == "class_name")
 		)
 		{
 			item.op_code.value.value =
@@ -233,13 +232,20 @@ class WidgetCSSModel extends BaseModel
 	void changeAttrContent(string value, string name)
 	{
 		WidgetItemParam item = null;
-		if (name == "param_widget_name") item = this.param_widget_name;
-		else if (name == "param_class_name") item = this.param_class_name;
+		if (name == "widget_name") item = this.param_widget_name;
+		else if (name == "class_name") item = this.param_class_name;
 		
+		/* Update attr */
 		if (item)
 		{
 			item.value = value;
 			this.updateAttr(item);
+		}
+		
+		/* Setup CSS */
+		if (name == "widget_name")
+		{
+			this.setupCSS();
 		}
 	}
 	

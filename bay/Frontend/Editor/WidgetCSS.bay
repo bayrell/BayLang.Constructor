@@ -39,7 +39,7 @@
 		<div class="widget_css__content">
 			<Input value={{ this.model.param_widget_name.value }}
 				@event:valueChange={{ void (var value) {
-					this.model.changeItemContent(value, "widget_name");
+					this.model.changeAttrContent(value, "widget_name");
 				} }}
 			/>
 		</div>
