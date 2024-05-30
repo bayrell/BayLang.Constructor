@@ -13,9 +13,9 @@ use Runtime.Web.BasePageModel;
 use Runtime.Web.RenderProvider;
 use Runtime.Widget.Tree.TreeItem;
 use Runtime.Widget.Tree.TreeModel;
+use BayLang.Constructor.Frontend.Editor.WidgetCSSModel;
 use BayLang.Constructor.Frontend.Editor.WidgetEditPage;
 use BayLang.Constructor.Frontend.Editor.WidgetItemParam;
-use BayLang.Constructor.Frontend.Editor.WidgetParamsModel;
 use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
 use BayLang.Constructor.WidgetDebug.WidgetPageModel;
 use BayLang.LangES6.TranslatorES6;
@@ -24,6 +24,7 @@ use BayLang.OpCodes.OpDeclareClass;
 use BayLang.OpCodes.OpDeclareFunction;
 use BayLang.OpCodes.OpHtmlItems;
 use BayLang.OpCodes.OpHtmlStyle;
+use BayLang.OpCodes.OpNamespace;
 use BayLang.SaveOpCode;
 
 
@@ -33,15 +34,16 @@ class WidgetEditPageModel extends BasePageModel
 	string project_id = "";
 	string current_widget = "";
 	string model_content = "";
+	string component_class_name = "";
 	string component_content = "";
-	string menu_selected = "";
+	string menu_selected = "css";
 	bool app_loaded = false;
 	var iframe = null;
 	BaseOpCode component_op_code = null;
 	TreeModel tree = null;
 	
-	/* Widget params */
-	WidgetParamsModel widget_params = null;
+	/* Widget css */
+	WidgetCSSModel css = null;
 	
 	
 	/**
@@ -85,8 +87,7 @@ class WidgetEditPageModel extends BasePageModel
 		this.layout.setLayoutName("default");
 		this.current_widget = this.layout.route.matches.get("widget_name");
 		this.project_id = this.layout.route.matches.get("project_id");
-		this.widget_params = new WidgetParamsModel(this);
-		this.translator = new TranslatorES6();
+		this.css = this.addWidget(classof WidgetCSSModel);
 		this.tree = this.addWidget(classof TreeModel);
 		this.tree.events.add("canDrag", new Callback(this, "canTreeDrop"));
 		this.tree.events.add("dragElement", new Callback(this, "treeDragElement"));
@@ -117,11 +118,25 @@ class WidgetEditPageModel extends BasePageModel
 			this.component_op_code = res.data.get("component_op_code");
 			this.model_content = res.data.get("model_content");
 			
-			/* Update styles content */
+			/* Setup component class name */
+			string component_namespace = "";
+			string component_class_name = "";
+			for (int i=0; i<this.component_op_code.items.count(); i++)
+			{
+				BaseOpCode item = this.component_op_code.items.get(i);
+				if (item instanceof OpNamespace) component_namespace = item.name;
+				if (item instanceof OpDeclareClass) component_class_name = item.name;
+			}
+			this.component_class_name = component_namespace != ""
+				? component_namespace ~ "." ~ component_class_name
+				: component_class_name
+			;
+			
+			/* Setup styles content */
 			Collection<OpHtmlStyle> styles = this.getStyleOpCode();
 			for (int i=0; i<styles.count(); i++)
 			{
-				styles.get(i).updateStylesFromContent();
+				styles.get(i).setupStyles();
 			}
 			
 			/* Load Tree items */
@@ -172,15 +187,15 @@ class WidgetEditPageModel extends BasePageModel
 	
 	
 	/**
-	 * Build render function
+	 * Create translator
 	 */
-	void buildRenderContent(string render_name = "render")
+	TranslatorES6 createTranslator()
 	{
-		OpDeclareFunction op_code_render = this.getRenderOpCode(render_name);
-		if (not op_code_render) return;
+		/* New instance */
+		TranslatorES6 t = new TranslatorES6();
 		
 		/* Reset translator */
-		TranslatorES6 t = TranslatorES6::reset(this.translator);
+		TranslatorES6 t = TranslatorES6::reset(t);
 		if (this.component_op_code.uses != null)
 		{
 			t <= modules <= this.component_op_code.uses;
@@ -189,16 +204,29 @@ class WidgetEditPageModel extends BasePageModel
 		/* Enable debug */
 		t = t.setFlag("DEBUG_COMPONENT", true);
 		
-		/* Save op codes */
-		string content = "";
+		/* Return */
+		return t;
+	}
+	
+	
+	/**
+	 * Build render function
+	 */
+	string buildRenderContent(string render_name = "render")
+	{
+		OpDeclareFunction op_code_render = this.getRenderOpCode(render_name);
+		if (not op_code_render) return;
+		
+		/* Create translator */
+		TranslatorES6 t = this.createTranslator();
 		Collection<SaveOpCode> save_op_codes = t.save_op_codes;
-		int save_op_code_inc = t.save_op_code_inc;
 		
 		/* Translate expression */
 		list res = t.expression::OpDeclareFunction(t, op_code_render, false);
 		t = res.get(0);
 		
 		/* Output save op code */
+		string content = "";
 		string save = t::outputSaveOpCode(t, save_op_codes.count());
 		if (save != "") content ~= save;
 		content ~= res.get(1);
@@ -210,11 +238,49 @@ class WidgetEditPageModel extends BasePageModel
 	
 	
 	/**
+	 * Build CSS Content
+	 */
+	string buildCSSContent()
+	{
+		OpDeclareClass op_code_class = this.component_op_code.findClass();
+		if (not op_code_class) return null;
+		
+		/* Create translator */
+		TranslatorES6 t = this.createTranslator();
+		Collection<SaveOpCode> save_op_codes = t.save_op_codes;
+		
+		/* Build content */
+		string content = "";
+		Vector<string> items = [];
+		items.push("var content = \"\";");
+		Collection<OpHtmlStyle> styles = this.getStyleOpCode();
+		for (int i=0; i<styles.count(); i++)
+		{
+			OpHtmlStyle item = styles.get(i);
+			list res = t.expression::Expression(t, item.value); t = res[0];
+			items.push("content += Runtime.rtl.toStr(" ~ res.get(1) ~ ");");
+		}
+		
+		content = window.eval(rs::join("\n", items));
+		return content;
+	}
+	
+	
+	/**
 	 * Update render
 	 */
-	void updateRender(string render_name = "render")
+	void updateFrameRender(string render_name = "render")
 	{
 		this.getFramePageModel().buildRender("render");
+	}
+	
+	
+	/**
+	 * Update css
+	 */
+	void updateFrameCSS()
+	{
+		this.getFramePageModel().buildCSS();
 	}
 	
 	
@@ -246,7 +312,7 @@ class WidgetEditPageModel extends BasePageModel
 	void treeSelectItem(Collection<int> path, WidgetTreeItem item)
 	{
 		this.getFramePageModel().selectItem(path);
-		this.widget_params.selectItem(item);
+		this.css.selectItem(item);
 	}
 	
 	

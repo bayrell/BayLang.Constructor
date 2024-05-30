@@ -1,0 +1,167 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Editor;
+
+use Runtime.Web.BaseModel;
+use BayLang.Constructor.Frontend.Editor.WidgetCSS;
+use BayLang.Constructor.Frontend.Editor.WidgetEditPageModel;
+use BayLang.Constructor.Frontend.Editor.WidgetItemParam;
+use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
+use BayLang.OpCodes.BaseOpCode;
+use BayLang.OpCodes.OpHtmlAttribute;
+use BayLang.OpCodes.OpHtmlStyle;
+use BayLang.OpCodes.OpString;
+
+
+class WidgetCSSModel extends BaseModel
+{
+	string component = classof WidgetCSS;
+	string widget_name = "css";
+	WidgetTreeItem selected_item = null;
+	WidgetItemParam param_class_name = new WidgetItemParam{ "name": "class_name" };
+	WidgetItemParam param_widget_name = new WidgetItemParam{ "name": "widget_name" };
+	Collection<WidgetItemParam> attrs = [];
+	string css_content = "";
+	
+	
+	/**
+	 * Select item
+	 */
+	void selectItem(WidgetTreeItem selected_item)
+	{
+		this.selected_item = selected_item;
+		Collection<OpHtmlAttribute> attrs = selected_item.op_code.attrs;
+		
+		/* Setup attributes */
+		this.attrs = [];
+		for (int i=0; i<attrs.count(); i++)
+		{
+			OpHtmlAttribute op_attr = attrs.get(i);
+			if (op_attr.value instanceof OpString)
+			{
+				if (op_attr.key == "class")
+				{
+					this.setupClass(op_attr);
+				}
+			}
+		}
+		
+		/* Setup CSS */
+		this.setupCSS();
+	}
+	
+	
+	/**
+	 * Setup class
+	 */
+	void setupClass(OpHtmlAttribute op_attr)
+	{
+		string param_class_name = op_attr.value.value;
+		Collection<string> names = rs::split(" ", param_class_name);
+		names = names.filter(bool (string s) => s != "");
+		this.param_class_name.op_code = op_attr;
+		this.param_class_name.value = names.slice(1);
+		this.param_widget_name.op_code = op_attr;
+		this.param_widget_name.value = names.get(0);
+	}
+	
+	
+	/**
+	 * Setup CSS
+	 */
+	void setupCSS()
+	{
+		this.css_content = "";
+		string selector_name = "." ~ this.param_widget_name.value;
+		
+		/* Find CSS content by selector name */
+		Collection<OpHtmlStyle> styles = this.parent_widget.getStyleOpCode();
+		for (int i=0; i<styles.count(); i++)
+		{
+			OpHtmlStyle item = styles.get(i);
+			if (item.is_global) continue;
+			if (item.styles.has(selector_name))
+			{
+				this.css_content = item.styles.get(selector_name);
+				break;
+			}
+		}
+	}
+	
+	
+	/**
+	 * Update attribute
+	 */
+	void updateAttr(WidgetItemParam item)
+	{
+		if (
+			item.op_code.key == "class" and
+			item.op_code.value instanceof OpString and
+			(item.name == "param_widget_name" or item.name == "param_class_name")
+		)
+		{
+			item.op_code.value.value =
+				rs::join(" ", this.param_class_name.value.insertIm(0, this.param_widget_name.value))
+			;
+		}
+		this.parent_widget.updateFrameRender();
+	}
+	
+	
+	/**
+	 * Change attrs
+	 */
+	void changeAttrContent(string value, string name)
+	{
+		WidgetItemParam item = null;
+		if (name == "param_widget_name") item = this.param_widget_name;
+		else if (name == "param_class_name") item = this.param_class_name;
+		
+		if (item)
+		{
+			item.value = value;
+			this.updateAttr(item);
+		}
+	}
+	
+	
+	/**
+	 * Change CSS
+	 */
+	void changeCSSContent(string value)
+	{
+		if (this.css_content == value) return;
+		
+		this.css_content = value;
+		string selector_name = "." ~ this.param_widget_name.value;
+		
+		/* Setup parser params */
+		Collection<string> current_class_name =
+			rs::split(".", this.parent_widget.component_class_name)
+		;
+		Dict parser_params = {
+			"current_namespace_name": rs::join(".", current_class_name.slice(0, -1))
+			"current_class_name": current_class_name.last(),
+			"uses": this.parent_widget.component_op_code.uses
+		};
+		
+		/* Find CSS content by selector name */
+		Collection<OpHtmlStyle> styles = this.parent_widget.getStyleOpCode();
+		for (int i=0; i<styles.count(); i++)
+		{
+			OpHtmlStyle item = styles.get(i);
+			if (item.is_global) continue;
+			if (item.styles.has(selector_name))
+			{
+				item.styles.set(selector_name, this.css_content);
+				item.setupContent(parser_params);
+				break;
+			}
+		}
+		
+		/* Update CSS */
+		this.parent_widget.updateFrameCSS();
+	}
+}

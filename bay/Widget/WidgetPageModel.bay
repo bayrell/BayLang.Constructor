@@ -25,6 +25,7 @@ class WidgetPageModel extends BasePageModel
 	Collection<int> selected_path = null;
 	var widget_component = null;
 	BaseModel widget_model = null;
+	string widget_css = "";
 	Map components = {};
 	
 	 
@@ -138,6 +139,25 @@ class WidgetPageModel extends BasePageModel
 		/* log(content); */
 		this.widget_component.render = window.eval("fn_new = " + content + ";");
 		this.widget_component.reload();
+		
+		/* Update selected box */
+		RenderProvider::nextTick(void(){
+			this.updateSelectedBox();
+		});
+	}
+	
+	
+	/**
+	 * Build CSS
+	 */
+	void buildCSS()
+	{
+		var page_model = this.getEditPageModel();
+		if (not page_model) return;
+		
+		/* Get content */
+		string content = page_model.buildCSSContent();
+		this.widget_css = content;
 		
 		/* Update selected box */
 		RenderProvider::nextTick(void(){

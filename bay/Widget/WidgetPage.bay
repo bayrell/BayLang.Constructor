@@ -49,7 +49,7 @@ body, html {
 
 
 <template name="renderStyle">
-	<style>{{ this.model.getCSS() }}</style>
+	<style>{{ this.model.widget_css }}</style>
 </template>
 
 
@@ -70,7 +70,7 @@ body, html {
 
 <template>
 	<div class="widget_page" @event:click={{ this.onClick }}>
-		%render this.renderStyle(this.model.widget_model);
+		%render this.renderStyle();
 		%render this.renderWidget(this.model.widget_model, {"ref": "widget_component"});
 		%render this.renderSelectedBox();
 	</div>
@@ -163,6 +163,7 @@ async void onMounted()
 	this.nextTick(void (){
 		this.model.widget_component = this.getRef("widget_component");
 		this.model.buildRender();
+		this.model.buildCSS();
 		this.model.sendAppLoaded();
 	});
 }

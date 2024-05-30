@@ -1,0 +1,101 @@
+<!--
+ *  BayLang Constructor
+-->
+
+<class name="BayLang.Constructor.Frontend.Editor.WidgetCSS">
+
+<use name="Runtime.Web.RenderProvider" />
+<use name="Runtime.Widget.Input" component="true" />
+<use name="Runtime.Widget.Tag" component="true" />
+<use name="Runtime.Widget.TextArea" component="true" />
+<use name="BayLang.Constructor.Frontend.Editor.WidgetItemParam" />
+
+
+<style>
+.widget_css__label{
+	margin-bottom: 5px;
+}
+.widget_css__row{
+	margin-bottom: 10px;
+}
+.widget_css__title{
+	text-align: center;
+	margin-bottom: 5px;
+}
+.widget_css %(Input)widget_input,
+.widget_css %(TextArea)widget_textarea{
+	padding: 7px;
+}
+.widget_css %(TextArea)widget_textarea{
+    font-family: 'PT Mono';
+	line-height: 1.5;
+}
+</style>
+
+
+<template name="renderWidgetName">
+	<div class="widget_css__row">
+		<div class="widget_css__label">Name</div>
+		<div class="widget_css__content">
+			<Input value={{ this.model.param_widget_name.value }}
+				@event:valueChange={{ void (var value) {
+					this.model.changeItemContent(value, "widget_name");
+				} }}
+			/>
+		</div>
+	</div>
+</template>
+
+
+<template name="renderClassName">
+	<div class="widget_css__row">
+		<div class="widget_css__label">Class</div>
+		<div class="widget_css__content">
+			<Tag value={{ this.model.param_class_name.value }}
+				@event:valueChange={{ void (var value) {
+					this.model.changeAttrContent(value, "class_name");
+				} }}
+			/>
+		</div>
+	</div>
+</template>
+
+
+<template name="renderCSS">
+	<div class="widget_css__title">
+		Content
+	</div>
+	<TextArea value={{ this.model.css_content }}
+		@event:valueChange={{ void (var value) {
+			this.model.changeCSSContent(value)
+		} }}
+		@event:keydown={{ this.onCSSKeyDown }}
+	/>
+</template>
+
+
+<template>
+	<div class="widget_css">
+		%if (this.model.selected_item)
+		{
+			%render this.renderWidgetName();
+			%render this.renderClassName();
+			%render this.renderCSS();
+		}
+	</div>
+</template>
+
+
+<script>
+
+void onCSSKeyDown(var e)
+{
+	/* if (not e.ctrlKey and e.keyCode == 13) return; */
+	if (e.keyCode != 13) return;
+	this.model.changeCSSContent(e.target.value);
+}
+
+</script>
+
+
+</class>

@@ -14,6 +14,28 @@ body, html {
 	padding: 0;
 	margin: 0;
 }
+@font-face {
+	font-family: 'PTMono';
+	font-weight: normal;
+	font-style: normal;
+	src: url('/assets/fonts/PTMono/PTMono-Regular.eot');
+	src: url('/assets/fonts/PTMono/PTMono-Regular.eot?#iefix') format('embedded-opentype'),
+		url('/assets/fonts/PTMono/PTMono-Regular.svg#PTMono-Regular') format('svg'),
+		url('/assets/fonts/PTMono/PTMono-Regular.ttf') format('truetype'),
+		url('/assets/fonts/PTMono/PTMono-Regular.woff') format('woff'),
+		url('/assets/fonts/PTMono/PTMono-Regular.woff2') format('woff2');
+}
+@font-face {
+	font-family: 'PT Mono';
+	font-weight: normal;
+	font-style: normal;
+	src: url('/assets/fonts/PTMono/PTMono-Regular.eot');
+	src: url('/assets/fonts/PTMono/PTMono-Regular.eot?#iefix') format('embedded-opentype'),
+		url('/assets/fonts/PTMono/PTMono-Regular.svg#PTMono-Regular') format('svg'),
+		url('/assets/fonts/PTMono/PTMono-Regular.ttf') format('truetype'),
+		url('/assets/fonts/PTMono/PTMono-Regular.woff') format('woff'),
+		url('/assets/fonts/PTMono/PTMono-Regular.woff2') format('woff2');
+}
 </style>
 
 

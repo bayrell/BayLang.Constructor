@@ -4,7 +4,7 @@
 
 <class name="BayLang.Constructor.Frontend.Editor.WidgetMenu">
 
-<use name="BayLang.Constructor.Frontend.Editor.WidgetParams" component="true" />
+<use name="BayLang.Constructor.Frontend.Editor.WidgetCSS" component="true" />
 
 
 <style>
@@ -41,22 +41,6 @@
 </style>
 
 
-<template name="renderHierarchy">
-	%if (this.model.menu_selected == "hierarchy")
-	{
-		%render this.renderWidget(this.model.tree);
-	}
-</template>
-
-
-<template name="renderParams">
-	%if (this.model.menu_selected == "params")
-	{
-		<WidgetParams @model={{ this.model.widget_params }} />
-	}
-</template>
-
-
 <template>
 	<div class="widget_menu"
 		class={{ this.model.menu_selected != "" ? "show" : "hide" }}
@@ -66,14 +50,14 @@
 		</div>
 		<div class="widget_menu__content">
 			<div class="widget_menu__item"
-				class={{ this.model.menu_selected != "hierarchy" ? "hide" : "" }}
+				class={{ this.model.menu_selected != "tree" ? "hide" : "" }}
 			>
 				%render this.renderWidget(this.model.tree);
 			</div>
 			<div class="widget_menu__item"
-				class={{ this.model.menu_selected != "params" ? "hide" : "" }}
+				class={{ this.model.menu_selected != "css" ? "hide" : "" }}
 			>
-				<WidgetParams @model={{ this.model.widget_params }} />
+				<WidgetCSS @model={{ this.model.css }} />
 			</div>
 		</div>
 	</div>
@@ -87,8 +71,8 @@
  */
 string getTitle()
 {
+	if (this.model.menu_selected == "css") return "CSS";
 	if (this.model.menu_selected == "hierarchy") return "Hierarchy";
-	if (this.model.menu_selected == "params") return "Params";
 	return "";
 }
 

@@ -26,7 +26,7 @@
 }
 .widget_edit_page__menu_item--button{
 	text-align: center;
-	width: 40px;
+	min-width: 40px;
 }
 .widget_edit_page__menu_item--selected{
 	background-color: var(--widget-color-primary);
@@ -72,22 +72,22 @@
 			<div class="widget_edit_page__menu_item_gap"></div>
 			<div class="widget_edit_page__menu_item widget_edit_page__menu_item--button"
 				class={{
-					this.model.menu_selected == "params"
+					this.model.menu_selected == "css"
 					? "widget_edit_page__menu_item--selected"
 					: ""
 				}}
 				@event:onClick={{
-					void(var e){ this.toggleMenu(e, "params"); }
-				}}>P</div>
+					void(var e){ this.toggleMenu(e, "css"); }
+				}}>CSS</div>
 			<div class="widget_edit_page__menu_item widget_edit_page__menu_item--button"
 				class={{
-					this.model.menu_selected == "hierarchy"
+					this.model.menu_selected == "tree"
 					? "widget_edit_page__menu_item--selected"
 					: ""
 				}}
 				@event:onClick={{
-					void(var e){ this.toggleMenu(e, "hierarchy"); }
-				}}>H</div>
+					void(var e){ this.toggleMenu(e, "tree"); }
+				}}>Tree</div>
 		</div>
 		<div class="widget_edit_page__content">
 			<div class="widget_edit_page__frame">
