@@ -13,6 +13,7 @@ use Runtime.Web.BasePageModel;
 use Runtime.Web.RenderProvider;
 use Runtime.Widget.Tree.TreeItem;
 use Runtime.Widget.Tree.TreeModel;
+use BayLang.LangBay.ParserBay;
 use BayLang.Constructor.Frontend.Editor.WidgetCSSModel;
 use BayLang.Constructor.Frontend.Editor.WidgetEditPage;
 use BayLang.Constructor.Frontend.Editor.WidgetItemParam;
@@ -132,11 +133,19 @@ class WidgetEditPageModel extends BasePageModel
 				: component_class_name
 			;
 			
-			/* Setup styles content */
-			Collection<OpHtmlStyle> styles = this.getStyleOpCode();
-			for (int i=0; i<styles.count(); i++)
+			/* Setup CSS styles */
+			this.css.clearStyles();
+			OpDeclareClass op_code_class = this.component_op_code.findClass();
+			if (op_code_class)
 			{
-				styles.get(i).setupStyles();
+				for (int i=0; i<op_code_class.items.count(); i++)
+				{
+					BaseOpCode item = op_code_class.items.get(i);
+					if (item instanceof OpHtmlStyle)
+					{
+						this.css.addStyle(item);
+					}
+				}
 			}
 			
 			/* Load Tree items */
@@ -187,6 +196,33 @@ class WidgetEditPageModel extends BasePageModel
 	
 	
 	/**
+	 * Create parser
+	 */
+	ParserBay createParser()
+	{
+		/* Setup parser params */
+		Collection<string> current_class_name = rs::split(".", this.component_class_name);
+		Dict params = {
+			"current_namespace_name": rs::join(".", current_class_name.slice(0, -1))
+			"current_class_name": current_class_name.last(),
+			"uses": this.component_op_code.uses
+		};
+		
+		/* Create new instance */
+		ParserBay parser = new ParserBay();
+		parser = parser::reset(parser);
+		if (params.has("current_namespace_name"))
+			parser <= current_namespace_name <= params.get("current_namespace_name");
+		if (params.has("current_class_name"))
+			parser <= current_class_name <= params.get("current_class_name");
+		if (params.has("uses"))
+			parser <= uses <= params.get("uses");
+		
+		return parser;
+	}
+	
+	
+	/**
 	 * Create translator
 	 */
 	TranslatorES6 createTranslator()
@@ -233,35 +269,6 @@ class WidgetEditPageModel extends BasePageModel
 		content = t.program::removeContext(content);
 		content = rs::trim(content);
 		
-		return content;
-	}
-	
-	
-	/**
-	 * Build CSS Content
-	 */
-	string buildCSSContent()
-	{
-		OpDeclareClass op_code_class = this.component_op_code.findClass();
-		if (not op_code_class) return null;
-		
-		/* Create translator */
-		TranslatorES6 t = this.createTranslator();
-		Collection<SaveOpCode> save_op_codes = t.save_op_codes;
-		
-		/* Build content */
-		string content = "";
-		Vector<string> items = [];
-		items.push("var content = \"\";");
-		Collection<OpHtmlStyle> styles = this.getStyleOpCode();
-		for (int i=0; i<styles.count(); i++)
-		{
-			OpHtmlStyle item = styles.get(i);
-			list res = t.expression::Expression(t, item.value); t = res[0];
-			items.push("content += Runtime.rtl.toStr(" ~ res.get(1) ~ ");");
-		}
-		
-		content = window.eval(rs::join("\n", items));
 		return content;
 	}
 	

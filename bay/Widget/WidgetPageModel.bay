@@ -155,9 +155,8 @@ class WidgetPageModel extends BasePageModel
 		var page_model = this.getEditPageModel();
 		if (not page_model) return;
 		
-		/* Get content */
-		string content = page_model.buildCSSContent();
-		this.widget_css = content;
+		/* Get css content */
+		this.widget_css = page_model.css.getCSS();
 		
 		/* Update selected box */
 		RenderProvider::nextTick(void(){

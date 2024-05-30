@@ -9,6 +9,9 @@ use BayLang.Constructor.Frontend.Editor.WidgetCSS;
 use BayLang.Constructor.Frontend.Editor.WidgetEditPageModel;
 use BayLang.Constructor.Frontend.Editor.WidgetItemParam;
 use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
+use BayLang.Exceptions.ParserUnknownError;
+use BayLang.LangBay.ParserBay;
+use BayLang.LangES6.TranslatorES6;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpHtmlAttribute;
 use BayLang.OpCodes.OpHtmlStyle;
@@ -18,12 +21,126 @@ use BayLang.OpCodes.OpString;
 class WidgetCSSModel extends BaseModel
 {
 	string component = classof WidgetCSS;
+	string css_content = "";
 	string widget_name = "css";
+	Collection<Dict> styles = {};
 	WidgetTreeItem selected_item = null;
 	WidgetItemParam param_class_name = new WidgetItemParam{ "name": "class_name" };
 	WidgetItemParam param_widget_name = new WidgetItemParam{ "name": "widget_name" };
-	Collection<WidgetItemParam> attrs = [];
-	string css_content = "";
+	
+	
+	/**
+	 * Translate CSS
+	 */
+	list translateCSS(ParserBay parser, TranslatorES6 translator, string source)
+	{
+		/* Parse source */
+		BaseOpCode op_code = null;
+		try
+		{
+			parser = parser::setContent(parser, source ~ "}");
+			list res = parser.parser_html::readCssBody(parser);
+			op_code = res.get(1);
+		}
+		catch (ParserUnknownError e)
+		{
+		}
+		
+		/* Translate source */
+		if (not op_code) return "";
+		
+		Vector items = [];
+		items.push("var content = \"\";");
+		list res = translator.expression::Expression(translator, op_code);
+		items.push("content += Runtime.rtl.toStr(" ~ res.get(1) ~ ");");
+		
+		string content = window.eval(rs::join("\n", items));
+		return content;
+	}
+	
+	
+	/**
+	 * Returns CSS content
+	 */
+	void getCSS()
+	{
+		Vector items = [];
+		Collection selectors = this.styles.keys().sort();
+		for (int i=0; i<selectors.count(); i++)
+		{
+			string selector_name = selectors.get(i);
+			Dict item = this.styles.get(selector_name);
+			items.push(item.get("content"));
+		}
+		return rs::join("\n", items);
+	}
+	
+	
+	/**
+	 * Returns source
+	 */
+	string getCSSCode(string selector_name, string source)
+	{
+		return selector_name ~ "{" ~ source ~ "}";
+	}
+	
+	
+	/**
+	 * Set CSS value
+	 */
+	Map setCSSValue(
+		ParserBay parser, TranslatorES6 translator,
+		string selector_name, string source
+	)
+	{
+		/* Parse CSS */
+		string content = this.translateCSS(
+			parser, translator, this.getCSSCode(selector_name, source)
+		);
+		
+		/* Set content */
+		if (not this.styles.has(selector_name))
+		{
+			this.styles.set(selector_name, {});
+		}
+		Map result = this.styles.get(selector_name);
+		result.set("source", source);
+		result.set("content", content);
+		
+		return result;
+	}
+	
+	
+	
+	/**
+	 * Add style
+	 */
+	void addStyle(OpHtmlStyle item)
+	{
+		ParserBay parser = this.parent_widget.createParser();
+		TranslatorES6 translator = this.parent_widget.createTranslator();
+		Dict styles = item.readStyles();
+		Collection selectors = styles.keys();
+		for (int i=0; i<selectors.count(); i++)
+		{
+			string selector_name = selectors.get(i);
+			if (this.styles.has(selector_name)) continue;
+			
+			/* Set CSS Value */
+			string source = styles.get(selector_name);
+			Map result = this.setCSSValue(parser, translator, selector_name, source);
+			result.set("style", item);
+		}
+	}
+	
+	
+	/**
+	 * Clear styles
+	 */
+	void clearStyles()
+	{
+		this.styles = {};
+	}
 	
 	
 	/**
@@ -33,6 +150,12 @@ class WidgetCSSModel extends BaseModel
 	{
 		this.selected_item = selected_item;
 		Collection<OpHtmlAttribute> attrs = selected_item.op_code.attrs;
+		
+		/* Clear params */
+		this.param_class_name.op_code = null;
+		this.param_class_name.value = "";
+		this.param_widget_name.op_code = null;
+		this.param_widget_name.value = "";
 		
 		/* Setup attributes */
 		this.attrs = [];
@@ -77,16 +200,10 @@ class WidgetCSSModel extends BaseModel
 		string selector_name = "." ~ this.param_widget_name.value;
 		
 		/* Find CSS content by selector name */
-		Collection<OpHtmlStyle> styles = this.parent_widget.getStyleOpCode();
-		for (int i=0; i<styles.count(); i++)
+		if (this.styles.has(selector_name))
 		{
-			OpHtmlStyle item = styles.get(i);
-			if (item.is_global) continue;
-			if (item.styles.has(selector_name))
-			{
-				this.css_content = item.styles.get(selector_name);
-				break;
-			}
+			Dict item = this.styles.get(selector_name);
+			this.css_content = item.get("source");
 		}
 	}
 	
@@ -137,29 +254,10 @@ class WidgetCSSModel extends BaseModel
 		this.css_content = value;
 		string selector_name = "." ~ this.param_widget_name.value;
 		
-		/* Setup parser params */
-		Collection<string> current_class_name =
-			rs::split(".", this.parent_widget.component_class_name)
-		;
-		Dict parser_params = {
-			"current_namespace_name": rs::join(".", current_class_name.slice(0, -1))
-			"current_class_name": current_class_name.last(),
-			"uses": this.parent_widget.component_op_code.uses
-		};
-		
-		/* Find CSS content by selector name */
-		Collection<OpHtmlStyle> styles = this.parent_widget.getStyleOpCode();
-		for (int i=0; i<styles.count(); i++)
-		{
-			OpHtmlStyle item = styles.get(i);
-			if (item.is_global) continue;
-			if (item.styles.has(selector_name))
-			{
-				item.styles.set(selector_name, this.css_content);
-				item.setupContent(parser_params);
-				break;
-			}
-		}
+		/* Set CSS Value */
+		ParserBay parser = this.parent_widget.createParser();
+		TranslatorES6 translator = this.parent_widget.createTranslator();
+		this.setCSSValue(parser, translator, selector_name, this.css_content);
 		
 		/* Update CSS */
 		this.parent_widget.updateFrameCSS();
