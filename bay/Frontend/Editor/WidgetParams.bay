@@ -6,6 +6,7 @@
 
 <use name="Runtime.Widget.Input" component="true" />
 <use name="Runtime.Widget.Tag" component="true" />
+<use name="Runtime.Widget.TextArea" component="true" />
 <use name="BayLang.Constructor.Frontend.Editor.WidgetItemParam" />
 
 
@@ -15,6 +16,14 @@
 }
 .widget_params__row{
 	margin-bottom: 10px;
+}
+.widget_params__title{
+	text-align: center;
+	margin-bottom: 5px;
+}
+.widget_params %(Input)widget_input,
+.widget_params %(TextArea)widget_textarea{
+	padding: 7px;
 }
 </style>
 
@@ -43,12 +52,21 @@
 </template>
 
 
+<template name="renderCSS">
+	<div class="widget_params__title">
+		CSS
+	</div>
+	<TextArea />
+</template>
+
+
 <template>
 	<div class="widget_params">
 		%if (this.model.selected_item)
 		{
 			%render this.renderWidgetName();
 			%render this.renderClassName();
+			%render this.renderCSS();
 		}
 	</div>
 </template>

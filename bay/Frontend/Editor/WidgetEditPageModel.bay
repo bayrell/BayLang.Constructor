@@ -23,6 +23,7 @@ use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpDeclareClass;
 use BayLang.OpCodes.OpDeclareFunction;
 use BayLang.OpCodes.OpHtmlItems;
+use BayLang.OpCodes.OpHtmlStyle;
 use BayLang.SaveOpCode;
 
 
@@ -115,7 +116,14 @@ class WidgetEditPageModel extends BasePageModel
 			this.component_content = res.data.get("component_content");
 			this.component_op_code = res.data.get("component_op_code");
 			this.model_content = res.data.get("model_content");
-		
+			
+			/* Update styles content */
+			Collection<OpHtmlStyle> styles = this.getStyleOpCode();
+			for (int i=0; i<styles.count(); i++)
+			{
+				styles.get(i).updateStylesFromContent();
+			}
+			
 			/* Load Tree items */
 			this.loadTreeItems();
 			
@@ -146,6 +154,20 @@ class WidgetEditPageModel extends BasePageModel
 		
 		OpDeclareFunction op_code_render = op_code_class.findFunction(render_name);
 		return op_code_render;
+	}
+	
+	
+	/**
+	 * Get styles op_code
+	 */
+	Collection<OpHtmlStyle> getStyleOpCode()
+	{
+		if (not this.component_op_code) return null;
+		
+		OpDeclareClass op_code_class = this.component_op_code.findClass();
+		if (not op_code_class) return null;
+		
+		return op_code_class.items.filter(lib::isInstance(classof OpHtmlStyle));
 	}
 	
 	
