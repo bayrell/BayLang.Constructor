@@ -1,0 +1,26 @@
+<!--
+ *  BayLang Constructor
+-->
+
+<class name="BayLang.Constructor.Frontend.Editor.AddItemDialog"
+	extends="Runtime.Widget.Dialog.Dialog"
+>
+
+
+<template name="renderTitle">
+	<div class='widget_dialog__title'>Add dialog item</div>
+</template>
+
+
+<template name="renderContent">
+	<div class='widget_dialog__content'>
+		Add dialog content
+	</div>
+</template>
+
+
+<script>
+</script>
+
+
+</class>

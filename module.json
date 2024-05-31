@@ -5,6 +5,8 @@
 		"Frontend/Blocks/Menu.bay",
 		"Frontend/Blocks/MenuModel.bay",
 		"Frontend/Editor/Helper.bay",
+		"Frontend/Editor/AddItemDialog.bay",
+		"Frontend/Editor/AddItemDialogModel.bay",
 		"Frontend/Editor/WidgetCSS.bay",
 		"Frontend/Editor/WidgetCSSModel.bay",
 		"Frontend/Editor/WidgetEditPage.bay",

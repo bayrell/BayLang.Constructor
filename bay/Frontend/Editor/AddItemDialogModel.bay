@@ -1,0 +1,42 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Editor;
+
+use Runtime.Callback;
+use Runtime.Widget.ButtonModel;
+use Runtime.Widget.Dialog.ConfirmDialogModel;
+use BayLang.Constructor.Frontend.Editor.AddItemDialog;
+
+
+class AddItemDialogModel extends ConfirmDialogModel
+{
+	string component = classof AddItemDialog;
+	string widget_name = "add_item_dialog";
+	
+	
+	/**
+	 * Init widget settings
+	 */
+	void initWidget(Dict params)
+	{
+		parent(params);
+		
+		/* Confirm button */
+		ButtonModel confirm_button = this.buttons.getWidget("confirm_button");
+		confirm_button.content = "Add";
+		confirm_button.styles.add("success");
+		confirm_button.styles.remove("primary");
+	}
+	
+	
+	/**
+	 * Add confirm button click
+	 */
+	void onConfirmButtonClick()
+	{
+		log("Add item");
+		this.hide();
+	}
+}
