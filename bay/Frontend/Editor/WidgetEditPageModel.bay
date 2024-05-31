@@ -6,11 +6,13 @@ namespace BayLang.Constructor.Frontend.Editor;
 
 use Runtime.lib;
 use Runtime.Callback;
+use Runtime.Context;
 use Runtime.Reference;
 use Runtime.Web.ApiResult;
 use Runtime.Web.BaseModel;
 use Runtime.Web.BasePageModel;
 use Runtime.Web.RenderProvider;
+use Runtime.Web.Annotations.Widget;
 use Runtime.Widget.ButtonModel;
 use Runtime.Widget.ContextMenu.ContextMenuModel;
 use Runtime.Widget.Dialog.ConfirmDialogModel;
@@ -63,6 +65,7 @@ class WidgetEditPageModel extends BasePageModel
 	 */
 	BaseModel getFrameLayout()
 	{
+		if (not this.app_loaded) return null;
 		if (not this.iframe) return null;
 		if (not this.iframe.contentWindow) return null;
 		if (not this.iframe.contentWindow.app_layout) return null;
@@ -84,10 +87,23 @@ class WidgetEditPageModel extends BasePageModel
 	/**
 	 * Returns widget frame page
 	 */
-	string getWidgetFramePage() =>
+	string getFramePageUrl() =>
 		"/project/" ~ this.project_id ~
 		"/open/widget.php?widget_name=" ~ this.current_widget
 	;
+	
+	
+	/**
+	 * Returns frame widgets
+	 */
+	Collection<Widget> getFrameWidgets()
+	{
+		if (not this.app_loaded) return null;
+		if (not this.iframe) return null;
+		if (not this.iframe.contentWindow) return null;
+		Context context = this.iframe.contentWindow.Runtime.rtl.getContext();
+		return context.getEntities(classof Widget);
+	}
 	
 	
 	/**
@@ -157,8 +173,6 @@ class WidgetEditPageModel extends BasePageModel
 		
 		if (res.isSuccess())
 		{
-			this.app_loaded = true;
-			
 			/* Setup op code */
 			this.component_content = res.data.get("component_content");
 			this.component_op_code = res.data.get("component_op_code");
@@ -197,7 +211,7 @@ class WidgetEditPageModel extends BasePageModel
 			this.loadTreeItems();
 			
 			/* Load iframe page */
-			this.iframe.src = this.getWidgetFramePage();
+			this.iframe.src = this.getFramePageUrl();
 		}
 	}
 	

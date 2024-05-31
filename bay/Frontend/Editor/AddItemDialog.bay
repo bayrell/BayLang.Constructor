@@ -6,6 +6,31 @@
 	extends="Runtime.Widget.Dialog.Dialog"
 >
 
+<use name="Runtime.Web.Annotations.Widget" />
+
+
+<style>
+.list_items{
+	border-radius: 4px;
+	border: var(--widget-border-width) var(--widget-color-border) solid;
+}
+.list_item{
+	cursor: pointer;
+	padding: 10px;
+	border-bottom: var(--widget-border-width) var(--widget-color-border) solid;
+}
+.list_item:last-child{
+	border-bottom-width: 0px;
+}
+.list_item:hover{
+	background-color: var(--widget-color-hover);
+}
+.list_item.selected{
+	background-color: var(--widget-color-selected);
+	color: var(--widget-color-selected-text);
+}
+</style>
+
 
 <template name="renderTitle">
 	<div class='widget_dialog__title'>Add dialog item</div>
@@ -13,8 +38,20 @@
 
 
 <template name="renderContent">
-	<div class='widget_dialog__content'>
-		Add dialog content
+	<div class="widget_dialog__content list_items">
+		%if (this.model.current_widgets)
+		{
+			%for (int i=0; i<this.model.current_widgets.count(); i++)
+			{
+				%set Widget widget = this.model.current_widgets.get(i);
+				<div class="list_item"
+					class={{ this.model.selected_item == widget.name ? "selected" : "" }}
+					@event:click={{
+						void () use (widget) { this.model.selectItem(widget.name) }
+					}}
+				>{{ widget.name }}</div>
+			}
+		}
 	</div>
 </template>
 
