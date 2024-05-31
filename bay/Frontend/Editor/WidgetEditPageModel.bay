@@ -11,6 +11,7 @@ use Runtime.Web.ApiResult;
 use Runtime.Web.BaseModel;
 use Runtime.Web.BasePageModel;
 use Runtime.Web.RenderProvider;
+use Runtime.Widget.ContextMenu.ContextMenuModel;
 use Runtime.Widget.Tree.TreeItem;
 use Runtime.Widget.Tree.TreeModel;
 use BayLang.LangBay.ParserBay;
@@ -43,8 +44,13 @@ class WidgetEditPageModel extends BasePageModel
 	BaseOpCode component_op_code = null;
 	TreeModel tree = null;
 	
+	/* Selected item */
+	Collection<int> path = null;
+	WidgetTreeItem item = null;
+	
 	/* Widget css */
 	WidgetCSSModel css = null;
+	ContextMenuModel context_menu = null;
 	
 	
 	/**
@@ -89,10 +95,29 @@ class WidgetEditPageModel extends BasePageModel
 		this.current_widget = this.layout.route.matches.get("widget_name");
 		this.project_id = this.layout.route.matches.get("project_id");
 		this.css = this.addWidget(classof WidgetCSSModel);
+		
+		/* Create Tree */
 		this.tree = this.addWidget(classof TreeModel);
 		this.tree.events.add("canDrag", new Callback(this, "canTreeDrop"));
 		this.tree.events.add("dragElement", new Callback(this, "treeDragElement"));
 		this.tree.events.add("selectItem", new Callback(this, "treeSelectItem"));
+		this.tree.events.add("contextMenuClick", new Callback(this, "treeContextMenuClick"));
+		
+		/* Create ContextMenu */
+		this.context_menu = this.addWidget(classof ContextMenuModel);
+		this.context_menu.addItem({
+			"label": "Params",
+			"key": "params"
+		});
+		this.context_menu.addItem({
+			"label": "Add item",
+			"key": "add"
+		});
+		this.context_menu.addItem({
+			"label": "Remove item",
+			"key": "remove"
+		});
+		this.context_menu.events.add("onClickItem", new Callback(this, "onContextClickItem"));
 	}
 	
 	
@@ -163,6 +188,16 @@ class WidgetEditPageModel extends BasePageModel
 	void appLoaded()
 	{
 		this.app_loaded = true;
+	}
+	
+	
+	/**
+	 * Context menu item click
+	 */
+	void onContextClickItem(Dict item)
+	{
+		string item_key = item.get("key");
+		this.context_menu.hide();
 	}
 	
 	
@@ -318,8 +353,34 @@ class WidgetEditPageModel extends BasePageModel
 	 */
 	void treeSelectItem(Collection<int> path, WidgetTreeItem item)
 	{
+		this.context_menu.hide();
+		this.selected_path = path.slice();
+		this.selected_item = item;
 		this.getFramePageModel().selectItem(path);
 		this.css.selectItem(item);
+	}
+	
+	
+	/**
+	 * Context menu click
+	 */
+	void editorContextMenuClick(var e)
+	{
+		var rect = this.iframe.getBoundingClientRect();
+		int x = e.clientX + rect.x;
+		int y = e.clientY + rect.y;
+		this.context_menu.show(x, y);
+	}
+	
+	
+	/**
+	 * Context menu click
+	 */
+	void treeContextMenuClick(var e)
+	{
+		int x = e.clientX;
+		int y = e.clientY;
+		this.context_menu.show(x, y);
 	}
 	
 	

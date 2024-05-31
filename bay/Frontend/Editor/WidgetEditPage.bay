@@ -94,6 +94,7 @@
 				<iframe @ref="iframe"></iframe>
 			</div>
 			<WidgetMenu @model={{ this.model }} />
+			%render this.renderWidget(this.model.context_menu);
 		</div>
 	</div>
 </template>

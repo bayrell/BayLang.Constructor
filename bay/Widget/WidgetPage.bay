@@ -69,7 +69,10 @@ body, html {
 
 
 <template>
-	<div class="widget_page" @event:click={{ this.onClick }}>
+	<div class="widget_page"
+		@event:click={{ this.onClick }}
+		@event:contextmenu={{ this.onContextMenu }}
+	>
 		%render this.renderStyle();
 		%render this.renderWidget(this.model.widget_model, {"ref": "widget_component"});
 		%render this.renderSelectedBox();
@@ -147,11 +150,42 @@ void onClick(var e)
 	var page_model = this.model.getEditPageModel();
 	if (not page_model) return;
 	
+	/* Prevent default */
+	e.preventDefault();
+	
 	/* Send select item */
 	string widget_path_str = this.getWidgetPath(elem);
 	Collection<int> widget_path = rs::split(".", widget_path_str);
 	Collection<int> path = this.model.convertWidgetToTreePath(widget_path);
 	page_model.tree.selectItem(path);
+	return false;
+}
+
+
+/**
+ * Context menu click
+ */
+void onContextMenu(var e)
+{
+	var elem = e.target;
+	elem = this.getWidget(elem);
+	if (not elem) return;
+	
+	var page_model = this.model.getEditPageModel();
+	if (not page_model) return;
+	
+	/* Prevent default */
+	e.preventDefault();
+	
+	/* Send select item */
+	string widget_path_str = this.getWidgetPath(elem);
+	Collection<int> widget_path = rs::split(".", widget_path_str);
+	Collection<int> path = this.model.convertWidgetToTreePath(widget_path);
+	page_model.tree.selectItem(path);
+	
+	/* Send event context menu */
+	page_model.editorContextMenuClick(e);
+	return false;
 }
 
 
