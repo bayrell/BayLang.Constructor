@@ -479,7 +479,7 @@ class WidgetEditPageModel extends BasePageModel
 			dest_parent_item.op_code.items.addItem(src_item.op_code, dest_item.op_code, kind);
 		}
 		
-		/* Build render */
-		this.updateRender();
+		/* Update frame render */
+		this.updateFrameRender();
 	}
 }

@@ -26,10 +26,7 @@ class AddItemDialogModel extends ConfirmDialogModel
 		parent(params);
 		
 		/* Confirm button */
-		ButtonModel confirm_button = this.buttons.getWidget("confirm_button");
-		confirm_button.content = "Add";
-		confirm_button.styles.add("success");
-		confirm_button.styles.remove("primary");
+		this.buttons.removeItemByName("confirm_button");
 	}
 	
 	
@@ -38,16 +35,7 @@ class AddItemDialogModel extends ConfirmDialogModel
 	 */
 	void selectItem(string name)
 	{
-		this.selected_item = name;
-	}
-	
-	
-	/**
-	 * Add confirm button click
-	 */
-	void onConfirmButtonClick()
-	{
-		log("Add item " ~ this.selected_item);
+		log("Add item " ~ name);
 		this.hide();
 	}
 	
@@ -57,7 +45,6 @@ class AddItemDialogModel extends ConfirmDialogModel
 	 */
 	void show()
 	{
-		this.selected_item = "";
 		this.current_widgets = this.parent_widget.getFrameWidgets();
 		parent();
 	}
