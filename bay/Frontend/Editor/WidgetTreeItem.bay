@@ -34,10 +34,24 @@ class WidgetTreeItem extends TreeItem
 	
 	
 	/**
+	 * Update item
+	 */
+	void update()
+	{
+		Collection<string> class_names = Helper::OpHtmlTagGetClassNames(this.op_code);
+		string key = class_names.get(0);
+		this.key = key;
+		this.label = this.op_code.tag_name ~ "." ~ key;
+	}
+	
+	
+	/**
 	 * Add HTML Items
 	 */
 	void addHtmlItems(OpHtmlItems op_code_items)
 	{
+		if (op_code_items == null) return;
+		if (op_code_items.items == null) return;
 		for (int i=0; i<op_code_items.items.count(); i++)
 		{
 			this.addHtmlItem(op_code_items.items.get(i));
@@ -62,14 +76,9 @@ class WidgetTreeItem extends TreeItem
 	 */
 	void addHtmlTag(OpHtmlTag op_code)
 	{
-		Collection<string> class_names = Helper::OpHtmlTagGetClassNames(op_code);
-		string key = class_names.get(0);
-		WidgetTreeItem new_item = this.newInstance({
-			"key": key,
-			"label": op_code.tag_name ~ "." ~ key,
-			"op_code": op_code,
-		});
+		WidgetTreeItem new_item = this.newInstance{ "op_code": op_code };
 		this.addItem(new_item);
+		new_item.update();
 		new_item.addHtmlItems(op_code.items);
 	}
 }

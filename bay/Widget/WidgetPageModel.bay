@@ -86,6 +86,7 @@ class WidgetPageModel extends BasePageModel
 	void selectItem(Collection<int> path)
 	{
 		this.selected_path = path;
+		if (path == null) return;
 		
 		string widget_path_str = rs::join(".", this.convertTreeToWidgetPath(path));
 		var component = this.components.get(widget_path_str);
@@ -142,6 +143,7 @@ class WidgetPageModel extends BasePageModel
 		
 		/* Update selected box */
 		RenderProvider::nextTick(void(){
+			this.selectItem(this.selected_path);
 			this.updateSelectedBox();
 		});
 	}

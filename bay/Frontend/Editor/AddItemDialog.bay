@@ -7,9 +7,13 @@
 >
 
 <use name="Runtime.Web.Annotations.Widget" />
+<use name="Runtime.Widget.Select" component="true" />
 
 
 <style>
+.list_title{
+	margin-bottom: 10px;
+}
 .list_items{
 	border-radius: 4px;
 	border: var(--widget-border-width) var(--widget-color-border) solid;
@@ -25,6 +29,14 @@
 .list_item:hover{
 	background-color: var(--widget-color-hover);
 }
+.row{
+	display: flex;
+	align-items: center;
+	margin-bottom: 20px;
+}
+.row_label{
+	margin-right: 10px;
+}
 </style>
 
 
@@ -34,7 +46,24 @@
 
 
 <template name="renderContent">
-	<div class="widget_dialog__content list_items">
+	<div class="widget_dialog__content">
+		<div class="row">
+			<div class="row_label">Kind</div>
+			<div class="row_content">
+				<Select
+					value={{ this.model.kind }}
+					options=[
+						{"value": "after", "label": "Add after"},
+						{"value": "before", "label": "Add before"},
+						{"value": "first", "label": "Insert fisrt"},
+						{"value": "last", "label": "Insert last"},
+					]
+					@event:valueChange={{ void (string value){ this.model.kind = value; } }}
+				/>
+			</div>
+		</div>
+		<div class="list_title">Select component</div>
+		<div class="list_items">
 		%if (this.model.current_widgets)
 		{
 			%for (int i=0; i<this.model.current_widgets.count(); i++)
@@ -47,6 +76,7 @@
 				>{{ widget.name }}</div>
 			}
 		}
+		</div>
 	</div>
 </template>
 

@@ -151,9 +151,9 @@ class WidgetCSSModel extends BaseModel
 		Collection<OpHtmlAttribute> attrs = selected_item.op_code.attrs;
 		
 		/* Clear params */
-		this.param_class_name.op_code = null;
-		this.param_class_name.value = "";
-		this.param_widget_name.op_code = null;
+		this.param_class_name.op_attr = null;
+		this.param_class_name.value = [];
+		this.param_widget_name.op_attr = null;
 		this.param_widget_name.value = "";
 		
 		/* Setup attributes */
@@ -183,9 +183,9 @@ class WidgetCSSModel extends BaseModel
 		string param_class_name = op_attr.value.value;
 		Collection<string> names = rs::split(" ", param_class_name);
 		names = names.filter(bool (string s) => s != "");
-		this.param_class_name.op_code = op_attr;
+		this.param_class_name.op_attr = op_attr;
 		this.param_class_name.value = names.slice(1);
-		this.param_widget_name.op_code = op_attr;
+		this.param_widget_name.op_attr = op_attr;
 		this.param_widget_name.value = names.get(0);
 	}
 	
@@ -212,16 +212,27 @@ class WidgetCSSModel extends BaseModel
 	 */
 	void updateAttr(WidgetItemParam item)
 	{
+		if (item.op_attr == null)
+		{
+			OpHtmlAttribute op_attr = new OpHtmlAttribute{
+				"key": "class",
+				"value": new OpString{},
+			};
+			this.param_class_name.op_attr = op_attr;
+			this.param_widget_name.op_attr = op_attr;
+			this.selected_item.op_code.attrs.prepend(op_attr);
+		}
 		if (
-			item.op_code.key == "class" and
-			item.op_code.value instanceof OpString and
+			item.op_attr.key == "class" and
+			item.op_attr.value instanceof OpString and
 			(item.name == "widget_name" or item.name == "class_name")
 		)
 		{
-			item.op_code.value.value =
+			item.op_attr.value.value =
 				rs::join(" ", this.param_class_name.value.insertIm(0, this.param_widget_name.value))
 			;
 		}
+		this.parent_widget.selected_item.update();
 		this.parent_widget.updateFrameRender();
 	}
 	

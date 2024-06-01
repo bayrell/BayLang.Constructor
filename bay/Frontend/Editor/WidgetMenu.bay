@@ -35,6 +35,9 @@
 	flex: 1;
 	overflow-y: auto;
 }
+.widget_menu__item{
+	height: 100%;
+}
 .widget_menu__item.hide{
 	display: none;
 }

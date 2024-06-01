@@ -12,7 +12,7 @@ class WidgetItemParam extends BaseObject
 {
 	string name = "";
 	string value = "";
-	OpHtmlAttribute op_code = null;
+	OpHtmlAttribute op_attr = null;
 	
 	
 	/**

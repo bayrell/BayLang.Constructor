@@ -14,7 +14,7 @@ class AddItemDialogModel extends ConfirmDialogModel
 {
 	string component = classof AddItemDialog;
 	string widget_name = "add_item_dialog";
-	string selected_item = "";
+	string kind = "after";
 	Collection<string> current_widgets = null;
 	
 	
@@ -33,9 +33,13 @@ class AddItemDialogModel extends ConfirmDialogModel
 	/**
 	 * Select item
 	 */
-	void selectItem(string name)
+	void selectItem(string widget_name)
 	{
-		log("Add item " ~ name);
+		this.parent_widget.createWidget(
+			widget_name,
+			this.parent_widget.selected_path,
+			this.kind
+		)
 		this.hide();
 	}
 	

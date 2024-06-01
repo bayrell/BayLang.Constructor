@@ -31,6 +31,7 @@ use BayLang.OpCodes.OpDeclareClass;
 use BayLang.OpCodes.OpDeclareFunction;
 use BayLang.OpCodes.OpHtmlItems;
 use BayLang.OpCodes.OpHtmlStyle;
+use BayLang.OpCodes.OpHtmlTag;
 use BayLang.OpCodes.OpNamespace;
 use BayLang.SaveOpCode;
 
@@ -50,8 +51,8 @@ class WidgetEditPageModel extends BasePageModel
 	TreeModel tree = null;
 	
 	/* Selected item */
-	Collection<int> path = null;
-	WidgetTreeItem item = null;
+	Collection<int> selected_path = null;
+	WidgetTreeItem selected_item = null;
 	
 	/* Widget css */
 	WidgetCSSModel css = null;
@@ -254,7 +255,7 @@ class WidgetEditPageModel extends BasePageModel
 	 */
 	void onRemoveItemConfirm()
 	{
-		log("Remove item");
+		this.removeWidget(this.selected_path);
 		this.remove_item_dialog.hide();
 	}
 	
@@ -413,7 +414,7 @@ class WidgetEditPageModel extends BasePageModel
 	{
 		this.context_menu.hide();
 		this.selected_path = path.slice();
-		this.selected_item = item;
+		this.selected_item = this.tree.root.get(path);
 		this.getFramePageModel().selectItem(path);
 		this.css.selectItem(item);
 	}
@@ -454,6 +455,49 @@ class WidgetEditPageModel extends BasePageModel
 		{
 			result.setValue(false);
 		}*/
+	}
+	
+	
+	/**
+	 * Create widget
+	 */
+	void createWidget(string widget_name, Collection<int> path, string kind)
+	{
+		Collection<int> parent_path = path.slice(0, -1);
+		WidgetTreeItem parent_item = this.tree.root.get(parent_path);
+		WidgetTreeItem dest_item = this.tree.root.get(path);
+		
+		/* Create op_code */
+		OpHtmlTag op_code = new OpHtmlTag{
+			"attrs": [],
+			"items": new OpHtmlItems,
+			"tag_name": widget_name,
+		};
+		parent_item.op_code.items.addItem(op_code, dest_item ? dest_item.op_code : null, "after");
+		parent_item.items = [];
+		parent_item.addHtmlItems(parent_item.op_code.items);
+		
+		/* Update frame render */
+		this.updateFrameRender();
+	}
+	
+	
+	/**
+	 * Remove widget
+	 */
+	void removeWidget(Collection<int> path)
+	{
+		if (path == null) return;
+		
+		Collection<int> parent_path = path.slice(0, -1);
+		WidgetTreeItem parent_item = this.tree.root.get(parent_path);
+		WidgetTreeItem dest_item = this.tree.root.get(path);
+		
+		parent_item.removeItem(dest_item);
+		parent_item.op_code.items.removeItem(dest_item.op_code);
+		
+		/* Update frame render */
+		this.updateFrameRender();
 	}
 	
 	
