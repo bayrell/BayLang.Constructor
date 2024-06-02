@@ -212,6 +212,14 @@ class WidgetEditPageModel extends BasePageModel
 				}
 			}
 			
+			/* Add render key */
+			OpDeclareFunction op_code_render = this.getRenderOpCode("render");
+			if (op_code_render)
+			{
+				BaseOpCode op_code_expression = op_code_render.getExpression();
+				this.addRenderKey(op_code_expression);
+			}
+			
 			/* Load Tree items */
 			this.loadTreeItems();
 			
@@ -405,6 +413,39 @@ class WidgetEditPageModel extends BasePageModel
 	
 	
 	/**
+	 * Add render key
+	 */
+	void addRenderKey(Collection items)
+	{
+		if (not items) return;
+		if (items instanceof OpHtmlItems) items = items.items;
+		for (int i=0; i<items.count(); i++)
+		{
+			BaseOpCode item = items.get(i);
+			
+			/* Add render key to items */
+			if (rtl::is_instanceof(item, classof OpHtmlTag))
+			{
+				OpHtmlAttribute key_attr = item.attrs.findItem(
+					lib::equalAttr("name", "@key")
+				);
+				if (key_attr == null)
+				{
+					item.attrs.push(new OpHtmlAttribute{
+						"key": "@key",
+						"value": new OpString{
+							"value": "widget_" ~ this.widget_inc,
+						},
+					});
+					this.widget_inc = this.widget_inc + 1;
+				}
+				this.addRenderKey(item.items);
+			}
+		}
+	}
+	
+	
+	/**
 	 * Load Tree items
 	 */
 	void loadTreeItems()
@@ -503,6 +544,12 @@ class WidgetEditPageModel extends BasePageModel
 			"attrs": [
 				new OpHtmlAttribute{
 					"key": "class",
+					"value": new OpString{
+						"value": "widget_" ~ this.widget_inc,
+					},
+				},
+				new OpHtmlAttribute{
+					"key": "@key",
 					"value": new OpString{
 						"value": "widget_" ~ this.widget_inc,
 					},
