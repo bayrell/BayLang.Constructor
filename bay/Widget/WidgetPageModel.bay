@@ -168,6 +168,28 @@ class WidgetPageModel extends BasePageModel
 	
 	
 	/**
+	 * Build global CSS
+	 */
+	void buildGlobalCSS()
+	{
+		var page_model = this.getEditPageModel();
+		if (not page_model) return;
+		
+		/* Get components */
+		Collection<string> components = page_model.getComponents();
+		components = this.layout.getComponents(components);
+		string css = this.layout::getCss(components);
+		
+		/* Update style CSS */
+		var style_element = document
+			.getElementsByTagName("head").item(0)
+			.getElementsByTagName("style").item(0)
+		;
+		style_element.innerText = css;
+	}
+	
+	
+	/**
 	 * Send loaded
 	 */
 	void sendAppLoaded()

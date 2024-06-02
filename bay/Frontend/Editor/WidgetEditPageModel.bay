@@ -29,10 +29,13 @@ use BayLang.LangES6.TranslatorES6;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpDeclareClass;
 use BayLang.OpCodes.OpDeclareFunction;
+use BayLang.OpCodes.OpHtmlAttribute;
 use BayLang.OpCodes.OpHtmlItems;
 use BayLang.OpCodes.OpHtmlStyle;
 use BayLang.OpCodes.OpHtmlTag;
+use BayLang.OpCodes.OpModule;
 use BayLang.OpCodes.OpNamespace;
+use BayLang.OpCodes.OpString;
 use BayLang.SaveOpCode;
 
 
@@ -46,8 +49,9 @@ class WidgetEditPageModel extends BasePageModel
 	string component_content = "";
 	string menu_selected = "css";
 	bool app_loaded = false;
+	int widget_inc = 1;
 	var iframe = null;
-	BaseOpCode component_op_code = null;
+	OpModule component_op_code = null;
 	TreeModel tree = null;
 	
 	/* Selected item */
@@ -290,6 +294,12 @@ class WidgetEditPageModel extends BasePageModel
 	
 	
 	/**
+	 * Returns components
+	 */
+	Collection<string> getComponents() => this.component_op_code.uses.values();
+	
+	
+	/**
 	 * Create parser
 	 */
 	ParserBay createParser()
@@ -373,6 +383,15 @@ class WidgetEditPageModel extends BasePageModel
 	void updateFrameRender(string render_name = "render")
 	{
 		this.getFramePageModel().buildRender("render");
+	}
+	
+	
+	/**
+	 * Update global css
+	 */
+	void updateFrameGlobalCSS()
+	{
+		this.getFramePageModel().buildGlobalCSS();
 	}
 	
 	
@@ -467,15 +486,37 @@ class WidgetEditPageModel extends BasePageModel
 		WidgetTreeItem parent_item = this.tree.root.get(parent_path);
 		WidgetTreeItem dest_item = this.tree.root.get(path);
 		
+		string widget_name_arr = rs::split(".", widget_name);
+		string alias_name = widget_name_arr.last();
+		if (not this.component_op_code.hasModule(alias_name))
+		{
+			this.component_op_code.addModule(widget_name, alias_name);
+			this.updateFrameGlobalCSS();
+		}
+		else if (this.component_op_code.uses.get(alias_name) != widget_name)
+		{
+			alias_name = widget_name;
+		}
+		
 		/* Create op_code */
 		OpHtmlTag op_code = new OpHtmlTag{
-			"attrs": [],
+			"attrs": [
+				new OpHtmlAttribute{
+					"key": "class",
+					"value": new OpString{
+						"value": "widget_" ~ this.widget_inc,
+					},
+				}
+			],
 			"items": new OpHtmlItems,
-			"tag_name": widget_name,
+			"tag_name": alias_name,
 		};
 		parent_item.op_code.items.addItem(op_code, dest_item ? dest_item.op_code : null, "after");
 		parent_item.items = [];
 		parent_item.addHtmlItems(parent_item.op_code.items);
+		
+		/* Widget inc */
+		this.widget_inc = this.widget_inc + 1;
 		
 		/* Update frame render */
 		this.updateFrameRender();

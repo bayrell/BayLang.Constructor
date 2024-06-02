@@ -148,13 +148,15 @@ class WidgetCSSModel extends BaseModel
 	void selectItem(WidgetTreeItem selected_item)
 	{
 		this.selected_item = selected_item;
-		Collection<OpHtmlAttribute> attrs = selected_item.op_code.attrs;
 		
 		/* Clear params */
 		this.param_class_name.op_attr = null;
 		this.param_class_name.value = [];
 		this.param_widget_name.op_attr = null;
 		this.param_widget_name.value = "";
+		
+		if (not this.selected_item) return;
+		Collection<OpHtmlAttribute> attrs = selected_item.op_code.attrs;
 		
 		/* Setup attributes */
 		this.attrs = [];

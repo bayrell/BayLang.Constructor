@@ -155,6 +155,8 @@ void onClick(var e)
 	
 	/* Send select item */
 	string widget_path_str = this.getWidgetPath(elem);
+	if (not rtl::exists(widget_path_str)) return;
+	
 	Collection<int> widget_path = rs::split(".", widget_path_str);
 	Collection<int> path = this.model.convertWidgetToTreePath(widget_path);
 	page_model.tree.selectItem(path);
