@@ -5,6 +5,7 @@
 <class name="BayLang.Constructor.Frontend.Editor.WidgetEditPage">
 
 <use name="BayLang.Constructor.Frontend.CSS" component="true" />
+<use name="BayLang.Constructor.Frontend.Editor.Breadcrumbs" component="true" />
 <use name="BayLang.Constructor.Frontend.Editor.WidgetMenu" component="true" />
 
 
@@ -42,16 +43,18 @@
 }
 .widget_edit_page__frame{
 	display: flex;
-	position: relative;
-	padding: 0px;
+	flex-direction: column;
 	justify-content: stretch;
 	align-items: stretch;
+	position: relative;
+	padding: 0px;
 	flex: 1;
 }
 .widget_edit_page__frame iframe{
 	border-style: none;
 	overflow: visible;
 	width: 100%;
+	flex: 1;
 }
 </style>
 
@@ -91,6 +94,7 @@
 		</div>
 		<div class="widget_edit_page__content">
 			<div class="widget_edit_page__frame">
+				<Breadcrumbs @model={{ this.model }} />
 				<iframe @ref="iframe"></iframe>
 			</div>
 			<WidgetMenu @model={{ this.model }} />
