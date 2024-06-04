@@ -10,14 +10,127 @@
 <style>
 .breadcrumbs{
 	display: flex;
-	min-height: 30px;
+	border-bottom: 1px var(--widget-color-border) solid;
+	min-height: 32px;
 	overflow: auto;
+	padding-left: 5px;
 }
-.breadcrumbs_item{
-	padding: 5px;
+.breadcrumbs__item{
+}
+.breadcrumbs__item_name{
+}
+.breadcrumbs__item_row{
+	display: flex;
+}
+.breadcrumbs__item_name, .breadcrumbs__item_arrow,
+.breadcrumbs__item--next, .breadcrumbs__item_menu_name{
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 31px;
+}
+.breadcrumbs__item_name{
+	cursor: pointer;
+	padding-left: 5px;
+}
+.breadcrumbs__item_name span{
+	flex: 1;
+}
+.breadcrumbs__item_arrow{
+	cursor: pointer;
+	width: 20px;
+}
+.breadcrumbs__item_menu{
+	display: none;
+	position: absolute;
+	background-color: white;
+	border: 1px var(--widget-color-border) solid;
+}
+.breadcrumbs__item_menu--open{
+	display: block;
+}
+.breadcrumbs__item_menu_name{
+	justify-content: flex-start;
+	padding-left: 5px;
+	padding-right: 5px;
+	border-bottom: 1px var(--widget-color-border) solid;
 	cursor: pointer;
 }
+.breadcrumbs__item_menu_name:hover{
+	background-color: var(--widget-color-hover);
+}
+.breadcrumbs__item_menu_name:last-child{
+	border-bottom-width: 0px;
+}
+.breadcrumbs__item--next{
+	width: 20px;
+}
 </style>
+
+
+<template name="renderRow" args="WidgetTreeItem item, int pos, bool is_last">
+	%set Collection<int> selected_path = this.model.selected_path;
+	<div class="breadcrumbs__item_row">
+		<span class="breadcrumbs__item_name"
+			@event:click={{
+				void () use (selected_path, pos, is_last) {
+					if (is_last)
+					{
+						this.model.selectBreadcrumbs(pos);
+					}
+					else
+					{
+						if (selected_path == selected_path.slice(0, pos + 1))
+						{
+							this.model.selectBreadcrumbs(pos);
+						}
+						else
+						{
+							this.model.breadcrumbs_selected = -1;
+							this.model.tree.selectItem(
+								selected_path.slice(0, pos + 1)
+							);
+						}
+					}
+				}
+			}}
+		>{{ not is_last ? item.label : "Select value" }}</span>
+		<div class="breadcrumbs__item_arrow"
+			@event:click={{
+				void () use (pos) {
+					this.model.selectBreadcrumbs(pos);
+				}
+			}}
+		>@raw{{ "&#9661;" }}</div>
+	</div>
+</template>
+
+
+<template name="renderMenu" args="WidgetTreeItem parent_item, int pos">
+	%set Collection<int> selected_path = this.model.selected_path;
+	<div class="breadcrumbs__item_menu"
+		class={{ this.model.breadcrumbs_selected == pos
+			? "breadcrumbs__item_menu--open"
+			: ""
+		}}
+	>
+		%for (int j=0; j<parent_item.items.count(); j++)
+		{
+			%set WidgetTreeItem menu_item = parent_item.items.get([j]);
+			<div class="breadcrumbs__item_menu_name"
+				@event:click={{
+					void () use (selected_path, pos, j) {
+						this.model.tree.selectItem(
+							selected_path.slice(0, pos).pushIm(j)
+						);
+					}
+				}}
+			>
+				{{ menu_item.label }}
+			</div>
+		}
+	</div>
+</template>
 
 
 <template>
@@ -32,37 +145,41 @@
 				{
 					%set WidgetTreeItem parent_item = item;
 					%set item = item.get([selected_path.get(i)]);
-					<div class="breadcrumbs_item breadcrumbs_item--value"
-						@event:click={{
-							void () use (selected_path, i) {
-								this.model.tree.selectItem(
-									selected_path.slice(0, i + 1)
-								);
-							}
-						}}
-					>
-						{{ item.label }}
+					<div class="breadcrumbs__item breadcrumbs__item--value">
+						
+						<!-- Render row -->
+						%render this.renderRow(item, i, false);
+						
+						<!-- Render menu -->
+						%render this.renderMenu(parent_item, i);
+						
 					</div>
 					%if (i != selected_path.count() - 1)
 					{
-						<div class="breadcrumbs_item breadcrumbs_item--next">{{ ">" }}</div>
+						<div class="breadcrumbs__item breadcrumbs__item--next">
+							@raw{{ "->" }}
+						</div>
 					}
 				}
 			}
 			%if (item != null and item.items.count() > 0)
 			{
-				<div class="breadcrumbs_item breadcrumbs_item--next">{{ ">" }}</div>
-				<div class="breadcrumbs_item breadcrumbs_item--last">
-					Select value
+				<div class="breadcrumbs__item breadcrumbs__item--next">
+					@raw{{ "->" }}
+				</div>
+				<div class="breadcrumbs__item breadcrumbs__item--last">
+					
+					<!-- Render row -->
+					%render this.renderRow(item, selected_path.count(), true);
+					
+					<!-- Render menu -->
+					%render this.renderMenu(item, selected_path.count());
+					
 				</div>
 			}
 		}
 	</div>
 </template>
-
-
-<script>
-</script>
 
 
 </class>

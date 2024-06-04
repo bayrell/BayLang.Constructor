@@ -49,6 +49,7 @@ class WidgetEditPageModel extends BasePageModel
 	string component_content = "";
 	string menu_selected = "css";
 	bool app_loaded = false;
+	int breadcrumbs_selected = -1;
 	int widget_inc = 1;
 	var iframe = null;
 	OpModule component_op_code = null;
@@ -472,11 +473,28 @@ class WidgetEditPageModel extends BasePageModel
 	 */
 	void treeSelectItem(Collection<int> path, WidgetTreeItem item)
 	{
+		this.breadcrumbs_selected = -1;
 		this.context_menu.hide();
 		this.selected_path = path.slice();
 		this.selected_item = this.tree.root.get(path);
 		this.getFramePageModel().selectItem(path);
 		this.css.selectItem(item);
+	}
+	
+	
+	/**
+	 * Breadcrumbs
+	 */
+	void selectBreadcrumbs(int pos)
+	{
+		if (this.breadcrumbs_selected != pos)
+		{
+			this.breadcrumbs_selected = pos;
+		}
+		else
+		{
+			this.breadcrumbs_selected = -1;
+		}
 	}
 	
 	

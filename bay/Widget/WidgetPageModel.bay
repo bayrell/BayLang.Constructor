@@ -77,7 +77,10 @@ class WidgetPageModel extends BasePageModel
 	/**
 	 * Convert widget_path to tree_path
 	 */
-	Collection<int> convertWidgetToTreePath(Collection<int> path) => path.slice(1);
+	Collection<int> convertWidgetToTreePath(Collection<int> path) => path
+		.map(int (string s) => rtl::toInt(s))
+		.slice(1)
+	;
 	
 	
 	/**
