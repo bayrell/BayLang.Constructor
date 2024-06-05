@@ -31,6 +31,7 @@ use BayLang.OpCodes.OpDeclareClass;
 use BayLang.OpCodes.OpDeclareFunction;
 use BayLang.OpCodes.OpHtmlAttribute;
 use BayLang.OpCodes.OpHtmlItems;
+use BayLang.OpCodes.OpHtmlSlot;
 use BayLang.OpCodes.OpHtmlStyle;
 use BayLang.OpCodes.OpHtmlTag;
 use BayLang.OpCodes.OpModule;
@@ -64,6 +65,18 @@ class WidgetEditPageModel extends BasePageModel
 	ContextMenuModel context_menu = null;
 	AddItemDialogModel add_item_dialog = null;
 	AddItemDialogModel remove_item_dialog = null;
+	
+	
+	/**
+	 * Returns iframe window
+	 */
+	BaseModel getFrameWindow()
+	{
+		if (not this.app_loaded) return null;
+		if (not this.iframe) return null;
+		if (not this.iframe.contentWindow) return null;
+		return this.iframe.contentWindow;
+	}
 	
 	
 	/**
@@ -557,6 +570,28 @@ class WidgetEditPageModel extends BasePageModel
 			alias_name = widget_name;
 		}
 		
+		OpHtmlItems op_code_items = new OpHtmlItems();
+		
+		/* Get slot info */
+		var content_window = this.getFrameWindow();
+		Callback f = new content_window.Runtime.Callback(widget_name, "getSlotInfo");
+		if (f.exists())
+		{
+			Collection slot_info = f.apply();
+			if (slot_info)
+			{
+				for (int i=0; i<slot_info.count(); i++)
+				{
+					Dict slot_item = slot_info.get(i);
+					OpHtmlSlot slot = new OpHtmlSlot{
+						"name": slot_item.get("name"),
+						"items": new OpHtmlItems,
+					};
+					op_code_items.items.push(slot);
+				}
+			}
+		}
+		
 		/* Create op_code */
 		OpHtmlTag op_code = new OpHtmlTag{
 			"attrs": [
@@ -573,7 +608,7 @@ class WidgetEditPageModel extends BasePageModel
 					},
 				}
 			],
-			"items": new OpHtmlItems,
+			"items": op_code_items,
 			"tag_name": alias_name,
 		};
 		parent_item.op_code.items.addItem(op_code, dest_item ? dest_item.op_code : null, "after");

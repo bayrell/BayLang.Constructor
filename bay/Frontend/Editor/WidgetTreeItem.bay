@@ -6,8 +6,11 @@ namespace BayLang.Constructor.Frontend.Editor;
 
 use Runtime.Widget.Tree.TreeItem;
 use BayLang.OpCodes.BaseOpCode;
+use BayLang.OpCodes.OpHtmlAttribute;
 use BayLang.OpCodes.OpHtmlItems;
+use BayLang.OpCodes.OpHtmlSlot;
 use BayLang.OpCodes.OpHtmlTag;
+use BayLang.OpCodes.OpString;
 use BayLang.Constructor.Frontend.Editor.Helper;
 
 
@@ -38,10 +41,18 @@ class WidgetTreeItem extends TreeItem
 	 */
 	void update()
 	{
-		Collection<string> class_names = Helper::OpHtmlTagGetClassNames(this.op_code);
-		string key = class_names.get(0);
-		this.key = key;
-		this.label = this.op_code.tag_name ~ "." ~ key;
+		if (this.op_code instanceof OpHtmlTag)
+		{
+			Collection<string> names = static::getAttrValues(this.op_code.attrs, "class");
+			string key = names.get(0);
+			this.key = key;
+			this.label = this.op_code.tag_name ~ "." ~ key;
+		}
+		else if (this.op_code instanceof OpHtmlSlot)
+		{
+			this.key = this.op_code.name;
+			this.label = "slot." ~ this.op_code.name;
+		}
 	}
 	
 	
@@ -64,21 +75,38 @@ class WidgetTreeItem extends TreeItem
 	 */
 	void addHtmlItem(BaseOpCode op_code)
 	{
-		if (rtl::is_instanceof(op_code, classof OpHtmlTag))
+		if (
+			op_code instanceof OpHtmlTag or
+			op_code instanceof OpHtmlSlot
+		)
 		{
-			this.addHtmlTag(op_code);
+			WidgetTreeItem new_item = this.newInstance{ "op_code": op_code };
+			this.addItem(new_item);
+			new_item.update();
+			new_item.addHtmlItems(op_code.items);
 		}
 	}
 	
 	
 	/**
-	 * Add HTML Tag
+	 * Returns attr values
 	 */
-	void addHtmlTag(OpHtmlTag op_code)
+	static Collection<string> getAttrValues(
+		Collection<OpHtmlAttribute> attrs,
+		string name
+	)
 	{
-		WidgetTreeItem new_item = this.newInstance{ "op_code": op_code };
-		this.addItem(new_item);
-		new_item.update();
-		new_item.addHtmlItems(op_code.items);
+		attrs = attrs.filter(
+			bool (OpHtmlAttribute op_code_attr) use (name)
+			{
+				if (op_code_attr.key != name) return false;
+				if (not rtl::is_instanceof(op_code_attr.value, classof OpString)) return false;
+				return true;
+			}
+		);
+		attrs = attrs.map(
+			string (OpHtmlAttribute op_code_attr) => op_code_attr.value.value
+		);
+		return attrs;
 	}
 }

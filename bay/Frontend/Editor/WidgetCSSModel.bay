@@ -160,14 +160,17 @@ class WidgetCSSModel extends BaseModel
 		
 		/* Setup attributes */
 		this.attrs = [];
-		for (int i=0; i<attrs.count(); i++)
+		if (attrs)
 		{
-			OpHtmlAttribute op_attr = attrs.get(i);
-			if (op_attr.value instanceof OpString)
+			for (int i=0; i<attrs.count(); i++)
 			{
-				if (op_attr.key == "class")
+				OpHtmlAttribute op_attr = attrs.get(i);
+				if (op_attr.value instanceof OpString)
 				{
-					this.setupClass(op_attr);
+					if (op_attr.key == "class")
+					{
+						this.setupClass(op_attr);
+					}
 				}
 			}
 		}
