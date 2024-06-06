@@ -37,7 +37,7 @@ class AddItemDialogModel extends ConfirmDialogModel
 	{
 		this.parent_widget.createWidget(
 			widget_name,
-			this.parent_widget.selected_path,
+			this.parent_widget.item.selected_path,
 			this.kind
 		)
 		this.hide();

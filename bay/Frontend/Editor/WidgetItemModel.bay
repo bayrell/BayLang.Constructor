@@ -16,6 +16,7 @@ use BayLang.Exceptions.ParserUnknownError;
 use BayLang.LangBay.ParserBay;
 use BayLang.LangES6.TranslatorES6;
 use BayLang.OpCodes.BaseOpCode;
+use BayLang.OpCodes.OpCollection;
 use BayLang.OpCodes.OpHtmlAttribute;
 use BayLang.OpCodes.OpHtmlSlot;
 use BayLang.OpCodes.OpHtmlStyle;
@@ -182,41 +183,42 @@ class WidgetItemModel extends BaseModel
 		this.setupParams();
 		
 		/* Setup attributes */
-		BaseOpCode selected_item_op_code = this.selected_item.op_code;
-		if (
-			selected_item_op_code instanceof OpHtmlTag or
-			selected_item_op_code instanceof OpHtmlSlot
-		)
+		this.setupAttrs();
+		
+		/* Create class attribute */
+		if (this.param_class_name.op_attr == null)
 		{
-			Collection<OpHtmlAttribute> attrs = this.selected_item.op_code.attrs;
-			if (attrs)
-			{
-				for (int i=0; i<attrs.count(); i++)
-				{
-					OpHtmlAttribute op_attr = attrs.get(i);
-					if (op_attr.value instanceof OpString)
-					{
-						if (op_attr.key == "class")
-						{
-							this.setupClass(op_attr);
-						}
-						else
-						{
-							this.setupAttr(op_attr);
-						}
-					}
-				}
-			}
+			OpHtmlAttribute op_attr = new OpHtmlAttribute{
+				"key": "class",
+			};
+			this.param_class_name.op_attr = op_attr;
+			this.param_widget_name.op_attr = op_attr;
 		}
 	}
 	
 	
 	/**
-	 * Setup attr
+	 * Setup attrs
 	 */
-	void setupAttr(OpHtmlAttribute op_attr)
+	void setupAttrs()
 	{
-		/*log(op_attr);*/
+		BaseOpCode selected_item_op_code = this.selected_item.op_code;
+		if (
+			not (selected_item_op_code instanceof OpHtmlTag) and
+			not (selected_item_op_code instanceof OpHtmlSlot)
+		)
+		{
+			return;
+		}
+		
+		Collection<OpHtmlAttribute> attrs = this.selected_item.op_code.attrs;
+		if (not attrs) return;
+		
+		for (int i=0; i<attrs.count(); i++)
+		{
+			OpHtmlAttribute op_attr = attrs.get(i);
+			this.setupAttr(op_attr);
+		}
 	}
 	
 	
@@ -238,6 +240,7 @@ class WidgetItemModel extends BaseModel
 		
 		/* Get params */
 		var content_window = this.parent_widget.getFrameWindow();
+		var widget_class = content_window.Runtime.rtl.find_class(class_name);
 		Callback getFieldsList = new content_window.Runtime.Callback(class_name, "getFieldsList");
 		Callback getFieldInfoByName = new content_window.Runtime.Callback(
 			class_name, "getFieldInfoByName"
@@ -257,22 +260,110 @@ class WidgetItemModel extends BaseModel
 			}
 		)
 		fields = fields.map(
-			Dict (Dict item)
+			Dict (Dict item) use (widget_class)
 			{
 				Collection annotations = item.get("annotations");
 				Param param = annotations.findItem(
 					bool (var annotation) =>
 						rtl::is_instanceof(annotation, classof Param)
 				);
+				
+				string field_name = item.get("name");
+				var value = widget_class.props[field_name].default;
+				
 				return new WidgetItemParam
 				{
-					"name": item.get("name"),
-					"value": param.get("value"),
+					"name": field_name,
+					"value": value,
 					"param": param,
 				};
 			}
 		);
 		this.params = fields.filter(lib::equalNot(null));
+	}
+	
+		
+	/**
+	 * Change attr op_code value
+	 */
+	void changeOpCodeAttrValue(WidgetItemParam item, string value)
+	{
+		/* Change item value */
+		item.value = value;
+		
+		/* Create Attribute */
+		if (item.op_attr == null)
+		{
+			item.op_attr = new OpHtmlAttribute{
+				"key": item.name,
+			};
+			this.selected_item.op_code.attrs.prepend(item.op_attr);
+		}
+		
+		/* Change op_code value */
+		if (rtl::isString(value))
+		{
+			item.op_attr.value = new OpString
+			{
+				"value": value
+			};
+		}
+		else if (rtl::is_instanceof(value, classof Collection))
+		{
+			item.op_attr.value = new OpCollection
+			{
+				"values": value.map(
+					OpString (string s) => new OpString{
+						"value": s,
+					}
+				)
+			};
+		}
+	}
+	
+	
+	/**
+	 * Returns op code value
+	 */
+	var getOpCodeAttrValue(OpHtmlAttribute op_attr)
+	{
+		if (rtl::is_instanceof(op_attr.value, classof OpString))
+		{
+			return op_attr.value.value;
+		}
+		if (rtl::is_instanceof(op_attr.value, classof OpCollection))
+		{
+			return op_attr.value.values.map(
+				string (OpString value) => value.value
+			);
+		}
+	}
+	
+	
+	/**
+	 * Setup attr
+	 */
+	void setupAttr(OpHtmlAttribute op_attr)
+	{
+		if (op_attr.key == "@key") return;
+		if (op_attr.key == "class")
+		{
+			this.setupClass(op_attr);
+			return;
+		}
+		
+		/* Get param value */
+		string name = op_attr.key
+		var value = this.getOpCodeAttrValue(op_attr);
+		
+		/* Setup param value */
+		this.params.each(void (WidgetItemParam item) use (op_attr, name, value){
+			if (item.name == name)
+			{
+				item.op_attr = op_attr;
+				item.value = value;
+			}
+		});
 	}
 	
 	
@@ -309,31 +400,14 @@ class WidgetItemModel extends BaseModel
 	
 	
 	/**
-	 * Update attribute
+	 * Change param
 	 */
-	void updateAttr(WidgetItemParam item)
+	void changeParam(WidgetItemParam item, var value)
 	{
-		if (item.op_attr == null)
-		{
-			OpHtmlAttribute op_attr = new OpHtmlAttribute{
-				"key": "class",
-				"value": new OpString{},
-			};
-			this.param_class_name.op_attr = op_attr;
-			this.param_widget_name.op_attr = op_attr;
-			this.selected_item.op_code.attrs.prepend(op_attr);
-		}
-		if (
-			item.op_attr.key == "class" and
-			item.op_attr.value instanceof OpString and
-			(item.name == "widget_name" or item.name == "class_name")
-		)
-		{
-			item.op_attr.value.value =
-				rs::join(" ", this.param_class_name.value.insertIm(0, this.param_widget_name.value))
-			;
-		}
-		this.parent_widget.selected_item.update();
+		/* Change op code value */
+		this.changeOpCodeAttrValue(item, value);
+		
+		/* Update render */
 		this.parent_widget.updateFrameRender();
 	}
 	
@@ -341,7 +415,7 @@ class WidgetItemModel extends BaseModel
 	/**
 	 * Change attrs
 	 */
-	void changeAttrContent(string value, string name)
+	void changeAttrContent(string name, var value)
 	{
 		WidgetItemParam item = null;
 		if (name == "widget_name") item = this.param_widget_name;
@@ -351,7 +425,12 @@ class WidgetItemModel extends BaseModel
 		if (item)
 		{
 			item.value = value;
-			this.updateAttr(item);
+			Collection value_arr = this.param_class_name.value.insertIm(0,
+				this.param_widget_name.value
+			);
+			this.changeOpCodeAttrValue(item, rs::join(" ", value_arr));
+			this.selected_item.updateLabel();
+			this.parent_widget.updateFrameRender();
 		}
 		
 		/* Setup CSS */

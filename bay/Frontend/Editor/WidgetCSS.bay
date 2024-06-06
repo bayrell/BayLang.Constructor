@@ -39,7 +39,7 @@
 		<div class="widget_css__content">
 			<Input value={{ this.model.param_widget_name.value }}
 				@event:valueChange={{ void (var value) {
-					this.model.changeAttrContent(value, "widget_name");
+					this.model.changeAttrContent("widget_name", value);
 				} }}
 			/>
 		</div>
@@ -53,7 +53,7 @@
 		<div class="widget_css__content">
 			<Tag value={{ this.model.param_class_name.value }}
 				@event:valueChange={{ void (var value) {
-					this.model.changeAttrContent(value, "class_name");
+					this.model.changeAttrContent("class_name", value);
 				} }}
 			/>
 		</div>

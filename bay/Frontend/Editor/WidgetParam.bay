@@ -27,6 +27,7 @@
 		%for (int i=0; i<this.model.params.count(); i++)
 		{
 			%set WidgetItemParam item = this.model.params.get(i);
+			%set Dict item_props = item.param.get("props");
 			%set string class_name = item.param.get("name");
 			<div class="widget_css__row">
 				<div class="widget_css__label">{{ item.param.get("label") }}</div>
@@ -36,7 +37,9 @@
 						<{class_name}
 							value={{ item.value }}
 							@event:valueChange={{ void (var value) use (item) {
+								this.model.changeParam(item, value);
 							} }}
+							...item_props
 						/>
 					}
 				</div>
@@ -51,6 +54,7 @@
 bool isAllowClassName(string class_name)
 {
 	if (class_name == "Runtime.Widget.Input") return true;
+	if (class_name == "Runtime.Widget.Select") return true;
 	if (class_name == "Runtime.Widget.Tag") return true;
 	return false;
 }
