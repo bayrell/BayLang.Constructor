@@ -75,6 +75,15 @@
 			<div class="widget_edit_page__menu_item_gap"></div>
 			<div class="widget_edit_page__menu_item widget_edit_page__menu_item--button"
 				class={{
+					this.model.menu_selected == "params"
+					? "widget_edit_page__menu_item--selected"
+					: ""
+				}}
+				@event:onClick={{
+					void(var e){ this.toggleMenu(e, "params"); }
+				}}>Params</div>
+			<div class="widget_edit_page__menu_item widget_edit_page__menu_item--button"
+				class={{
 					this.model.menu_selected == "css"
 					? "widget_edit_page__menu_item--selected"
 					: ""

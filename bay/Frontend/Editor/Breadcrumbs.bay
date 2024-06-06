@@ -69,7 +69,7 @@
 
 
 <template name="renderRow" args="WidgetTreeItem item, int pos, bool is_last">
-	%set Collection<int> selected_path = this.model.selected_path;
+	%set Collection<int> selected_path = this.model.item.selected_path;
 	<div class="breadcrumbs__item_row">
 		<span class="breadcrumbs__item_name"
 			@event:click={{
@@ -107,7 +107,7 @@
 
 
 <template name="renderMenu" args="WidgetTreeItem parent_item, int pos">
-	%set Collection<int> selected_path = this.model.selected_path;
+	%set Collection<int> selected_path = this.model.item.selected_path;
 	<div class="breadcrumbs__item_menu"
 		class={{ this.model.breadcrumbs_selected == pos
 			? "breadcrumbs__item_menu--open"
@@ -136,7 +136,7 @@
 <template>
 	<div class="breadcrumbs">
 		%set WidgetTreeItem item = this.model.tree.root;
-		%set Collection<int> selected_path = this.model.selected_path;
+		%set Collection<int> selected_path = this.model.item.selected_path;
 		%if (selected_path)
 		{
 			%for (int i=0; i<selected_path.count(); i++)

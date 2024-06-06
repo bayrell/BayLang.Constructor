@@ -161,7 +161,7 @@ class WidgetPageModel extends BasePageModel
 		if (not page_model) return;
 		
 		/* Get css content */
-		this.widget_css = page_model.css.getCSS();
+		this.widget_css = page_model.item.getCSS();
 		
 		/* Update selected box */
 		RenderProvider::nextTick(void(){

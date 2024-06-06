@@ -4,7 +4,10 @@
 
 namespace BayLang.Constructor.Frontend.Editor;
 
+use Runtime.lib;
+use Runtime.Callback;
 use Runtime.Web.BaseModel;
+use Runtime.Web.Annotations.Param;
 use BayLang.Constructor.Frontend.Editor.WidgetCSS;
 use BayLang.Constructor.Frontend.Editor.WidgetEditPageModel;
 use BayLang.Constructor.Frontend.Editor.WidgetItemParam;
@@ -14,20 +17,30 @@ use BayLang.LangBay.ParserBay;
 use BayLang.LangES6.TranslatorES6;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpHtmlAttribute;
+use BayLang.OpCodes.OpHtmlSlot;
 use BayLang.OpCodes.OpHtmlStyle;
+use BayLang.OpCodes.OpHtmlTag;
 use BayLang.OpCodes.OpString;
 
 
-class WidgetCSSModel extends BaseModel
+class WidgetItemModel extends BaseModel
 {
 	string component = classof WidgetCSS;
 	string css_content = "";
-	string widget_name = "css";
+	string widget_name = "item";
 	Collection<Dict> styles = {};
-	WidgetTreeItem selected_item = null;
+	
+	/* Params */
+	Collection<WidgetItemParam> params = [];
 	WidgetItemParam param_class_name = new WidgetItemParam{ "name": "class_name" };
 	WidgetItemParam param_widget_name = new WidgetItemParam{ "name": "widget_name" };
 	
+	/* Selected item */
+	Collection<int> selected_path = null;
+	WidgetTreeItem selected_item = null;
+	string selected_class_name = "";
+	string selected_widget_name = "";
+		
 	
 	/**
 	 * Translate CSS
@@ -145,38 +158,121 @@ class WidgetCSSModel extends BaseModel
 	/**
 	 * Select item
 	 */
-	void selectItem(WidgetTreeItem selected_item)
+	void selectItem(Collection<int> path, WidgetTreeItem item)
 	{
-		this.selected_item = selected_item;
+		this.selected_item = item;
+		this.selected_path = path.slice();
 		
 		/* Clear params */
+		this.attrs = [];
+		this.params = [];
 		this.param_class_name.op_attr = null;
 		this.param_class_name.value = [];
 		this.param_widget_name.op_attr = null;
 		this.param_widget_name.value = "";
+		this.selected_class_name = "";
+		this.selected_widget_name = "";
 		
 		if (not this.selected_item) return;
-		Collection<OpHtmlAttribute> attrs = selected_item.op_code.attrs;
+		
+		/* Setup CSS */
+		this.setupCSS();
+		
+		/* Setup params */
+		this.setupParams();
 		
 		/* Setup attributes */
-		this.attrs = [];
-		if (attrs)
+		BaseOpCode selected_item_op_code = this.selected_item.op_code;
+		if (
+			selected_item_op_code instanceof OpHtmlTag or
+			selected_item_op_code instanceof OpHtmlSlot
+		)
 		{
-			for (int i=0; i<attrs.count(); i++)
+			Collection<OpHtmlAttribute> attrs = this.selected_item.op_code.attrs;
+			if (attrs)
 			{
-				OpHtmlAttribute op_attr = attrs.get(i);
-				if (op_attr.value instanceof OpString)
+				for (int i=0; i<attrs.count(); i++)
 				{
-					if (op_attr.key == "class")
+					OpHtmlAttribute op_attr = attrs.get(i);
+					if (op_attr.value instanceof OpString)
 					{
-						this.setupClass(op_attr);
+						if (op_attr.key == "class")
+						{
+							this.setupClass(op_attr);
+						}
+						else
+						{
+							this.setupAttr(op_attr);
+						}
 					}
 				}
 			}
 		}
+	}
+	
+	
+	/**
+	 * Setup attr
+	 */
+	void setupAttr(OpHtmlAttribute op_attr)
+	{
+		/*log(op_attr);*/
+	}
+	
+	
+	/**
+	 * Setup params
+	 */
+	void setupParams()
+	{
+		BaseOpCode selected_item_op_code = this.selected_item.op_code;
+		if (not (selected_item_op_code instanceof OpHtmlTag)) return;
 		
-		/* Setup CSS */
-		this.setupCSS();
+		/* Setup widget name */
+		this.selected_widget_name = selected_item_op_code.tag_name;
+		
+		/* Setup widget class name */
+		string class_name = this.parent_widget.getWidgetClassName(this.selected_widget_name);
+		if (not class_name) return;
+		this.selected_class_name = class_name;
+		
+		/* Get params */
+		var content_window = this.parent_widget.getFrameWindow();
+		Callback getFieldsList = new content_window.Runtime.Callback(class_name, "getFieldsList");
+		Callback getFieldInfoByName = new content_window.Runtime.Callback(
+			class_name, "getFieldInfoByName"
+		);
+		
+		if (not getFieldsList.exists()) return;
+		if (not getFieldInfoByName.exists()) return;
+		
+		/* Get fields params */
+		Collection<string> fields = getFieldsList.apply();
+		fields = fields.map(
+			Dict (string field_name) use (getFieldInfoByName)
+			{
+				Dict info = getFieldInfoByName.apply([field_name])
+				info.set("name", field_name);
+				return info;
+			}
+		)
+		fields = fields.map(
+			Dict (Dict item)
+			{
+				Collection annotations = item.get("annotations");
+				Param param = annotations.findItem(
+					bool (var annotation) =>
+						rtl::is_instanceof(annotation, classof Param)
+				);
+				return new WidgetItemParam
+				{
+					"name": item.get("name"),
+					"value": param.get("value"),
+					"param": param,
+				};
+			}
+		);
+		this.params = fields.filter(lib::equalNot(null));
 	}
 	
 	

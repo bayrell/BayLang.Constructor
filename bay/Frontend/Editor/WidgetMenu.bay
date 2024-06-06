@@ -5,6 +5,7 @@
 <class name="BayLang.Constructor.Frontend.Editor.WidgetMenu">
 
 <use name="BayLang.Constructor.Frontend.Editor.WidgetCSS" component="true" />
+<use name="BayLang.Constructor.Frontend.Editor.WidgetParam" component="true" />
 
 
 <style>
@@ -60,7 +61,12 @@
 			<div class="widget_menu__item"
 				class={{ this.model.menu_selected != "css" ? "hide" : "" }}
 			>
-				<WidgetCSS @model={{ this.model.css }} />
+				<WidgetCSS @model={{ this.model.item }} />
+			</div>
+			<div class="widget_menu__item"
+				class={{ this.model.menu_selected != "params" ? "hide" : "" }}
+			>
+				<WidgetParam @model={{ this.model.item }} />
 			</div>
 		</div>
 	</div>
@@ -76,6 +82,7 @@ string getTitle()
 {
 	if (this.model.menu_selected == "css") return "CSS";
 	if (this.model.menu_selected == "hierarchy") return "Hierarchy";
+	if (this.model.menu_selected == "params") return "Parameters";
 	return "";
 }
 

@@ -12,11 +12,11 @@
 
 
 <style>
-.widget_css__label{
-	margin-bottom: 5px;
-}
 .widget_css__row{
 	margin-bottom: 10px;
+}
+.widget_css__label{
+	margin-bottom: 5px;
 }
 .widget_css__title{
 	text-align: center;
@@ -27,7 +27,7 @@
 	padding: 7px;
 }
 .widget_css %(TextArea)widget_textarea{
-    font-family: 'PT Mono';
+	font-family: 'PT Mono';
 	line-height: 1.5;
 }
 </style>

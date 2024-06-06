@@ -20,8 +20,8 @@ use Runtime.Widget.Tree.TreeItem;
 use Runtime.Widget.Tree.TreeModel;
 use BayLang.LangBay.ParserBay;
 use BayLang.Constructor.Frontend.Editor.AddItemDialogModel;
-use BayLang.Constructor.Frontend.Editor.WidgetCSSModel;
 use BayLang.Constructor.Frontend.Editor.WidgetEditPage;
+use BayLang.Constructor.Frontend.Editor.WidgetItemModel;
 use BayLang.Constructor.Frontend.Editor.WidgetItemParam;
 use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
 use BayLang.Constructor.WidgetDebug.WidgetPageModel;
@@ -48,20 +48,14 @@ class WidgetEditPageModel extends BasePageModel
 	string model_content = "";
 	string component_class_name = "";
 	string component_content = "";
-	string menu_selected = "css";
+	string menu_selected = "params";
 	bool app_loaded = false;
 	int breadcrumbs_selected = -1;
 	int widget_inc = 1;
 	var iframe = null;
 	OpModule component_op_code = null;
 	TreeModel tree = null;
-	
-	/* Selected item */
-	Collection<int> selected_path = null;
-	WidgetTreeItem selected_item = null;
-	
-	/* Widget css */
-	WidgetCSSModel css = null;
+	WidgetItemModel item = null;
 	ContextMenuModel context_menu = null;
 	AddItemDialogModel add_item_dialog = null;
 	AddItemDialogModel remove_item_dialog = null;
@@ -135,7 +129,7 @@ class WidgetEditPageModel extends BasePageModel
 		this.layout.setLayoutName("default");
 		this.current_widget = this.layout.route.matches.get("widget_name");
 		this.project_id = this.layout.route.matches.get("project_id");
-		this.css = this.addWidget(classof WidgetCSSModel);
+		this.item = this.addWidget(classof WidgetItemModel);
 		
 		/* Create Tree */
 		this.tree = this.addWidget(classof TreeModel);
@@ -212,7 +206,7 @@ class WidgetEditPageModel extends BasePageModel
 			;
 			
 			/* Setup CSS styles */
-			this.css.clearStyles();
+			this.item.clearStyles();
 			OpDeclareClass op_code_class = this.component_op_code.findClass();
 			if (op_code_class)
 			{
@@ -221,7 +215,7 @@ class WidgetEditPageModel extends BasePageModel
 					BaseOpCode item = op_code_class.items.get(i);
 					if (item instanceof OpHtmlStyle)
 					{
-						this.css.addStyle(item);
+						this.item.addStyle(item);
 					}
 				}
 			}
@@ -281,7 +275,7 @@ class WidgetEditPageModel extends BasePageModel
 	 */
 	void onRemoveItemConfirm()
 	{
-		this.removeWidget(this.selected_path);
+		this.removeWidget(this.item.selected_path);
 		this.remove_item_dialog.hide();
 	}
 	
@@ -488,10 +482,8 @@ class WidgetEditPageModel extends BasePageModel
 	{
 		this.breadcrumbs_selected = -1;
 		this.context_menu.hide();
-		this.selected_path = path.slice();
-		this.selected_item = this.tree.root.get(path);
 		this.getFramePageModel().selectItem(path);
-		this.css.selectItem(item);
+		this.item.selectItem(path, item);
 	}
 	
 	
@@ -546,6 +538,29 @@ class WidgetEditPageModel extends BasePageModel
 		{
 			result.setValue(false);
 		}*/
+	}
+	
+	
+	/**
+	 * Is component
+	 */
+	pure bool isComponent(string tag_name)
+	{
+		string ch1 = rs::substr(tag_name, 0, 1);
+		string ch2 = rs::upper(ch1);
+		return ch1 == ch2;
+	}
+	
+	
+	/**
+	 * Returns Widget class name
+	 */
+	string getWidgetClassName(string widget_name)
+	{
+		if (not static::isComponent(widget_name)) return null;
+		if (not this.component_op_code) return null;
+		if (not this.component_op_code.uses.has(widget_name)) return null;
+		return this.component_op_code.uses.get(widget_name);
 	}
 	
 	

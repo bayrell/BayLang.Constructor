@@ -1,0 +1,61 @@
+<!--
+ *  BayLang Constructor
+-->
+
+<class name="BayLang.Constructor.Frontend.Editor.WidgetParam">
+
+<use name="Runtime.Widget.Input" component="true" />
+<use name="BayLang.Constructor.Frontend.Editor.WidgetItemParam" />
+
+
+<style>
+.widget_css__row{
+	margin-bottom: 10px;
+}
+.widget_css__label{
+	margin-bottom: 5px;
+}
+.widget_css__title{
+	text-align: center;
+	margin-bottom: 5px;
+}
+</style>
+
+
+<template>
+	<div class="widget_param">
+		%for (int i=0; i<this.model.params.count(); i++)
+		{
+			%set WidgetItemParam item = this.model.params.get(i);
+			%set string class_name = item.param.get("name");
+			<div class="widget_css__row">
+				<div class="widget_css__label">{{ item.param.get("label") }}</div>
+				<div class="widget_css__content">
+					%if (this.isAllowClassName(class_name))
+					{
+						<{class_name}
+							value={{ item.value }}
+							@event:valueChange={{ void (var value) use (item) {
+							} }}
+						/>
+					}
+				</div>
+			</div>
+		}
+	</div>
+</template>
+
+
+<script>
+
+bool isAllowClassName(string class_name)
+{
+	if (class_name == "Runtime.Widget.Input") return true;
+	if (class_name == "Runtime.Widget.Tag") return true;
+	return false;
+}
+
+</script>
+
+
+</class>

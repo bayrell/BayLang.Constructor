@@ -5,14 +5,17 @@
 namespace BayLang.Constructor.Frontend.Editor;
 
 use Runtime.BaseObject;
+use Runtime.Web.Annotations.Param;
 use BayLang.OpCodes.OpHtmlAttribute;
 
 
 class WidgetItemParam extends BaseObject
 {
+	string label = "";
 	string name = "";
-	string value = "";
+	string value = null;
 	OpHtmlAttribute op_attr = null;
+	Param param = null;
 	
 	
 	/**
