@@ -74,24 +74,7 @@
 		<span class="breadcrumbs__item_name"
 			@event:click={{
 				void () use (selected_path, pos, is_last) {
-					if (is_last)
-					{
-						this.model.selectBreadcrumbs(pos);
-					}
-					else
-					{
-						if (selected_path == selected_path.slice(0, pos + 1))
-						{
-							this.model.selectBreadcrumbs(pos);
-						}
-						else
-						{
-							this.model.breadcrumbs_selected = -1;
-							this.model.tree.selectItem(
-								selected_path.slice(0, pos + 1)
-							);
-						}
-					}
+					this.model.selectBreadcrumbs(pos);
 				}
 			}}
 		>{{ not is_last ? item.label : "Select value" }}</span>
@@ -106,7 +89,7 @@
 </template>
 
 
-<template name="renderMenu" args="WidgetTreeItem parent_item, int pos">
+<template name="renderMenu" args="WidgetTreeItem parent_item, int pos, bool is_last">
 	%set Collection<int> selected_path = this.model.item.selected_path;
 	<div class="breadcrumbs__item_menu"
 		class={{ this.model.breadcrumbs_selected == pos
@@ -127,6 +110,21 @@
 				}}
 			>
 				{{ menu_item.label }}
+			</div>
+		}
+		%if (is_last)
+		{
+			<div class="breadcrumbs__item_menu_name"
+				@event:click={{
+					void () use (selected_path, pos) {
+						this.model.tree.selectItem(
+							selected_path.slice(0, pos)
+						);
+						this.model.add_item_dialog.show();
+					}
+				}}
+			>
+				+ Add Widget
 			</div>
 		}
 	</div>
@@ -151,7 +149,7 @@
 						%render this.renderRow(item, i, false);
 						
 						<!-- Render menu -->
-						%render this.renderMenu(parent_item, i);
+						%render this.renderMenu(parent_item, i, false);
 						
 					</div>
 					%if (i != selected_path.count() - 1)
@@ -162,21 +160,19 @@
 					}
 				}
 			}
-			%if (item != null and item.items.count() > 0)
-			{
-				<div class="breadcrumbs__item breadcrumbs__item--next">
-					@raw{{ "->" }}
-				</div>
-				<div class="breadcrumbs__item breadcrumbs__item--last">
-					
-					<!-- Render row -->
-					%render this.renderRow(item, selected_path.count(), true);
-					
-					<!-- Render menu -->
-					%render this.renderMenu(item, selected_path.count());
-					
-				</div>
-			}
+			
+			<div class="breadcrumbs__item breadcrumbs__item--next">
+				@raw{{ "->" }}
+			</div>
+			<div class="breadcrumbs__item breadcrumbs__item--last">
+				
+				<!-- Render row -->
+				%render this.renderRow(item, selected_path.count(), true);
+				
+				<!-- Render menu -->
+				%render this.renderMenu(item, selected_path.count(), true);
+				
+			</div>
 		}
 	</div>
 </template>

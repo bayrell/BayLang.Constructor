@@ -162,7 +162,7 @@ class WidgetItemModel extends BaseModel
 	void selectItem(Collection<int> path, WidgetTreeItem item)
 	{
 		this.selected_item = item;
-		this.selected_path = path.slice();
+		this.selected_path = path ? path.slice() : null;
 		
 		/* Clear params */
 		this.attrs = [];

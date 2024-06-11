@@ -697,10 +697,14 @@ class WidgetEditPageModel extends BasePageModel
 		
 		Collection<int> parent_path = path.slice(0, -1);
 		WidgetTreeItem parent_item = this.tree.root.get(parent_path);
-		WidgetTreeItem dest_item = this.tree.root.get(path);
+		if (not parent_item) return;
 		
+		WidgetTreeItem dest_item = this.tree.root.get(path);
 		parent_item.removeItem(dest_item);
 		parent_item.op_code.items.removeItem(dest_item.op_code);
+		
+		/* Set selected is null */
+		this.tree.selectItem(null);
 		
 		/* Update frame render */
 		this.updateFrameRender();
