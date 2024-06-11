@@ -7,7 +7,7 @@ namespace BayLang.Constructor.WidgetDebug;
 use Runtime.Web.Hooks.AppHook as BaseAppHook;
 
 
-class ApiHook extends BaseAppHook
+class AppHook extends BaseAppHook
 {
 	/**
 	 * Register hooks
@@ -15,6 +15,7 @@ class ApiHook extends BaseAppHook
 	void register_hooks()
 	{
 		this.register(static::CALL_API_BEFORE);
+		this.register(static::VUE_MODULES);
 	}
 	
 	
@@ -40,5 +41,33 @@ class ApiHook extends BaseAppHook
 		string api_url = "/" ~ api_url_arr.join("/") ~ "/";
         
 		params.set("api_url", api_url);
+	}
+	
+	
+	/**
+	 * Init vue app
+	 */
+	void vue_modules(Map params)
+	{
+		fn registerComponent = null;
+		
+		#ifcode JAVASCRIPT then
+		registerComponent = () => {
+			const mixin =
+			{
+				mounted: function () {
+					this.$el.__component__ = this;
+				}
+			};
+			return {
+				install: () => {
+					vue_app.mixin(mixin);
+				},
+			};
+		};
+		#endif
+		
+		var vue_app = params.get("vue");
+		vue_app.use(registerComponent());
 	}
 }

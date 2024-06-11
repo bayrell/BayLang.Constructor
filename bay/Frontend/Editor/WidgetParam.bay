@@ -5,19 +5,33 @@
 <class name="BayLang.Constructor.Frontend.Editor.WidgetParam">
 
 <use name="Runtime.Widget.Input" component="true" />
+<use name="Runtime.Widget.Select" component="true" />
+<use name="Runtime.Widget.Tag" component="true" />
+<use name="Runtime.Widget.TextArea" component="true" />
 <use name="BayLang.Constructor.Frontend.Editor.WidgetItemParam" />
 
 
 <style>
-.widget_css__row{
+.widget_param__row{
 	margin-bottom: 10px;
 }
-.widget_css__label{
+.widget_param__label{
 	margin-bottom: 5px;
 }
-.widget_css__title{
+.widget_param__title{
 	text-align: center;
 	margin-bottom: 5px;
+}
+.widget_param %(Select)widget_select{
+	padding: 4px;
+}
+.widget_param %(Input)widget_input,
+.widget_param %(TextArea)widget_textarea{
+	padding: 7px;
+}
+.widget_param %(TextArea)widget_textarea{
+	font-family: 'PT Mono';
+	line-height: 1.5;
 }
 </style>
 
@@ -29,9 +43,9 @@
 			%set WidgetItemParam item = this.model.params.get(i);
 			%set Dict item_props = item.param.get("props");
 			%set string class_name = item.param.get("name");
-			<div class="widget_css__row">
-				<div class="widget_css__label">{{ item.param.get("label") }}</div>
-				<div class="widget_css__content">
+			<div class="widget_param__row">
+				<div class="widget_param__label">{{ item.param.get("label") }}</div>
+				<div class="widget_param__content">
 					%if (this.isAllowClassName(class_name))
 					{
 						<{class_name}
@@ -55,6 +69,7 @@ bool isAllowClassName(string class_name)
 {
 	if (class_name == "Runtime.Widget.Input") return true;
 	if (class_name == "Runtime.Widget.Select") return true;
+	if (class_name == "Runtime.Widget.SortableList") return true;
 	if (class_name == "Runtime.Widget.Tag") return true;
 	return false;
 }

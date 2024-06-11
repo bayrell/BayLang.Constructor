@@ -8,6 +8,7 @@ use Runtime.lib;
 use Runtime.Callback;
 use Runtime.Context;
 use Runtime.Reference;
+use Runtime.Serializer;
 use Runtime.Web.ApiResult;
 use Runtime.Web.BaseModel;
 use Runtime.Web.BasePageModel;
@@ -155,12 +156,12 @@ class WidgetEditPageModel extends BasePageModel
 		/* Create ContextMenu */
 		this.context_menu = this.addWidget(classof ContextMenuModel);
 		this.context_menu.addItem({
-			"label": "Params",
-			"key": "params"
-		});
-		this.context_menu.addItem({
 			"label": "Add item",
 			"key": "add"
+		});
+		this.context_menu.addItem({
+			"label": "Duplicate item",
+			"key": "duplicate"
 		});
 		this.context_menu.addItem({
 			"label": "Remove item",
@@ -258,6 +259,12 @@ class WidgetEditPageModel extends BasePageModel
 		if (item_key == "add")
 		{
 			this.add_item_dialog.show();
+		}
+		
+		/* Duplicate item */
+		if (item_key == "duplicate")
+		{
+			this.duplicateWidget();
 		}
 		
 		/* Remove item */
@@ -598,7 +605,8 @@ class WidgetEditPageModel extends BasePageModel
 				for (int i=0; i<slot_info.count(); i++)
 				{
 					Dict slot_item = slot_info.get(i);
-					OpHtmlSlot slot = new OpHtmlSlot{
+					OpHtmlSlot slot = new OpHtmlSlot
+					{
 						"name": slot_item.get("name"),
 						"items": new OpHtmlItems,
 					};
@@ -608,17 +616,23 @@ class WidgetEditPageModel extends BasePageModel
 		}
 		
 		/* Create op_code */
-		OpHtmlTag op_code = new OpHtmlTag{
-			"attrs": [
-				new OpHtmlAttribute{
+		OpHtmlTag op_code = new OpHtmlTag
+		{
+			"attrs":
+			[
+				new OpHtmlAttribute
+				{
 					"key": "class",
-					"value": new OpString{
+					"value": new OpString
+					{
 						"value": "widget_" ~ this.widget_inc,
 					},
 				},
-				new OpHtmlAttribute{
+				new OpHtmlAttribute
+				{
 					"key": "@key",
-					"value": new OpString{
+					"value": new OpString
+					{
 						"value": "widget_" ~ this.widget_inc,
 					},
 				}
@@ -626,12 +640,48 @@ class WidgetEditPageModel extends BasePageModel
 			"items": op_code_items,
 			"tag_name": alias_name,
 		};
-		parent_item.op_code.items.addItem(op_code, dest_item ? dest_item.op_code : null, "after");
-		parent_item.items = [];
-		parent_item.addHtmlItems(parent_item.op_code.items);
+		
+		/* Add items */
+		if (kind == "before" or kind == "after")
+		{
+			parent_item.op_code.items.addItem(op_code, dest_item ? dest_item.op_code : null, kind);
+			parent_item.items = [];
+			parent_item.addHtmlItems(parent_item.op_code.items);
+		}
+		else
+		{
+			if (kind == "first") dest_item.op_code.items.items.insert(0, op_code);
+			else if (kind == "last") dest_item.op_code.items.items.push(op_code);
+			dest_item.items = [];
+			dest_item.addHtmlItems(dest_item.op_code.items);
+		}
 		
 		/* Widget inc */
 		this.widget_inc = this.widget_inc + 1;
+		
+		/* Update frame render */
+		this.updateFrameRender();
+	}
+	
+	
+	/**
+	 * Duplicate selected widget
+	 */
+	void duplicateWidget()
+	{
+		if (not this.item.selected_item) return;
+		
+		Collection<int> parent_path = this.item.selected_path.slice(0, -1);
+		WidgetTreeItem parent_item = this.tree.root.get(parent_path);
+		WidgetTreeItem dest_item = this.item.selected_item;
+		
+		/* Duplicate */
+		OpHtmlTag op_code = Serializer::copy(this.item.selected_item.op_code);
+		
+		/* Add items */
+		parent_item.op_code.items.addItem(op_code, dest_item ? dest_item.op_code : null, "after");
+		parent_item.items = [];
+		parent_item.addHtmlItems(parent_item.op_code.items);
 		
 		/* Update frame render */
 		this.updateFrameRender();

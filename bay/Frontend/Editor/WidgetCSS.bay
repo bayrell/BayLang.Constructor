@@ -6,6 +6,7 @@
 
 <use name="Runtime.Web.RenderProvider" />
 <use name="Runtime.Widget.Input" component="true" />
+<use name="Runtime.Widget.Select" component="true" />
 <use name="Runtime.Widget.Tag" component="true" />
 <use name="Runtime.Widget.TextArea" component="true" />
 <use name="BayLang.Constructor.Frontend.Editor.WidgetItemParam" />
@@ -21,6 +22,9 @@
 .widget_css__title{
 	text-align: center;
 	margin-bottom: 5px;
+}
+.widget_css %(Select)widget_select{
+	padding: 4px;
 }
 .widget_css %(Input)widget_input,
 .widget_css %(TextArea)widget_textarea{
@@ -88,10 +92,23 @@
 
 <script>
 
+var css_change_timer = null;
+
 void onCSSKeyDown(var e)
 {
-	/* if (not e.ctrlKey and e.keyCode == 13) return; */
-	if (e.keyCode != 13) return;
+	if (this.css_change_timer != null)
+	{
+		window.clearTimeout(this.css_change_timer);
+		this.css_change_timer = null;
+	}
+	if (e.keyCode != 13 and e.keyCode != 186)
+	{
+		this.css_change_timer = window.setTimeout(void () use (e)
+		{
+			this.model.changeCSSContent(e.target.value);
+		}, 300);
+		return;
+	}
 	this.model.changeCSSContent(e.target.value);
 }
 

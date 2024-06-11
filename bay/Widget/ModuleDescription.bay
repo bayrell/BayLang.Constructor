@@ -40,7 +40,7 @@ static class ModuleDescription
 	 */
 	pure Collection<Dict> entities() =>
 	[
-		new Hook("BayLang.Constructor.WidgetDebug.ApiHook"),
+		new Hook("BayLang.Constructor.WidgetDebug.AppHook"),
 		
 		#ifdef BACKEND then
 		

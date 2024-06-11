@@ -2,7 +2,7 @@
 	"name": "BayLang.Constructor.WidgetDebug",
 	"assets":
 	[
-		"ApiHook.bay",
+		"AppHook.bay",
 		"WidgetPage.bay",
 		"WidgetPageModel.bay",
 		"ModuleDescription.bay"
