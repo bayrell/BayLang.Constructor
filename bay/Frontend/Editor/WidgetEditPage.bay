@@ -6,6 +6,7 @@
 
 <use name="BayLang.Constructor.Frontend.CSS" component="true" />
 <use name="BayLang.Constructor.Frontend.Editor.Breadcrumbs" component="true" />
+<use name="BayLang.Constructor.Frontend.Editor.WidgetEditPageModel" />
 <use name="BayLang.Constructor.Frontend.Editor.WidgetMenu" component="true" />
 
 
@@ -67,10 +68,14 @@
 					"baylang:project:widgets",
 					{ "project_id": this.model.project_id }
 				) }}>Back</a>
-			<div class="widget_edit_page__menu_item">Save</div>
+			<div class="widget_edit_page__menu_item"
+				@event:onClick={{
+					void(var e){ this.model.saveWidget(); }
+				}}
+			>Save</div>
 			<div class="widget_edit_page__menu_item">Export</div>
 			<div class="widget_edit_page__menu_item">
-				{{ not this.model.app_loaded ? "Loading..." : "Loaded" }}
+				{{ this.getAppStatusMessage() }}
 			</div>
 			<div class="widget_edit_page__menu_item_gap"></div>
 			<div class="widget_edit_page__menu_item widget_edit_page__menu_item--button"
@@ -118,6 +123,21 @@
 <script>
 
 /**
+ * Returns app status message
+ */
+string getAppStatusMessage()
+{
+	if (this.model.app_status == WidgetEditPageModel::STATUS_LOADING) return "Loading...";
+	if (this.model.app_status == WidgetEditPageModel::STATUS_LOADED) return "Loaded";
+	if (this.model.app_status == WidgetEditPageModel::STATUS_CHANGED) return "";
+	if (this.model.app_status == WidgetEditPageModel::STATUS_SAVE_PROCESS) return "Saving...";
+	if (this.model.app_status == WidgetEditPageModel::STATUS_SAVE_SUCCESS) return "Saved";
+	if (this.model.app_status == WidgetEditPageModel::STATUS_SAVE_ERROR) return "Save error";
+	return "";
+}
+
+
+/**
  * Toggle property
  */
 void toggleMenu(var e, string name)
@@ -152,8 +172,8 @@ void onMounted()
 	/* Setup iframe */
 	this.model.iframe = iframe;
 	
-	/* Load widget op_code */
-	this.model.loadWidgetOpCode();
+	/* Load widget */
+	this.model.loadWidget();
 }
 
 </script>

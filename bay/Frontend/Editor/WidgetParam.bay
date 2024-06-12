@@ -87,6 +87,7 @@
 			<TextArea
 				name="content"
 				value={{ this.model.html_content }}
+				@event:keydown={{ this.onHtmlContentKeyDown }}
 				@event:valueChange={{ void (var value) {
 					this.model.changeHtmlContent(value)
 				} }}
@@ -115,6 +116,12 @@
 
 <script>
 
+var html_content_change_timer = null;
+
+
+/**
+ * Returns true if class name is allowed
+ */
 bool isAllowClassName(string class_name)
 {
 	if (class_name == "Runtime.Widget.Input") return true;
@@ -123,6 +130,24 @@ bool isAllowClassName(string class_name)
 	if (class_name == "Runtime.Widget.Tag") return true;
 	return false;
 }
+
+
+/**
+ * HTML content key down
+ */
+void onHtmlContentKeyDown(var e)
+{
+	if (this.html_content_change_timer != null)
+	{
+		window.clearTimeout(this.html_content_change_timer);
+		this.html_content_change_timer = null;
+	}
+	this.html_content_change_timer = window.setTimeout(void () use (e)
+	{
+		this.model.changeHtmlContent(e.target.value);
+	}, 300);
+}
+
 
 </script>
 

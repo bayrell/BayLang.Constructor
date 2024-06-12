@@ -181,6 +181,7 @@ class WidgetPageModel extends BasePageModel
 		/* Get components */
 		Collection<string> components = page_model.getComponents();
 		components = this.layout.getComponents(components);
+		components.removeValue(this.widget_model.component);
 		string css = this.layout::getCss(components);
 		
 		/* Update style CSS */
@@ -201,7 +202,7 @@ class WidgetPageModel extends BasePageModel
 		if (not page_model) return;
 		
 		/* Send app loaded */
-		page_model.appLoaded();
+		page_model.onAppLoaded();
 	}
 	
 	

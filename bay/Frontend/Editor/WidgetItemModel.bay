@@ -133,9 +133,9 @@ class WidgetItemModel extends BaseModel
 	
 	
 	/**
-	 * Add style
+	 * Add HTML style
 	 */
-	void addStyle(OpHtmlStyle item)
+	void addHtmlStyle(OpHtmlStyle item)
 	{
 		ParserBay parser = this.parent_widget.createParser();
 		TranslatorES6 translator = this.parent_widget.createTranslator();
@@ -150,6 +150,36 @@ class WidgetItemModel extends BaseModel
 			string source = styles.get(selector_name);
 			Map result = this.setCSSValue(parser, translator, selector_name, source);
 			result.set("style", item);
+		}
+	}
+	
+	
+	/**
+	 * Update HTML Style
+	 */
+	void updateHtmlStyle(OpHtmlStyle item)
+	{
+		/* Build style source */
+		Vector source = [];
+		Collection selectors = this.styles.keys().sort();
+		for (int i=0; i<selectors.count(); i++)
+		{
+			string selector_name = selectors.get(i);
+			Dict result = this.styles.get(selector_name);
+			if (result.get("style") != item) continue;
+			source.push(selector_name ~ "{");
+			Collection lines = rs::split("\n", result.get("source"));
+			lines = lines.map(string (string s) => "\t" ~ s);
+			source.appendItems(lines);
+			source.push("}");
+		}
+		
+		/* Set content to html style op_code */
+		string content = rs::join("\n", source);
+		item.content = content;
+		if (item.value instanceof OpString)
+		{
+			item.value.value = content;
 		}
 	}
 	
@@ -188,14 +218,14 @@ class WidgetItemModel extends BaseModel
 		
 		if (not this.selected_item) return;
 		
-		/* Setup CSS */
-		this.setupCSS();
-		
 		/* Setup params */
 		this.setupParams();
 		
 		/* Setup attributes */
 		this.setupAttrs();
+		
+		/* Setup CSS */
+		this.setupCSS();
 		
 		/* Create class attribute */
 		if (this.param_class_name.op_attr == null)
@@ -230,6 +260,65 @@ class WidgetItemModel extends BaseModel
 		{
 			OpHtmlAttribute op_attr = attrs.get(i);
 			this.setupAttr(op_attr);
+		}
+	}
+	
+	
+	/**
+	 * Setup attr
+	 */
+	void setupAttr(OpHtmlAttribute op_attr)
+	{
+		if (op_attr.key == "@key") return;
+		if (op_attr.key == "class")
+		{
+			this.setupClass(op_attr);
+			return;
+		}
+		
+		/* Get param value */
+		string name = op_attr.key
+		var value = this.getOpCodeAttrValue(op_attr);
+		
+		/* Setup param value */
+		this.params.each(void (WidgetItemParam item) use (op_attr, name, value){
+			if (item.name == name)
+			{
+				item.op_attr = op_attr;
+				item.value = value;
+			}
+		});
+	}
+	
+	
+	/**
+	 * Setup class
+	 */
+	void setupClass(OpHtmlAttribute op_attr)
+	{
+		string param_class_name = op_attr.value.value;
+		Collection<string> names = rs::split(" ", param_class_name);
+		names = names.filter(bool (string s) => s != "");
+		this.param_class_name.op_attr = op_attr;
+		this.param_class_name.value = names.slice(1);
+		this.param_widget_name.op_attr = op_attr;
+		this.param_widget_name.value = names.get(0);
+	}
+	
+	
+	/**
+	 * Setup CSS
+	 */
+	void setupCSS()
+	{
+		this.css_content = "";
+		string selector_name = "." ~ this.param_widget_name.value;
+		
+		/* Find CSS content by selector name */
+		if (this.styles.has(selector_name))
+		{
+			Dict item = this.styles.get(selector_name);
+			this.css_content = item.get("source");
 		}
 	}
 	
@@ -390,71 +479,15 @@ class WidgetItemModel extends BaseModel
 	
 	
 	/**
-	 * Setup attr
-	 */
-	void setupAttr(OpHtmlAttribute op_attr)
-	{
-		if (op_attr.key == "@key") return;
-		if (op_attr.key == "class")
-		{
-			this.setupClass(op_attr);
-			return;
-		}
-		
-		/* Get param value */
-		string name = op_attr.key
-		var value = this.getOpCodeAttrValue(op_attr);
-		
-		/* Setup param value */
-		this.params.each(void (WidgetItemParam item) use (op_attr, name, value){
-			if (item.name == name)
-			{
-				item.op_attr = op_attr;
-				item.value = value;
-			}
-		});
-	}
-	
-	
-	/**
-	 * Setup class
-	 */
-	void setupClass(OpHtmlAttribute op_attr)
-	{
-		string param_class_name = op_attr.value.value;
-		Collection<string> names = rs::split(" ", param_class_name);
-		names = names.filter(bool (string s) => s != "");
-		this.param_class_name.op_attr = op_attr;
-		this.param_class_name.value = names.slice(1);
-		this.param_widget_name.op_attr = op_attr;
-		this.param_widget_name.value = names.get(0);
-	}
-	
-	
-	/**
-	 * Setup CSS
-	 */
-	void setupCSS()
-	{
-		this.css_content = "";
-		string selector_name = "." ~ this.param_widget_name.value;
-		
-		/* Find CSS content by selector name */
-		if (this.styles.has(selector_name))
-		{
-			Dict item = this.styles.get(selector_name);
-			this.css_content = item.get("source");
-		}
-	}
-	
-	
-	/**
 	 * Change param
 	 */
 	void changeParam(WidgetItemParam item, var value)
 	{
 		/* Change op code value */
 		this.changeOpCodeAttrValue(item, value);
+		
+		/* Set app is changed */
+		this.parent_widget.onAppChanged();
 		
 		/* Update render */
 		this.parent_widget.updateFrameRender();
@@ -486,6 +519,9 @@ class WidgetItemModel extends BaseModel
 				text_item.value.value = value;
 			}
 		}
+		
+		/* Set app is changed */
+		this.parent_widget.onAppChanged();
 		
 		/* Update render */
 		this.parent_widget.updateFrameRender();
@@ -532,6 +568,9 @@ class WidgetItemModel extends BaseModel
 			);
 		}
 		
+		/* Set app is changed */
+		this.parent_widget.onAppChanged();
+		
 		/* Update render */
 		this.parent_widget.updateFrameRender();
 	}
@@ -563,6 +602,9 @@ class WidgetItemModel extends BaseModel
 		{
 			this.setupCSS();
 		}
+		
+		/* Set app is changed */
+		this.parent_widget.onAppChanged();
 	}
 	
 	
@@ -580,6 +622,9 @@ class WidgetItemModel extends BaseModel
 		ParserBay parser = this.parent_widget.createParser();
 		TranslatorES6 translator = this.parent_widget.createTranslator();
 		this.setCSSValue(parser, translator, selector_name, this.css_content);
+		
+		/* Set app is changed */
+		this.parent_widget.onAppChanged();
 		
 		/* Update CSS */
 		this.parent_widget.updateFrameCSS();

@@ -26,6 +26,7 @@ use BayLang.Constructor.Frontend.Editor.WidgetItemModel;
 use BayLang.Constructor.Frontend.Editor.WidgetItemParam;
 use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
 use BayLang.Constructor.WidgetDebug.WidgetPageModel;
+use BayLang.LangBay.TranslatorBay;
 use BayLang.LangES6.TranslatorES6;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpDeclareClass;
@@ -43,6 +44,14 @@ use BayLang.SaveOpCode;
 
 class WidgetEditPageModel extends BasePageModel
 {
+	static const string STATUS_LOADING = 0;
+	static const string STATUS_LOADED = 1;
+	static const string STATUS_CHANGED = 2;
+	static const string STATUS_SAVE_PROCESS = 3;
+	static const string STATUS_SAVE_SUCCESS = 4;
+	static const string STATUS_SAVE_ERROR = 5;
+	
+	/* Variables */
 	string component = classof WidgetEditPage;
 	string project_id = "";
 	string current_widget = "";
@@ -50,7 +59,7 @@ class WidgetEditPageModel extends BasePageModel
 	string component_class_name = "";
 	string component_content = "";
 	string menu_selected = "params";
-	bool app_loaded = false;
+	int app_status = static::STATUS_LOADING;
 	int breadcrumbs_selected = -1;
 	int widget_inc = 1;
 	var iframe = null;
@@ -67,7 +76,7 @@ class WidgetEditPageModel extends BasePageModel
 	 */
 	BaseModel getFrameWindow()
 	{
-		if (not this.app_loaded) return null;
+		if (not this.isLoaded()) return null;
 		if (not this.iframe) return null;
 		if (not this.iframe.contentWindow) return null;
 		return this.iframe.contentWindow;
@@ -79,7 +88,7 @@ class WidgetEditPageModel extends BasePageModel
 	 */
 	BaseModel getFrameLayout()
 	{
-		if (not this.app_loaded) return null;
+		if (not this.isLoaded()) return null;
 		if (not this.iframe) return null;
 		if (not this.iframe.contentWindow) return null;
 		if (not this.iframe.contentWindow.app_layout) return null;
@@ -112,7 +121,7 @@ class WidgetEditPageModel extends BasePageModel
 	 */
 	Collection<Widget> getFrameWidgets()
 	{
-		if (not this.app_loaded) return null;
+		if (not this.isLoaded()) return null;
 		if (not this.iframe) return null;
 		if (not this.iframe.contentWindow) return null;
 		Context context = this.iframe.contentWindow.Runtime.rtl.getContext();
@@ -172,9 +181,9 @@ class WidgetEditPageModel extends BasePageModel
 	
 	
 	/**
-	 * Load widget op_code
+	 * Load widget
 	 */
-	async void loadWidgetOpCode()
+	async void loadWidget()
 	{
 		ApiResult res = await this.layout.callApi({
 			"api_name": "admin.constructor.widget",
@@ -216,7 +225,7 @@ class WidgetEditPageModel extends BasePageModel
 					BaseOpCode item = op_code_class.items.get(i);
 					if (item instanceof OpHtmlStyle)
 					{
-						this.item.addStyle(item);
+						this.item.addHtmlStyle(item);
 					}
 				}
 			}
@@ -239,12 +248,76 @@ class WidgetEditPageModel extends BasePageModel
 	
 	
 	/**
+	 * Save widget
+	 */
+	async void saveWidget()
+	{
+		OpDeclareClass op_code_class = this.component_op_code.findClass();
+		if (not op_code_class) return;
+		
+		/* Update widget html styles op_code */
+		for (int i=0; i<op_code_class.items.count(); i++)
+		{
+			BaseOpCode item = op_code_class.items.get(i);
+			if (item instanceof OpHtmlStyle)
+			{
+				this.item.updateHtmlStyle(item);
+			}
+		}
+		
+		/* Translate widget */
+		TranslatorBay translator = new TranslatorBay();
+		list res = translator::translate(translator, this.component_op_code);
+		string content = res.get(1);
+		
+		/* Save content */
+		this.app_status = static::STATUS_SAVE_PROCESS;
+		ApiResult res = await this.layout.callApi({
+			"api_name": "admin.constructor.widget",
+			"method_name": "save",
+			"data": {
+				"project_id": this.project_id,
+				"current_widget": this.current_widget,
+				"content": content,
+			}
+		});
+		
+		/* Set result */
+		if (res.isSuccess())
+		{
+			this.app_status = static::STATUS_SAVE_SUCCESS;
+		}
+		
+		/* Set error */
+		else
+		{
+			this.app_status = static::STATUS_SAVE_ERROR;
+		}
+	}
+	
+	
+	/**
 	 * Iframe loaded
 	 */
-	void appLoaded()
+	void onAppLoaded()
 	{
-		this.app_loaded = true;
+		this.app_status = static::STATUS_LOADED;
 	}
+	
+	
+	/**
+	 * App is changed
+	 */
+	void onAppChanged()
+	{
+		this.app_status = static::STATUS_CHANGED;
+	}
+	
+	
+	/**
+	 * Returns true if app is loaded
+	 */
+	bool isLoaded() => this.app_status > 0;
 	
 	
 	/**
@@ -659,6 +732,9 @@ class WidgetEditPageModel extends BasePageModel
 		/* Widget inc */
 		this.widget_inc = this.widget_inc + 1;
 		
+		/* Set app is changed */
+		this.onAppChanged();
+		
 		/* Update frame render */
 		this.updateFrameRender();
 	}
@@ -683,6 +759,9 @@ class WidgetEditPageModel extends BasePageModel
 		parent_item.items = [];
 		parent_item.addHtmlItems(parent_item.op_code.items);
 		
+		/* Set app is changed */
+		this.onAppChanged();
+		
 		/* Update frame render */
 		this.updateFrameRender();
 	}
@@ -705,6 +784,9 @@ class WidgetEditPageModel extends BasePageModel
 		
 		/* Set selected is null */
 		this.tree.selectItem(null);
+		
+		/* Set app is changed */
+		this.onAppChanged();
 		
 		/* Update frame render */
 		this.updateFrameRender();
@@ -732,6 +814,9 @@ class WidgetEditPageModel extends BasePageModel
 		{
 			dest_parent_item.op_code.items.addItem(src_item.op_code, dest_item.op_code, kind);
 		}
+		
+		/* Set app is changed */
+		this.onAppChanged();
 		
 		/* Update frame render */
 		this.updateFrameRender();
