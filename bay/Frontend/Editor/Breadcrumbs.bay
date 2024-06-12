@@ -74,17 +74,30 @@
 		<span class="breadcrumbs__item_name"
 			@event:click={{
 				void () use (selected_path, pos, is_last) {
-					this.model.selectBreadcrumbs(pos);
+					if (is_last)
+					{
+						this.model.selectBreadcrumbs(pos);
+					}
+					else
+					{
+						this.model.breadcrumbs_selected = -1;
+						this.model.tree.selectItem(
+							selected_path.slice(0, pos + 1)
+						);
+					}
 				}
 			}}
 		>{{ not is_last ? item.label : "Select value" }}</span>
-		<div class="breadcrumbs__item_arrow"
-			@event:click={{
-				void () use (pos) {
-					this.model.selectBreadcrumbs(pos);
-				}
-			}}
-		>@raw{{ "&#9661;" }}</div>
+		%if (is_last)
+		{
+			<div class="breadcrumbs__item_arrow"
+				@event:click={{
+					void () use (pos) {
+						this.model.selectBreadcrumbs(pos);
+					}
+				}}
+			>@raw{{ "&#9661;" }}</div>
+		}
 	</div>
 </template>
 
@@ -147,9 +160,6 @@
 						
 						<!-- Render row -->
 						%render this.renderRow(item, i, false);
-						
-						<!-- Render menu -->
-						%render this.renderMenu(parent_item, i, false);
 						
 					</div>
 					%if (i != selected_path.count() - 1)

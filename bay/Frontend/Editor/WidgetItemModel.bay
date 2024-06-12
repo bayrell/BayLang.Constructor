@@ -18,9 +18,11 @@ use BayLang.LangES6.TranslatorES6;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpCollection;
 use BayLang.OpCodes.OpHtmlAttribute;
+use BayLang.OpCodes.OpHtmlContent;
 use BayLang.OpCodes.OpHtmlSlot;
 use BayLang.OpCodes.OpHtmlStyle;
 use BayLang.OpCodes.OpHtmlTag;
+use BayLang.OpCodes.OpHtmlValue;
 use BayLang.OpCodes.OpString;
 
 
@@ -41,7 +43,12 @@ class WidgetItemModel extends BaseModel
 	WidgetTreeItem selected_item = null;
 	string selected_class_name = "";
 	string selected_widget_name = "";
-		
+	
+	/* HTML Element */
+	bool is_component = false;
+	bool is_raw = false;
+	string html_content = "";
+	
 	
 	/**
 	 * Translate CSS
@@ -174,6 +181,11 @@ class WidgetItemModel extends BaseModel
 		this.selected_class_name = "";
 		this.selected_widget_name = "";
 		
+		/* Clear HTML params */
+		this.is_component = false;
+		this.is_raw = false;
+		this.html_content = "";
+		
 		if (not this.selected_item) return;
 		
 		/* Setup CSS */
@@ -223,6 +235,35 @@ class WidgetItemModel extends BaseModel
 	
 	
 	/**
+	 * Setup HTML Params
+	 */
+	bool setupHtmlParams()
+	{
+		this.is_component = false;
+		this.is_raw = false;
+		this.html_content = "";
+		
+		/* Get op_code */
+		OpHtmlTag selected_item_op_code = this.selected_item.op_code;
+		BaseOpCode text_item = selected_item_op_code.items.items.get(0);
+		
+		/* Setup text */
+		if (text_item instanceof OpHtmlContent)
+		{
+			this.html_content = text_item.value;
+		}
+		else if (text_item instanceof OpHtmlValue)
+		{
+			this.is_raw = text_item.kind == "raw";
+			if (text_item.value instanceof OpString)
+			{
+				this.html_content = text_item.value.value;
+			}
+		}
+	}
+	
+	
+	/**
 	 * Setup params
 	 */
 	void setupParams()
@@ -232,6 +273,14 @@ class WidgetItemModel extends BaseModel
 		
 		/* Setup widget name */
 		this.selected_widget_name = selected_item_op_code.tag_name;
+		if (not WidgetEditPageModel::isComponent(this.selected_widget_name))
+		{
+			this.setupHtmlParams();
+			return;
+		}
+		
+		/* Set component */
+		this.is_component = true;
 		
 		/* Setup widget class name */
 		string class_name = this.parent_widget.getWidgetClassName(this.selected_widget_name);
@@ -406,6 +455,82 @@ class WidgetItemModel extends BaseModel
 	{
 		/* Change op code value */
 		this.changeOpCodeAttrValue(item, value);
+		
+		/* Update render */
+		this.parent_widget.updateFrameRender();
+	}
+	
+	
+	
+	/**
+	 * Change HTML Content
+	 */
+	void changeHtmlContent(string value)
+	{
+		/* Get op_code */
+		OpHtmlTag selected_item_op_code = this.selected_item.op_code;
+		BaseOpCode text_item = selected_item_op_code.items.items.get(0);
+		
+		/* Set value */
+		this.html_content = value;
+		
+		/* Setup text */
+		if (text_item instanceof OpHtmlContent)
+		{
+			text_item.value = value;
+		}
+		else if (text_item instanceof OpHtmlValue)
+		{
+			if (text_item.value instanceof OpString)
+			{
+				text_item.value.value = value;
+			}
+		}
+		
+		/* Update render */
+		this.parent_widget.updateFrameRender();
+	}
+	
+	
+	/**
+	 * Change HTML Raw Flag
+	 */
+	void changeHtmlRaw(string is_raw)
+	{
+		/* Get op_code */
+		OpHtmlTag selected_item_op_code = this.selected_item.op_code;
+		
+		/* Set value */
+		this.is_raw = is_raw == "1";
+		selected_item_op_code.items.items = [];
+		
+		/* Set Raw HTML */
+		if (this.is_raw)
+		{
+			selected_item_op_code.items.items.push
+			(
+				new OpHtmlValue
+				{
+					"kind": "raw",
+					"value": new OpString
+					{
+						"value": this.html_content,
+					}
+				}
+			);
+		}
+		
+		/* Set HTML Content */
+		else
+		{
+			selected_item_op_code.items.items.push
+			(
+				new OpHtmlContent
+				{
+					"value": this.html_content,
+				}
+			);
+		}
 		
 		/* Update render */
 		this.parent_widget.updateFrameRender();

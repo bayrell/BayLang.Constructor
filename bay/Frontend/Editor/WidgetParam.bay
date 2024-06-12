@@ -36,28 +36,78 @@
 </style>
 
 
+<template name="renderComponentParams">
+	%for (int i=0; i<this.model.params.count(); i++)
+	{
+		%set WidgetItemParam item = this.model.params.get(i);
+		%set Dict item_props = item.param.get("props");
+		%set string class_name = item.param.get("name");
+		<div class="widget_param__row">
+			<div class="widget_param__label">{{ item.param.get("label") }}</div>
+			<div class="widget_param__content">
+				%if (this.isAllowClassName(class_name))
+				{
+					<{class_name}
+						value={{ item.value }}
+						@event:valueChange={{ void (var value) use (item) {
+							this.model.changeParam(item, value);
+						} }}
+						...item_props
+					/>
+				}
+			</div>
+		</div>
+	}
+</template>
+
+
+<template name="renderHtmlParams">
+	<!--
+	<div class="widget_param__row">
+		<div class="widget_param__label">Is Raw HTML</div>
+		<div class="widget_param__content">
+			<Select
+				name="is_raw_html"
+				value={{ this.model.is_raw }}
+				show_select_value={{ false }}
+				options=[
+					{ "value": "0", "label": "No" },
+					{ "value": "1", "label": "Yes" },
+				]
+				@event:valueChange={{ void (var value) {
+					this.model.changeHtmlRaw(value)
+				} }}
+			/>
+		</div>
+	</div>
+	-->
+	<div class="widget_param__row">
+		<div class="widget_param__label">Content</div>
+		<div class="widget_param__content">
+			<TextArea
+				name="content"
+				value={{ this.model.html_content }}
+				@event:valueChange={{ void (var value) {
+					this.model.changeHtmlContent(value)
+				} }}
+			/>
+		</div>
+	</div>
+</template>
+
+
 <template>
 	<div class="widget_param">
-		%for (int i=0; i<this.model.params.count(); i++)
+		%if (this.model.selected_item)
 		{
-			%set WidgetItemParam item = this.model.params.get(i);
-			%set Dict item_props = item.param.get("props");
-			%set string class_name = item.param.get("name");
-			<div class="widget_param__row">
-				<div class="widget_param__label">{{ item.param.get("label") }}</div>
-				<div class="widget_param__content">
-					%if (this.isAllowClassName(class_name))
-					{
-						<{class_name}
-							value={{ item.value }}
-							@event:valueChange={{ void (var value) use (item) {
-								this.model.changeParam(item, value);
-							} }}
-							...item_props
-						/>
-					}
-				</div>
-			</div>
+			%if (this.model.is_component)
+			{
+				%render this.renderComponentParams();
+			}
+			%else
+			{
+				%render this.renderHtmlParams();
+			}
 		}
 	</div>
 </template>
