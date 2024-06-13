@@ -73,7 +73,8 @@
 	<div class="breadcrumbs__item_row">
 		<span class="breadcrumbs__item_name"
 			@event:click={{
-				void () use (selected_path, pos, is_last) {
+				void () use (selected_path, pos, is_last)
+				{
 					if (is_last)
 					{
 						this.model.selectBreadcrumbs(pos);
@@ -102,6 +103,24 @@
 </template>
 
 
+<template name="renderRowAddWidget" args="WidgetTreeItem item, int pos">
+	%set Collection<int> selected_path = this.model.item.selected_path;
+	<div class="breadcrumbs__item_row">
+		<span class="breadcrumbs__item_name"
+			@event:click={{
+				void () use (selected_path, pos)
+				{
+					this.model.tree.selectItem(
+						selected_path.slice(0, pos)
+					);
+					this.model.add_item_dialog.show();
+				}
+			}}
+		>+ Add Widget</span>
+	</div>
+</template>
+
+
 <template name="renderMenu" args="WidgetTreeItem parent_item, int pos, bool is_last">
 	%set Collection<int> selected_path = this.model.item.selected_path;
 	<div class="breadcrumbs__item_menu"
@@ -115,7 +134,8 @@
 			%set WidgetTreeItem menu_item = parent_item.items.get([j]);
 			<div class="breadcrumbs__item_menu_name"
 				@event:click={{
-					void () use (selected_path, pos, j) {
+					void () use (selected_path, pos, j)
+					{
 						this.model.tree.selectItem(
 							selected_path.slice(0, pos).pushIm(j)
 						);
@@ -177,10 +197,7 @@
 			<div class="breadcrumbs__item breadcrumbs__item--last">
 				
 				<!-- Render row -->
-				%render this.renderRow(item, selected_path.count(), true);
-				
-				<!-- Render menu -->
-				%render this.renderMenu(item, selected_path.count(), true);
+				%render this.renderRowAddWidget(item, selected_path.count(), true);
 				
 			</div>
 		}

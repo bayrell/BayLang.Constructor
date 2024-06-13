@@ -252,6 +252,9 @@ class WidgetEditPageModel extends BasePageModel
 	 */
 	async void saveWidget()
 	{
+		/*if (not this.isLoaded()) return;*/
+		if (not this.component_op_code) return;
+		
 		OpDeclareClass op_code_class = this.component_op_code.findClass();
 		if (not op_code_class) return;
 		
@@ -515,12 +518,15 @@ class WidgetEditPageModel extends BasePageModel
 			if (rtl::is_instanceof(item, classof OpHtmlTag))
 			{
 				OpHtmlAttribute key_attr = item.attrs.findItem(
-					lib::equalAttr("name", "@key")
+					lib::equalAttr("key", "@key")
 				);
-				if (key_attr == null)
+				OpHtmlAttribute key_debug_attr = item.attrs.findItem(
+					lib::equalAttr("key", "@key_debug")
+				);
+				if (key_attr == null and key_debug_attr == null)
 				{
 					item.attrs.push(new OpHtmlAttribute{
-						"key": "@key",
+						"key": "@key_debug",
 						"value": new OpString{
 							"value": "widget_" ~ this.widget_inc,
 						},

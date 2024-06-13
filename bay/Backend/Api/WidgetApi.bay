@@ -25,50 +25,7 @@ class WidgetApi extends BaseApi
 	
 	
 	/**
-	 * Returns op code
-	 */
-	@ApiMethod
-	async void save()
-	{
-		string project_id = this.post_data.get("project_id");
-		string current_widget = this.post_data.get("current_widget");
-		
-		/* Find project */
-		Project project = await Project::readProject(
-			fs::join([@.env("constructor_path"), "projects", project_id])
-		);
-		if (not project)
-		{
-			throw new ApiError( new ItemNotFound(project_id, "Project") );
-			return;
-		}
-		
-		/* Find widget */
-		Widget widget = await project.getWidget(current_widget);
-		if (not widget)
-		{
-			throw new ApiError( new ItemNotFound(current_widget, "Widget") );
-			return;
-		}
-		
-		/* Load widget */
-		widget.load();
-		
-		/* Save widget content */
-		string file_path = widget.getComponetPath();
-		string content = this.post_data.get("content");
-		await fs::saveFile(file_path, content);
-		
-		/* Compile file */
-		widget.module.compile(file_path);
-		
-		/* Success */
-		this.success();
-	}
-	
-	
-	/**
-	 * Returns op code
+	 * Load widget
 	 */
 	@ApiMethod
 	async void getOpCode()
@@ -86,6 +43,9 @@ class WidgetApi extends BaseApi
 			return;
 		}
 		
+		/* Load project */
+		await project.load();
+		
 		/* Find widget */
 		Widget widget = await project.getWidget(current_widget);
 		if (not widget)
@@ -96,6 +56,16 @@ class WidgetApi extends BaseApi
 		
 		/* Load widget */
 		await widget.load();
+		
+		/* Get component path */
+		string component_path = widget.getComponetPath();
+		if (not component_path)
+		{
+			throw new ApiError(
+				new RuntimeException("Failed to load widget '" ~ current_widget ~ "'")
+			);
+			return;
+		}
 		
 		/* Get widget op code */
 		string model_content = await widget.getModelContent();
@@ -110,5 +80,65 @@ class WidgetApi extends BaseApi
 				"component_op_code": component_op_code,
 			},
 		});
+	}
+	
+	
+	/**
+	 * Save widget
+	 */
+	@ApiMethod
+	async void save()
+	{
+		string project_id = this.post_data.get("project_id");
+		string current_widget = this.post_data.get("current_widget");
+		
+		/* Find project */
+		Project project = await Project::readProject(
+			fs::join([@.env("constructor_path"), "projects", project_id])
+		);
+		if (not project)
+		{
+			throw new ApiError( new ItemNotFound(project_id, "Project") );
+			return;
+		}
+		
+		/* Load project */
+		await project.load();
+		
+		/* Find widget */
+		Widget widget = await project.getWidget(current_widget);
+		if (not widget)
+		{
+			throw new ApiError( new ItemNotFound(current_widget, "Widget") );
+			return;
+		}
+		
+		/* Load widget */
+		await widget.load();
+		
+		/* Get component path */
+		string component_path = widget.getComponetPath();
+		if (not component_path)
+		{
+			throw new ApiError(
+				new RuntimeException("Failed to load widget '" ~ current_widget ~ "'")
+			);
+			return;
+		}
+		
+		/* Save widget content */
+		string file_path = widget.getComponetPath();
+		string content = this.post_data.get("content");
+		await fs::saveFile(file_path, content);
+		
+		/* Compile file */
+		string relative_src_file_path = widget.module.getRelativeSourcePath(file_path);
+		widget.module.compile(relative_src_file_path);
+		
+		/* Update assets */
+		widget.module.updateAssets();
+		
+		/* Success */
+		this.success();
 	}
 }
