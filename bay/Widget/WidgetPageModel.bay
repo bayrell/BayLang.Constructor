@@ -19,7 +19,7 @@ use BayLang.Constructor.WidgetDebug.WidgetPage;
 class WidgetPageModel extends BasePageModel
 {
 	string component = classof WidgetPage;
-	string current_widget = "";
+	string current_widget_name = "";
 	var selected_box = null;
 	var selected_elem = null;
 	Collection<int> selected_path = null;
@@ -27,6 +27,12 @@ class WidgetPageModel extends BasePageModel
 	BaseModel widget_model = null;
 	string widget_css = "";
 	Map components = {};
+	
+	
+	/**
+	 * Is model based widget
+	 */
+	static bool isModelBased(string widget_name) => rs::substr(widget_name, -5) == "Model";
 	
 	 
 	/**
@@ -36,14 +42,31 @@ class WidgetPageModel extends BasePageModel
 	{
 		parent(params);
 		
-		/* Create widget model */
-		this.current_widget = this.layout.request_query.get("widget_name");
-		this.widget_model = this.addWidget(
-			this.current_widget,
-			{
-				"widget_name": "current_widget",
-			}
-		);
+		/* Get current widget name */
+		this.current_widget_name = this.layout.request_query.get("widget_name");
+		
+		/* Create model based widget */
+		if (static::isModelBased(this.current_widget_name))
+		{
+			this.widget_model = this.addWidget(
+				this.current_widget_name,
+				{
+					"widget_name": "current_widget",
+				}
+			);
+		}
+		
+		/* Create component based widget */
+		else
+		{
+			this.widget_model = this.addWidget(
+				classof BaseModel,
+				{
+					"component": this.current_widget_name,
+					"widget_name": "current_widget",
+				}
+			);
+		}
 		
 		/* Add event listeners */
 		RenderProvider provider = @.provider(classof RenderProvider);

@@ -87,6 +87,7 @@
 				@event:onClick={{
 					void(var e){ this.toggleMenu(e, "params"); }
 				}}>Params</div>
+			<!--
 			<div class="widget_edit_page__menu_item widget_edit_page__menu_item--button"
 				class={{
 					this.model.menu_selected == "css"
@@ -96,6 +97,7 @@
 				@event:onClick={{
 					void(var e){ this.toggleMenu(e, "css"); }
 				}}>CSS</div>
+			-->
 			<div class="widget_edit_page__menu_item widget_edit_page__menu_item--button"
 				class={{
 					this.model.menu_selected == "tree"

@@ -12,6 +12,9 @@
 
 
 <style>
+.widget_param{
+	padding-bottom: 20px;
+}
 .widget_param__row{
 	margin-bottom: 10px;
 }
@@ -19,7 +22,6 @@
 	margin-bottom: 5px;
 }
 .widget_param__title{
-	text-align: center;
 	margin-bottom: 5px;
 }
 .widget_param %(Select)widget_select{
@@ -34,6 +36,47 @@
 	line-height: 1.5;
 }
 </style>
+
+
+<template name="renderWidgetName">
+	<div class="widget_param__row">
+		<div class="widget_param__label">Name</div>
+		<div class="widget_param__content">
+			<Input value={{ this.model.param_widget_name.value }}
+				@event:valueChange={{ void (var value) {
+					this.model.changeAttrContent("widget_name", value);
+				} }}
+			/>
+		</div>
+	</div>
+</template>
+
+
+<template name="renderClassName">
+	<div class="widget_param__row">
+		<div class="widget_param__label">Class</div>
+		<div class="widget_param__content">
+			<Tag value={{ this.model.param_class_name.value }}
+				@event:valueChange={{ void (var value) {
+					this.model.changeAttrContent("class_name", value);
+				} }}
+			/>
+		</div>
+	</div>
+</template>
+
+
+<template name="renderCSS">
+	<div class="widget_param__title">
+		CSS
+	</div>
+	<TextArea value={{ this.model.css_content }}
+		@event:valueChange={{ void (var value) {
+			this.model.changeCSSContent(value)
+		} }}
+		@event:keydown={{ this.onCSSKeyDown }}
+	/>
+</template>
 
 
 <template name="renderComponentParams">
@@ -101,6 +144,14 @@
 	<div class="widget_param">
 		%if (this.model.selected_item)
 		{
+			<!-- Render widget name -->
+			%render this.renderWidgetName();
+			%render this.renderClassName();
+			
+			<!-- Render CSS -->
+			%render this.renderCSS();
+			
+			<!-- Render params -->
 			%if (this.model.is_component)
 			{
 				%render this.renderComponentParams();
@@ -116,6 +167,7 @@
 
 <script>
 
+var css_change_timer = null;
 var html_content_change_timer = null;
 
 
@@ -129,6 +181,28 @@ bool isAllowClassName(string class_name)
 	if (class_name == "Runtime.Widget.SortableList") return true;
 	if (class_name == "Runtime.Widget.Tag") return true;
 	return false;
+}
+
+
+/**
+ * CSS Change
+ */
+void onCSSKeyDown(var e)
+{
+	if (this.css_change_timer != null)
+	{
+		window.clearTimeout(this.css_change_timer);
+		this.css_change_timer = null;
+	}
+	if (e.keyCode != 13 and e.keyCode != 186)
+	{
+		this.css_change_timer = window.setTimeout(void () use (e)
+		{
+			this.model.changeCSSContent(e.target.value);
+		}, 300);
+		return;
+	}
+	this.model.changeCSSContent(e.target.value);
 }
 
 
@@ -147,7 +221,6 @@ void onHtmlContentKeyDown(var e)
 		this.model.changeHtmlContent(e.target.value);
 	}, 300);
 }
-
 
 </script>
 

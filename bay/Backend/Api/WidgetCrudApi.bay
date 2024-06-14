@@ -84,6 +84,9 @@ class WidgetCrudApi extends CrudApi
 		);
 		if (not this.project) return;
 		
+		/* Load project */
+		await this.project.load();
+		
 		if (this.project.modules != null)
 		{
 			Collection<string> modules = this.project.modules.keys();
