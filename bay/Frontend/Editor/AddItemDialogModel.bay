@@ -16,6 +16,7 @@ class AddItemDialogModel extends ConfirmDialogModel
 	string widget_name = "add_item_dialog";
 	string kind = "after";
 	Collection<string> current_widgets = null;
+	Collection<int> selected_path = null;
 	
 	
 	/**
@@ -37,7 +38,7 @@ class AddItemDialogModel extends ConfirmDialogModel
 	{
 		this.parent_widget.createWidget(
 			widget_name,
-			this.parent_widget.item.selected_path,
+			this.selected_path,
 			this.kind
 		)
 		this.hide();
@@ -47,9 +48,11 @@ class AddItemDialogModel extends ConfirmDialogModel
 	/**
 	 * Show dialog
 	 */
-	void show()
+	void show(Collection<string> selected_path = null)
 	{
+		if (not selected_path) return;
 		this.current_widgets = this.parent_widget.getFrameWidgets();
+		this.selected_path = selected_path ? selected_path.slice() : null;
 		parent();
 	}
 }

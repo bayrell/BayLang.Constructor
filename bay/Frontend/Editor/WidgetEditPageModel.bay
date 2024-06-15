@@ -334,7 +334,7 @@ class WidgetEditPageModel extends BasePageModel
 		/* Add item */
 		if (item_key == "add")
 		{
-			this.add_item_dialog.show();
+			this.add_item_dialog.show(this.item.selected_path);
 		}
 		
 		/* Duplicate item */

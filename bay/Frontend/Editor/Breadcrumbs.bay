@@ -68,14 +68,14 @@
 </style>
 
 
-<template name="renderRow" args="WidgetTreeItem item, int pos, bool is_last">
+<template name="renderRow" args="WidgetTreeItem item, int pos, bool is_menu">
 	%set Collection<int> selected_path = this.model.item.selected_path;
 	<div class="breadcrumbs__item_row">
 		<span class="breadcrumbs__item_name"
 			@event:click={{
-				void () use (selected_path, pos, is_last)
+				void () use (selected_path, pos, is_menu)
 				{
-					if (is_last)
+					if (is_menu)
 					{
 						this.model.selectBreadcrumbs(pos);
 					}
@@ -88,8 +88,8 @@
 					}
 				}
 			}}
-		>{{ not is_last ? item.label : "Select value" }}</span>
-		%if (is_last)
+		>{{ (item != null) ? item.label : "Select value" }}</span>
+		%if (is_menu)
 		{
 			<div class="breadcrumbs__item_arrow"
 				@event:click={{
@@ -150,10 +150,8 @@
 			<div class="breadcrumbs__item_menu_name"
 				@event:click={{
 					void () use (selected_path, pos) {
-						this.model.tree.selectItem(
-							selected_path.slice(0, pos)
-						);
-						this.model.add_item_dialog.show();
+						this.model.breadcrumbs_selected = -1;
+						this.model.add_item_dialog.show(selected_path.slice(0, pos));
 					}
 				}}
 			>
@@ -179,25 +177,28 @@
 					<div class="breadcrumbs__item breadcrumbs__item--value">
 						
 						<!-- Render row -->
-						%render this.renderRow(item, i, false);
+						%if (i < selected_path.count() - 1)
+						{
+							%render this.renderRow(item, i, false);
+						}
+						%else
+						{
+							%render this.renderRow(item, i, true);
+							%render this.renderMenu(parent_item, i, false);
+						}
 						
 					</div>
-					%if (i != selected_path.count() - 1)
-					{
-						<div class="breadcrumbs__item breadcrumbs__item--next">
-							@raw{{ "->" }}
-						</div>
-					}
+					<div class="breadcrumbs__item breadcrumbs__item--next">
+						@raw{{ "->" }}
+					</div>
 				}
 			}
 			
-			<div class="breadcrumbs__item breadcrumbs__item--next">
-				@raw{{ "->" }}
-			</div>
 			<div class="breadcrumbs__item breadcrumbs__item--last">
 				
 				<!-- Render row -->
-				%render this.renderRowAddWidget(item, selected_path.count(), true);
+				%render this.renderRow(null, selected_path.count(), true);
+				%render this.renderMenu(item, selected_path.count(), true);
 				
 			</div>
 		}
