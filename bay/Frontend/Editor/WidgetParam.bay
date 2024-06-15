@@ -8,6 +8,7 @@
 <use name="Runtime.Widget.Select" component="true" />
 <use name="Runtime.Widget.Tag" component="true" />
 <use name="Runtime.Widget.TextArea" component="true" />
+<use name="Runtime.Widget.TextEditable" component="true" />
 <use name="BayLang.Constructor.Frontend.Editor.WidgetItemParam" />
 
 
@@ -67,15 +68,16 @@
 
 
 <template name="renderCSS">
-	<div class="widget_param__title">
-		CSS
+	<div class="widget_param__row">
+		<div class="widget_param__title">
+			CSS
+		</div>
+		<TextEditable value={{ this.model.css_content }}
+			@event:valueChange={{ void (var value) {
+				this.model.changeCSSContent(value)
+			} }}
+		/>
 	</div>
-	<TextArea value={{ this.model.css_content }}
-		@event:valueChange={{ void (var value) {
-			this.model.changeCSSContent(value)
-		} }}
-		@event:keydown={{ this.onCSSKeyDown }}
-	/>
 </template>
 
 
@@ -127,10 +129,10 @@
 	<div class="widget_param__row">
 		<div class="widget_param__label">Content</div>
 		<div class="widget_param__content">
-			<TextArea
+			<TextEditable
 				name="content"
 				value={{ this.model.html_content }}
-				@event:keydown={{ this.onHtmlContentKeyDown }}
+				direct_update={{ true }}
 				@event:valueChange={{ void (var value) {
 					this.model.changeHtmlContent(value)
 				} }}
@@ -167,10 +169,6 @@
 
 <script>
 
-var css_change_timer = null;
-var html_content_change_timer = null;
-
-
 /**
  * Returns true if class name is allowed
  */
@@ -180,46 +178,8 @@ bool isAllowClassName(string class_name)
 	if (class_name == "Runtime.Widget.Select") return true;
 	if (class_name == "Runtime.Widget.SortableList") return true;
 	if (class_name == "Runtime.Widget.Tag") return true;
+	if (class_name == "Runtime.Widget.TextEditable") return true;
 	return false;
-}
-
-
-/**
- * CSS Change
- */
-void onCSSKeyDown(var e)
-{
-	if (this.css_change_timer != null)
-	{
-		window.clearTimeout(this.css_change_timer);
-		this.css_change_timer = null;
-	}
-	if (e.keyCode != 13 and e.keyCode != 186)
-	{
-		this.css_change_timer = window.setTimeout(void () use (e)
-		{
-			this.model.changeCSSContent(e.target.value);
-		}, 300);
-		return;
-	}
-	this.model.changeCSSContent(e.target.value);
-}
-
-
-/**
- * HTML content key down
- */
-void onHtmlContentKeyDown(var e)
-{
-	if (this.html_content_change_timer != null)
-	{
-		window.clearTimeout(this.html_content_change_timer);
-		this.html_content_change_timer = null;
-	}
-	this.html_content_change_timer = window.setTimeout(void () use (e)
-	{
-		this.model.changeHtmlContent(e.target.value);
-	}, 300);
 }
 
 </script>

@@ -432,10 +432,13 @@ class WidgetItemModel extends BaseModel
 	/**
 	 * Change attr op_code value
 	 */
-	void changeOpCodeAttrValue(WidgetItemParam item, string value)
+	void changeOpCodeAttrValue(WidgetItemParam item, var value)
 	{
 		/* Change item value */
-		item.value = value;
+		if (item.name != "widget_name" and item.name != "class_name")
+		{
+			item.value = value;
+		}
 		
 		/* Create Attribute */
 		if (item.op_attr == null)
