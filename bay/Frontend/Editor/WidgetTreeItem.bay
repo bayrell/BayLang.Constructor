@@ -44,10 +44,18 @@ class WidgetTreeItem extends TreeItem
 		if (this.op_code instanceof OpHtmlTag)
 		{
 			Collection<string> names = static::getAttrValues(this.op_code.attrs, "class");
-			string key = names.get(0);
-			Collection<string> keys = rs::split(" ", key);
-			this.key = key;
-			this.label = this.op_code.tag_name ~ "." ~ keys.get(0);
+			if (names.count() == 0)
+			{
+				this.key = this.op_code.tag_name;
+				this.label = this.op_code.tag_name;
+			}
+			else
+			{
+				string key = names.get(0);
+				Collection<string> keys = rs::split(" ", key);
+				this.key = key;
+				this.label = this.op_code.tag_name ~ "." ~ keys.get(0);
+			}
 		}
 		else if (this.op_code instanceof OpHtmlSlot)
 		{

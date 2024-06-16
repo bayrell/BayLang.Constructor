@@ -39,6 +39,7 @@ use BayLang.OpCodes.OpHtmlTag;
 use BayLang.OpCodes.OpModule;
 use BayLang.OpCodes.OpNamespace;
 use BayLang.OpCodes.OpString;
+use BayLang.BuilderOpCode;
 use BayLang.SaveOpCode;
 
 
@@ -671,30 +672,8 @@ class WidgetEditPageModel extends BasePageModel
 			alias_name = widget_name;
 		}
 		
-		OpHtmlItems op_code_items = new OpHtmlItems();
-		
-		/* Get slot info */
-		var content_window = this.getFrameWindow();
-		Callback f = new content_window.Runtime.Callback(widget_name, "getSlotInfo");
-		if (f.exists())
-		{
-			Collection slot_info = f.apply();
-			if (slot_info)
-			{
-				for (int i=0; i<slot_info.count(); i++)
-				{
-					Dict slot_item = slot_info.get(i);
-					OpHtmlSlot slot = new OpHtmlSlot
-					{
-						"name": slot_item.get("name"),
-						"items": new OpHtmlItems,
-					};
-					op_code_items.items.push(slot);
-				}
-			}
-		}
-		
 		/* Create op_code */
+		string css_name = "widget_" ~ this.widget_inc;
 		OpHtmlTag op_code = new OpHtmlTag
 		{
 			"attrs":
@@ -704,7 +683,7 @@ class WidgetEditPageModel extends BasePageModel
 					"key": "class",
 					"value": new OpString
 					{
-						"value": "widget_" ~ this.widget_inc,
+						"value": css_name,
 					},
 				},
 				new OpHtmlAttribute
@@ -712,13 +691,30 @@ class WidgetEditPageModel extends BasePageModel
 					"key": "@key",
 					"value": new OpString
 					{
-						"value": "widget_" ~ this.widget_inc,
+						"value": css_name,
 					},
 				}
 			],
-			"items": op_code_items,
+			"items": new OpHtmlItems(),
 			"tag_name": alias_name,
 		};
+		
+		/* Get default op_code */
+		var content_window = this.getFrameWindow();
+		Callback f = new content_window.Runtime.Callback(widget_name, "getDefaultOpCode");
+		if (f.exists())
+		{
+			BuilderOpCode builder = new BuilderOpCode();
+			f.apply([op_code, builder]);
+		}
+		
+		/* Get default css */
+		Callback f = new content_window.Runtime.Callback(widget_name, "getDefaultCSS");
+		if (f.exists())
+		{
+			string css_content = f.apply();
+			this.item.setCSSValue("." ~ css_name, css_content);
+		}
 		
 		/* Add items */
 		if (kind == "before" or kind == "after")
@@ -743,6 +739,9 @@ class WidgetEditPageModel extends BasePageModel
 		
 		/* Update frame render */
 		this.updateFrameRender();
+		
+		/* Update CSS */
+		this.updateFrameCSS();
 	}
 	
 	

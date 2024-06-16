@@ -10,8 +10,8 @@
 <use name="Runtime.Widget.TextEditable" component="true" />
 <use name="Runtime.Widget.Dialog.ConfirmDialogModel" />
 <use name="Runtime.Widget.Dialog.DialogModelException" />
-<use name="Runtime.Widget.Dialog.PromtDialog" component="true" />
-<use name="Runtime.Widget.Dialog.PromtDialogModel" />
+<use name="Runtime.Widget.Dialog.PromptDialog" component="true" />
+<use name="Runtime.Widget.Dialog.PromptDialogModel" />
 
 
 <style>
@@ -109,7 +109,7 @@
 string old_selector_name = "";
 
 /* Dialogs */
-PromtDialogModel add_dialog = new PromtDialogModel{
+PromptDialogModel add_dialog = new PromptDialogModel{
 	"widget_name": "add_dialog",
 	"confirm_button": "Add",
 	"title": "Add new style",
@@ -117,7 +117,7 @@ PromtDialogModel add_dialog = new PromtDialogModel{
 		"confirm": new Callback(this, "onAddStyle")
 	},
 };
-PromtDialogModel edit_dialog = new PromtDialogModel{
+PromptDialogModel edit_dialog = new PromptDialogModel{
 	"widget_name": "edit_dialog",
 	"confirm_button": "Rename",
 	"title": "Rename style",
