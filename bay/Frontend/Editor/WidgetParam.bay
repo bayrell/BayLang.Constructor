@@ -68,13 +68,14 @@
 
 
 <template name="renderCSS">
+	%set string selector_name = this.model.getCurrentSelector();
 	<div class="widget_param__row">
 		<div class="widget_param__title">
 			CSS
 		</div>
-		<TextEditable value={{ this.model.css_content }}
-			@event:valueChange={{ void (var value) {
-				this.model.changeCSSContent(value)
+		<TextEditable value={{ this.model.getCSSContent(selector_name) }}
+			@event:valueChange={{ void (var value) use (selector_name) {
+				this.model.changeCSSContent(selector_name, value)
 			} }}
 		/>
 	</div>

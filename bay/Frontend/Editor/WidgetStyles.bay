@@ -1,0 +1,217 @@
+<!--
+ *  BayLang Constructor
+-->
+
+<class name="BayLang.Constructor.Frontend.Editor.WidgetStyles">
+
+<use name="Runtime.Callback" />
+<use name="Runtime.Widget.Button" component="true" />
+<use name="Runtime.Widget.ButtonModel" />
+<use name="Runtime.Widget.TextEditable" component="true" />
+<use name="Runtime.Widget.Dialog.ConfirmDialogModel" />
+<use name="Runtime.Widget.Dialog.DialogModelException" />
+<use name="Runtime.Widget.Dialog.PromtDialog" component="true" />
+<use name="Runtime.Widget.Dialog.PromtDialogModel" />
+
+
+<style>
+.widget_styles{
+}
+.widget_styles__buttons{
+	padding-bottom: 5px;
+}
+.widget_styles__items{
+	border: 1px var(--widget-color-border) solid;
+	border-bottom: 0px;
+}
+.widget_style__name{
+	display: flex;
+	padding: 5px;
+	gap: 5px;
+	background-color: aliceblue;
+	border-bottom: 1px var(--widget-color-border) solid;
+	width: 100%;
+}
+.widget_style__label{
+	flex: 1;
+	overflow-wrap: anywhere;
+}
+.widget_style__button{
+	/*display: none;*/
+	cursor: pointer;
+	font-size: 12px;
+}
+.widget_style__button:hover{
+	text-decoration: underline;
+}
+.widget_style__name:hover .widget_style__button{
+	display: block;
+}
+.widget_style__content{
+	padding: 5px;
+	border-bottom: 1px var(--widget-color-border) solid;
+}
+.widget_style__editable{
+	border: 0;
+	padding: 10px;
+}
+</style>
+
+
+<template name="renderStyle" args="string selector_name">
+	<div class="widget_style" @key={{ selector_name }}>
+		<div class="widget_style__name">
+			<div class="widget_style__label">{{ selector_name }}</div>
+			<div class="widget_style__button"
+				@event:click={{ void () use (selector_name){ this.onEditClick(selector_name) } }}
+			>[Edit]</div>
+			<div class="widget_style__button"
+				@event:click={{ void () use (selector_name){ this.onDeleteClick(selector_name) } }}
+			>[Delete]</div>
+		</div>
+		<div class="widget_style__content">
+			<TextEditable
+				class="widget_style__editable"
+				name={{ selector_name }}
+				value={{ this.model.getCSSContent(selector_name) }}
+				@event:valueChange={{ void (var value) use (selector_name) {
+					this.model.changeCSSContent(selector_name, value);
+				} }}
+			/>
+		</div>
+	</div>
+</template>
+
+
+<template>
+	<div class="widget_styles">
+		<div class="widget_styles__buttons">
+			<Button styles=["small"]
+				@event:click={{ this.onAddClick }}
+			>Add</Button>
+		</div>
+		<div class="widget_styles__items">
+			%set Collection<string> keys = this.model.styles.keys().sort();
+			%for (int i=0; i<keys.count(); i++)
+			{
+				%render this.renderStyle(keys.get(i));
+			}
+		</div>
+		%render this.renderWidget(this.add_dialog);
+		%render this.renderWidget(this.edit_dialog);
+		%render this.renderWidget(this.delete_dialog);
+	</div>
+</template>
+
+
+<script>
+
+string old_selector_name = "";
+
+/* Dialogs */
+PromtDialogModel add_dialog = new PromtDialogModel{
+	"widget_name": "add_dialog",
+	"confirm_button": "Add",
+	"title": "Add new style",
+	"events": {
+		"confirm": new Callback(this, "onAddStyle")
+	},
+};
+PromtDialogModel edit_dialog = new PromtDialogModel{
+	"widget_name": "edit_dialog",
+	"confirm_button": "Rename",
+	"title": "Rename style",
+	"events": {
+		"confirm": new Callback(this, "onRenameStyle")
+	},
+};
+ConfirmDialogModel delete_dialog = new ConfirmDialogModel{
+	"widget_name": "delete_dialog",
+	"confirm_button": "Delete",
+	"title": "Delete style",
+	"events": {
+		"confirm": new Callback(this, "onDeleteStyle")
+	},
+};
+
+
+/**
+ * Add dialog
+ */
+void onAddClick()
+{
+	this.add_dialog.setValue("");
+	this.add_dialog.show();
+}
+
+
+/**
+ * Edit click
+ */
+void onEditClick(string selector_name)
+{
+	this.old_selector_name = selector_name;
+	this.edit_dialog.setTitle("Rename style " ~ selector_name);
+	this.edit_dialog.setValue(selector_name);
+	this.edit_dialog.show();
+}
+
+
+/**
+ * Delete click
+ */
+void onDeleteClick(string selector_name)
+{
+	this.old_selector_name = selector_name;
+	this.delete_dialog.setTitle("Delete style " ~ selector_name);
+	this.delete_dialog.show();
+}
+
+
+/**
+ * Add style
+ */
+void onAddStyle(string selector_name)
+{
+	if (rs::charAt(selector_name, 0) != ".") selector_name = "." ~ selector_name;
+	if (this.model.styles.has(selector_name))
+	{
+		throw new DialogModelException("selector " ~ selector_name ~ " allready exists");
+	}
+	this.model.changeCSSContent(selector_name, "");
+}
+
+
+/**
+ * Rename style
+ */
+void onRenameStyle(string new_selector_name)
+{
+	if (rs::charAt(new_selector_name, 0) != ".") new_selector_name = "." ~ new_selector_name;
+	if (this.model.styles.has(new_selector_name))
+	{
+		throw new DialogModelException(new_selector_name ~ " allready exists");
+		return;
+	}
+	
+	/* Rename style */
+	string css_content = this.model.getCSSContent(this.old_selector_name)
+	this.model.styles.remove(this.old_selector_name);
+	this.model.changeCSSContent(new_selector_name, css_content);
+}
+
+
+/**
+ * Delete style
+ */
+void onDeleteStyle()
+{
+	this.model.changeCSSContent(this.old_selector_name, "");
+	this.model.styles.remove(this.old_selector_name);
+}
+
+
+</script>
+
+
+</class>

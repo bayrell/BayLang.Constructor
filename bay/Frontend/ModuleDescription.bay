@@ -52,6 +52,7 @@ static class ModuleDescription
 	 */
 	pure Collection<Dict> entities() =>
 	[
+		new Hook("BayLang.Constructor.Frontend.AppHook"),
 		new SetupLayout({
 			"names": {
 				"baylang": "BayLang.Constructor.Frontend.Layout.DefaultLayout",

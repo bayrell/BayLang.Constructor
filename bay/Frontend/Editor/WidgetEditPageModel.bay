@@ -58,7 +58,7 @@ class WidgetEditPageModel extends BasePageModel
 	string model_content = "";
 	string component_class_name = "";
 	string component_content = "";
-	string menu_selected = "params";
+	string menu_selected = "styles";
 	int app_status = static::STATUS_LOADING;
 	int breadcrumbs_selected = -1;
 	int widget_inc = 1;
