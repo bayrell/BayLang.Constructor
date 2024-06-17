@@ -21,6 +21,9 @@
 	justify-content: flex-start;
 	border-bottom: 1px var(--widget-color-border) solid;
 }
+.widget_edit_page__menu--right{
+	justify-content: right;
+}
 .widget_edit_page__menu_item{
 	cursor: pointer;
 	user-select: none;
@@ -30,11 +33,30 @@
 	text-align: center;
 	min-width: 40px;
 }
+.widget_edit_page__menu_item--status_message{
+	width: 100px;
+}
+.widget_edit_page__menu_item--select_size{
+	display: flex;
+	padding: 0px;
+	.widget_edit_page__iframe_size{
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		width: 40px;
+		padding: 10px;
+	}
+	.widget_edit_page__iframe_size.selected{
+		background-color: var(--widget-color-primary);
+		color: var(--widget-color-primary-text);
+	}
+}
 .widget_edit_page__menu_item--selected{
 	background-color: var(--widget-color-primary);
 	color: var(--widget-color-primary-text);
 }
 .widget_edit_page__menu_item_gap{
+	display: flex;
 	flex: 1;
 }
 .widget_edit_page__content{
@@ -51,18 +73,22 @@
 	padding: 0px;
 	flex: 1;
 }
+.widget_edit_page__frame_wrap{
+	display: flex;
+	justify-content: center;
+	flex: 1;
+}
 .widget_edit_page__frame iframe{
 	border-style: none;
 	overflow: visible;
 	width: 100%;
-	flex: 1;
 }
 </style>
 
 
-<template>
-	<div class="widget_edit_page">
-		<div class="widget_edit_page__menu">
+<template name="renderMenu">
+	<div class="widget_edit_page__menu">
+		<div class="widget_edit_page__menu_item_gap">
 			<a class="widget_edit_page__menu_item nolink"
 				href={{ this.layout.url(
 					"baylang:project:widgets",
@@ -74,10 +100,26 @@
 				}}
 			>Save</div>
 			<div class="widget_edit_page__menu_item">Export</div>
-			<div class="widget_edit_page__menu_item">
+			<div class="widget_edit_page__menu_item widget_edit_page__menu_item--status_message">
 				{{ this.getAppStatusMessage() }}
 			</div>
-			<div class="widget_edit_page__menu_item_gap"></div>
+		</div>
+		<div class="widget_edit_page__menu_item widget_edit_page__menu_item--select_size">
+			%for (int i=0; i<this.model.iframe_sizes.count(); i++)
+			{
+				%set Dict size = this.model.iframe_sizes.get(i);
+				<div class="widget_edit_page__iframe_size"
+					class={{ this.model.iframe_current_size == size.get("label") ? "selected" : "" }}
+					@event:click={{
+						void () use (size)
+						{
+							this.model.selectIFrameSize(size);
+						}
+					}}
+				>{{ size.get("label") }}</div>
+			}
+		</div>
+		<div class="widget_edit_page__menu_item_gap widget_edit_page__menu--right">
 			<div class="widget_edit_page__menu_item widget_edit_page__menu_item--button"
 				class={{
 					this.model.menu_selected == "styles"
@@ -106,16 +148,30 @@
 					void(var e){ this.toggleMenu(e, "tree"); }
 				}}>Tree</div>
 		</div>
-		<div class="widget_edit_page__content">
-			<div class="widget_edit_page__frame">
-				<Breadcrumbs @model={{ this.model }} />
+	</div>
+</template>
+
+
+<template name="renderContent">
+	<div class="widget_edit_page__content">
+		<div class="widget_edit_page__frame">
+			<Breadcrumbs @model={{ this.model }} />
+			<div class="widget_edit_page__frame_wrap">
 				<iframe @ref="iframe"></iframe>
 			</div>
-			<WidgetMenu @model={{ this.model }} />
-			%render this.renderWidget(this.model.add_item_dialog);
-			%render this.renderWidget(this.model.context_menu);
-			%render this.renderWidget(this.model.remove_item_dialog);
 		</div>
+		<WidgetMenu @model={{ this.model }} />
+		%render this.renderWidget(this.model.add_item_dialog);
+		%render this.renderWidget(this.model.context_menu);
+		%render this.renderWidget(this.model.remove_item_dialog);
+	</div>
+</template>
+
+
+<template>
+	<div class="widget_edit_page">
+		%render this.renderMenu();
+		%render this.renderContent();
 	</div>
 </template>
 

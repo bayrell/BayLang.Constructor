@@ -239,6 +239,8 @@ void onEditClickName()
  */
 void onRename(string new_widget_name)
 {
+	if (this.old_widget_name == new_widget_name) return;
+	
 	string new_selector_name = new_widget_name;
 	if (rs::charAt(new_selector_name, 0) != ".") new_selector_name = "." ~ new_selector_name;
 	

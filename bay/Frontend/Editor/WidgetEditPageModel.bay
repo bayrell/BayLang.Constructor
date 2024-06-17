@@ -60,6 +60,33 @@ class WidgetEditPageModel extends BasePageModel
 	string component_class_name = "";
 	string component_content = "";
 	string menu_selected = "params";
+	string iframe_current_size = "";
+	Dict iframe_sizes = [
+		{
+			"label": "320",
+			"width": 320,
+		},
+		{
+			"label": "480",
+			"width": 480,
+		},
+		{
+			"label": "576",
+			"width": 576,
+		},
+		{
+			"label": "768",
+			"width": 768,
+		},
+		{
+			"label": "992",
+			"width": 992,
+		},
+		{
+			"label": "[x]",
+			"width": 1200,
+		},
+	];
 	int app_status = static::STATUS_LOADING;
 	int breadcrumbs_selected = -1;
 	int widget_inc = 1;
@@ -474,6 +501,33 @@ class WidgetEditPageModel extends BasePageModel
 		content = rs::trim(content);
 		
 		return content;
+	}
+	
+	
+	/**
+	 * Select Frame size
+	 */
+	void selectIFrameSize(Dict size)
+	{
+		if (not this.isLoaded()) return;
+		
+		/* Select item */
+		this.iframe_current_size = size.get("label");
+		
+		/* Set iframe width */
+		int width = size.get("width");
+		if (width > 1000)
+		{
+			this.iframe.style.width = "";
+			this.iframe_current_size = "";
+		}
+		else
+		{
+			this.iframe.style.width = width ~ "px";
+		}
+		
+		/* Update selected box */
+		this.getFramePageModel().updateSelectedBox();
 	}
 	
 	
