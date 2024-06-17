@@ -39,7 +39,7 @@ use BayLang.OpCodes.OpHtmlTag;
 use BayLang.OpCodes.OpModule;
 use BayLang.OpCodes.OpNamespace;
 use BayLang.OpCodes.OpString;
-use BayLang.BuilderOpCode;
+use BayLang.OpCodes.OpUse;
 use BayLang.SaveOpCode;
 
 
@@ -59,7 +59,7 @@ class WidgetEditPageModel extends BasePageModel
 	string model_content = "";
 	string component_class_name = "";
 	string component_content = "";
-	string menu_selected = "styles";
+	string menu_selected = "params";
 	int app_status = static::STATUS_LOADING;
 	int breadcrumbs_selected = -1;
 	int widget_inc = 1;
@@ -652,6 +652,58 @@ class WidgetEditPageModel extends BasePageModel
 	
 	
 	/**
+	 * Add module
+	 */
+	string addModule(string widget_name, bool is_component = true, string alias_name = "")
+	{
+		if (alias_name == "")
+		{
+			string widget_name_arr = rs::split(".", widget_name);
+			alias_name = widget_name_arr.last();
+		}
+		if (not this.component_op_code.hasModule(alias_name))
+		{
+			this.component_op_code.addModule(widget_name, is_component, alias_name);
+			this.updateFrameGlobalCSS();
+		}
+		else if (this.component_op_code.uses.get(alias_name) != widget_name)
+		{
+			alias_name = widget_name;
+		}
+		return alias_name;
+	}
+	
+	
+	/**
+	 * Add default template
+	 */
+	void addDefaultTemplate(OpHtmlTag op_code, OpModule default_template)
+	{
+		/* Add uses */
+		Collection modules = default_template.uses.keys();
+		for (int i=0; i<default_template.items.count(); i++)
+		{
+			BaseOpCode item = default_template.items.get(i);
+			if (item instanceof OpUse)
+			{
+				this.addModule(item.name, item.is_component, item.alias);
+			}
+		}
+		
+		OpDeclareClass op_code_class = default_template.findClass();
+		if (not op_code_class) return null;
+		
+		OpDeclareFunction op_code_render = op_code_class.findFunction("render");
+		if (not op_code_render) return null;
+		if (not op_code_render.expression) return null;
+		if (not (op_code_render.expression instanceof OpHtmlItems)) return null;
+		
+		/* Add items */
+		op_code.items = op_code_render.expression;
+	}
+	
+	
+	/**
 	 * Create widget
 	 */
 	void createWidget(string widget_name, Collection<int> path, string kind)
@@ -660,17 +712,8 @@ class WidgetEditPageModel extends BasePageModel
 		WidgetTreeItem parent_item = this.tree.root.get(parent_path);
 		WidgetTreeItem dest_item = this.tree.root.get(path);
 		
-		string widget_name_arr = rs::split(".", widget_name);
-		string alias_name = widget_name_arr.last();
-		if (not this.component_op_code.hasModule(alias_name))
-		{
-			this.component_op_code.addModule(widget_name, alias_name);
-			this.updateFrameGlobalCSS();
-		}
-		else if (this.component_op_code.uses.get(alias_name) != widget_name)
-		{
-			alias_name = widget_name;
-		}
+		/* Add module */
+		string alias_name = this.addModule(widget_name);
 		
 		/* Create op_code */
 		string css_name = "widget_" ~ this.widget_inc;
@@ -699,16 +742,36 @@ class WidgetEditPageModel extends BasePageModel
 			"tag_name": alias_name,
 		};
 		
-		/* Get default op_code */
+		/* Default template */
 		var content_window = this.getFrameWindow();
-		Callback f = new content_window.Runtime.Callback(widget_name, "getDefaultOpCode");
+		Callback f = new content_window.Runtime.Callback(widget_name, "getDefaultTemplate");
 		if (f.exists())
 		{
-			BuilderOpCode builder = new BuilderOpCode();
-			f.apply([op_code, builder]);
+			/* Get default template */
+			string template_content = f.apply();
+			template_content = "<class>" ~ template_content ~ "</class>";
+			
+			/* Parse default template */
+			OpModule default_template = null;
+			ParserBay parser = this.createParser();
+			try
+			{
+				list res = parser::parse(parser, template_content);
+				parser = res.get(0);
+				default_template = res.get(1);
+			}
+			catch (var e)
+			{
+			}
+			
+			/* Add default template */
+			if (default_template != null)
+			{
+				this.addDefaultTemplate(op_code, default_template);
+			}
 		}
 		
-		/* Get default css */
+		/* Default css */
 		Callback f = new content_window.Runtime.Callback(widget_name, "getDefaultCSS");
 		if (f.exists())
 		{
