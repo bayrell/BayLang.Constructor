@@ -12,6 +12,7 @@
 		"Frontend/Editor/WidgetEditPageModel.bay",
 		"Frontend/Editor/WidgetItemModel.bay",
 		"Frontend/Editor/WidgetItemParam.bay",
+		"Frontend/Editor/WidgetItemStyle.bay",
 		"Frontend/Editor/WidgetMenu.bay",
 		"Frontend/Editor/WidgetParam.bay",
 		"Frontend/Editor/WidgetStyles.bay",

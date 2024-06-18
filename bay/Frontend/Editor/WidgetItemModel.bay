@@ -11,6 +11,7 @@ use Runtime.Web.Annotations.Param;
 use BayLang.Constructor.Frontend.Editor.WidgetCSS;
 use BayLang.Constructor.Frontend.Editor.WidgetEditPageModel;
 use BayLang.Constructor.Frontend.Editor.WidgetItemParam;
+use BayLang.Constructor.Frontend.Editor.WidgetItemStyle;
 use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
 use BayLang.Exceptions.ParserUnknownError;
 use BayLang.LangBay.ParserBay;
@@ -51,36 +52,6 @@ class WidgetItemModel extends BaseModel
 	
 	
 	/**
-	 * Translate CSS
-	 */
-	list translateCSS(ParserBay parser, TranslatorES6 translator, string source)
-	{
-		/* Parse source */
-		BaseOpCode op_code = null;
-		try
-		{
-			parser = parser::setContent(parser, source ~ "}");
-			list res = parser.parser_html::readCssBody(parser);
-			op_code = res.get(1);
-		}
-		catch (ParserUnknownError e)
-		{
-		}
-		
-		/* Translate source */
-		if (not op_code) return "";
-		
-		Vector items = [];
-		items.push("var content = \"\";");
-		list res = translator.expression::Expression(translator, op_code);
-		items.push("content += Runtime.rtl.toStr(" ~ res.get(1) ~ ");");
-		
-		string content = window.eval(rs::join("\n", items));
-		return content;
-	}
-	
-	
-	/**
 	 * Returns CSS content
 	 */
 	void getCSS()
@@ -91,7 +62,7 @@ class WidgetItemModel extends BaseModel
 		{
 			string selector_name = selectors.get(i);
 			Dict item = this.styles.get(selector_name);
-			items.push(item.get("content"));
+			items.push(item.content);
 		}
 		return rs::join("\n", items);
 	}
@@ -109,28 +80,27 @@ class WidgetItemModel extends BaseModel
 	/**
 	 * Set CSS value
 	 */
-	Map setCSSValue(string selector_name, string source)
+	void setCSSValue(string selector_name, string source, OpHtmlStyle item = null)
 	{
-		ParserBay parser = this.parent_widget.createParser();
-		TranslatorES6 translator = this.parent_widget.createTranslator();
+		/* Default item */
+		if (item == null)
+		{
+			item = this.main_style_item;
+		}
 		
-		/* Parse CSS */
-		string content = this.translateCSS(
-			parser, translator, this.getCSSCode(selector_name, source)
-		);
-		
-		/* Set content */
+		/* Add style if does not exists */
 		if (not this.styles.has(selector_name))
 		{
-			this.styles.set(selector_name, {
-				"style": this.main_style_item,
-			});
+			WidgetItemStyle item_style = new WidgetItemStyle();
+			item_style.op_code = item;
+			item_style.selector_name = selector_name;
+			item_style.parent_widget = this.parent_widget;
+			this.styles.set(selector_name, item_style);
 		}
-		Map result = this.styles.get(selector_name);
-		result.set("source", source);
-		result.set("content", content);
 		
-		return result;
+		/* Set content */
+		WidgetItemStyle item_style = this.styles.get(selector_name);
+		item_style.setSource(source);
 	}
 	
 	
@@ -153,8 +123,7 @@ class WidgetItemModel extends BaseModel
 			
 			/* Set CSS Value */
 			string source = styles.get(selector_name);
-			Map result = this.setCSSValue(selector_name, source);
-			result.set("style", item);
+			this.setCSSValue(selector_name, source, item);
 		}
 	}
 	
@@ -170,10 +139,10 @@ class WidgetItemModel extends BaseModel
 		for (int i=0; i<selectors.count(); i++)
 		{
 			string selector_name = selectors.get(i);
-			Dict result = this.styles.get(selector_name);
-			if (result.get("style") != item) continue;
+			WidgetItemStyle item_style = this.styles.get(selector_name);
+			if (item_style.op_code != item) continue;
 			source.push(selector_name ~ "{");
-			Collection lines = rs::split("\n", result.get("source"));
+			Collection lines = rs::split("\n", item_style.source);
 			lines = lines.map(string (string s) => "\t" ~ s);
 			source.appendItems(lines);
 			source.push("}");
@@ -602,7 +571,7 @@ class WidgetItemModel extends BaseModel
 	string getCSSContent(string selector_name)
 	{
 		if (not this.styles.has(selector_name)) return "";
-		return this.styles.get(selector_name).get("source");
+		return this.styles.get(selector_name).source;
 	}
 	
 	

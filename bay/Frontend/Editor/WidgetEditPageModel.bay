@@ -263,12 +263,12 @@ class WidgetEditPageModel extends BasePageModel
 				}
 			}
 			
-			/* Add render key */
+			/* Add op_code attrs */
 			OpDeclareFunction op_code_render = this.getRenderOpCode("render");
 			if (op_code_render)
 			{
 				BaseOpCode op_code_expression = op_code_render.getExpression();
-				this.addRenderKeys(op_code_expression);
+				this.addHtmlItemsAttrs(op_code_expression);
 			}
 			
 			/* Load Tree items */
@@ -736,10 +736,24 @@ class WidgetEditPageModel extends BasePageModel
 	
 	
 	/**
-	 * Add render key
+	 * Add op_code tag attrs
 	 */
-	void addRenderKey(OpHtmlTag op_code)
+	void addTagAttrs(OpHtmlTag op_code)
 	{
+		string css_name = null;
+		
+		/* Generate css name */
+		fn generateCssName = string () use (css_name)
+		{
+			if (css_name == null)
+			{
+				css_name = "widget_" ~ this.widget_inc;
+				this.widget_inc = this.widget_inc + 1;
+			}
+			return css_name;
+		};
+		
+		/* Add render key */
 		OpHtmlAttribute key_attr = op_code.attrs.findItem(
 			lib::equalAttr("key", "@key")
 		);
@@ -748,22 +762,55 @@ class WidgetEditPageModel extends BasePageModel
 		);
 		if (key_attr == null and key_debug_attr == null)
 		{
+			/* Add key debug */
 			op_code.attrs.push(new OpHtmlAttribute{
 				"key": "@key_debug",
 				"value": new OpString{
-					"value": "widget_" ~ this.widget_inc,
+					"value": generateCssName(),
 				},
 			});
-			this.widget_inc = this.widget_inc + 1;
 		}
-		this.addRenderKeys(op_code.items);
+		
+		/* Change widget name */
+		OpHtmlAttribute class_name_attr = op_code.attrs.findItem(
+			lib::equalAttr("key", "class")
+		);
+		if (class_name_attr and class_name_attr.value instanceof OpString)
+		{
+			string class_name = class_name_attr.value.value;
+			Collection attrs = rs::split(" ", class_name);
+			attrs = attrs.filter(lib::equalNot(""));
+			attrs = attrs.map(
+				string (string item) use (generateCssName)
+				{
+					if (item == "[widget_name]")
+					{
+						return generateCssName();
+					}
+					return item;
+				}
+			);
+			class_name_attr.value.value = rs::join(" ", attrs);
+		}
+		
+		/* Generate html items attrs */
+		this.addHtmlItemsAttrs(op_code.items);
 	}
 	
 	
 	/**
-	 * Add render keys
+	 * Add op_code slot attrs
 	 */
-	void addRenderKeys(Collection items)
+	void addSlotAttrs(OpHtmlTag op_code)
+	{
+		this.addHtmlItemsAttrs(op_code.items);
+	}
+	
+	
+	/**
+	 * Generate html items attrs
+	 */
+	void addHtmlItemsAttrs(Collection items)
 	{
 		if (not items) return;
 		if (items instanceof OpHtmlItems) items = items.items;
@@ -774,7 +821,11 @@ class WidgetEditPageModel extends BasePageModel
 			/* Add render key to item */
 			if (rtl::is_instanceof(item, classof OpHtmlTag))
 			{
-				this.addRenderKey(item);
+				this.addTagAttrs(item);
+			}
+			else if (rtl::is_instanceof(item, classof OpHtmlSlot))
+			{
+				this.addSlotAttrs(item);
 			}
 		}
 	}
@@ -790,6 +841,7 @@ class WidgetEditPageModel extends BasePageModel
 		
 		/* Create op_code */
 		string css_name = "widget_" ~ this.widget_inc;
+		this.widget_inc = this.widget_inc + 1;
 		OpHtmlTag op_code = new OpHtmlTag
 		{
 			"attrs":
@@ -797,6 +849,14 @@ class WidgetEditPageModel extends BasePageModel
 				new OpHtmlAttribute
 				{
 					"key": "class",
+					"value": new OpString
+					{
+						"value": css_name,
+					},
+				},
+				new OpHtmlAttribute
+				{
+					"key": "@key_debug",
 					"value": new OpString
 					{
 						"value": css_name,
@@ -853,8 +913,8 @@ class WidgetEditPageModel extends BasePageModel
 			}
 		}
 		
-		/* Add render key */
-		this.addRenderKey(op_code);
+		/* Add op_code attrs */
+		this.addTagAttrs(op_code);
 		
 		return op_code;
 	}
