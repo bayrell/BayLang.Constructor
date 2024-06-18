@@ -56,6 +56,16 @@
 </style>
 
 
+<template name="renderComponentName">
+	<div class="widget_param__row">
+		<div class="widget_param__label">Component</div>
+		<div class="widget_param__content">
+			{{ this.model.selected_item.op_code.tag_name }}
+		</div>
+	</div>
+</template>
+
+
 <template name="renderWidgetName">
 	<div class="widget_param__row">
 		<div class="widget_param__label">
@@ -171,12 +181,10 @@
 	<div class="widget_param">
 		%if (this.model.selected_item)
 		{
-			<!-- Render widget name -->
+			<!-- Render info -->
+			%render this.renderComponentName();
 			%render this.renderWidgetName();
 			%render this.renderClassName();
-			
-			<!-- Render CSS -->
-			%render this.renderCSS();
 			
 			<!-- Render params -->
 			%if (this.model.is_component)
@@ -187,6 +195,9 @@
 			{
 				%render this.renderHtmlParams();
 			}
+			
+			<!-- Render CSS -->
+			%render this.renderCSS();
 			
 			<!-- Render dialog -->
 			%render this.renderWidget(this.edit_dialog);

@@ -197,6 +197,10 @@ class WidgetEditPageModel extends BasePageModel
 			"key": "add"
 		});
 		this.context_menu.addItem({
+			"label": "Insert item",
+			"key": "insert"
+		});
+		this.context_menu.addItem({
 			"label": "Duplicate item",
 			"key": "duplicate"
 		});
@@ -205,6 +209,7 @@ class WidgetEditPageModel extends BasePageModel
 			"key": "remove"
 		});
 		this.context_menu.events.add("onClickItem", new Callback(this, "onContextClickItem"));
+		this.tree.setContextMenu(this.context_menu);
 	}
 	
 	
@@ -263,7 +268,7 @@ class WidgetEditPageModel extends BasePageModel
 			if (op_code_render)
 			{
 				BaseOpCode op_code_expression = op_code_render.getExpression();
-				this.addRenderKey(op_code_expression);
+				this.addRenderKeys(op_code_expression);
 			}
 			
 			/* Load Tree items */
@@ -362,6 +367,14 @@ class WidgetEditPageModel extends BasePageModel
 		/* Add item */
 		if (item_key == "add")
 		{
+			this.add_item_dialog.kind = "after";
+			this.add_item_dialog.show(this.item.selected_path);
+		}
+		
+		/* Insert item */
+		if (item_key == "insert")
+		{
+			this.add_item_dialog.kind = "last";
 			this.add_item_dialog.show(this.item.selected_path);
 		}
 		
@@ -559,42 +572,6 @@ class WidgetEditPageModel extends BasePageModel
 	
 	
 	/**
-	 * Add render key
-	 */
-	void addRenderKey(Collection items)
-	{
-		if (not items) return;
-		if (items instanceof OpHtmlItems) items = items.items;
-		for (int i=0; i<items.count(); i++)
-		{
-			BaseOpCode item = items.get(i);
-			
-			/* Add render key to items */
-			if (rtl::is_instanceof(item, classof OpHtmlTag))
-			{
-				OpHtmlAttribute key_attr = item.attrs.findItem(
-					lib::equalAttr("key", "@key")
-				);
-				OpHtmlAttribute key_debug_attr = item.attrs.findItem(
-					lib::equalAttr("key", "@key_debug")
-				);
-				if (key_attr == null and key_debug_attr == null)
-				{
-					item.attrs.push(new OpHtmlAttribute{
-						"key": "@key_debug",
-						"value": new OpString{
-							"value": "widget_" ~ this.widget_inc,
-						},
-					});
-					this.widget_inc = this.widget_inc + 1;
-				}
-				this.addRenderKey(item.items);
-			}
-		}
-	}
-	
-	
-	/**
 	 * Load Tree items
 	 */
 	void loadTreeItems()
@@ -621,6 +598,7 @@ class WidgetEditPageModel extends BasePageModel
 	 */
 	void treeSelectItem(Collection<int> path, WidgetTreeItem item)
 	{
+		if (not this.isLoaded()) return null;
 		this.breadcrumbs_selected = -1;
 		this.context_menu.hide();
 		this.getFramePageModel().selectItem(path);
@@ -758,14 +736,55 @@ class WidgetEditPageModel extends BasePageModel
 	
 	
 	/**
+	 * Add render key
+	 */
+	void addRenderKey(OpHtmlTag op_code)
+	{
+		OpHtmlAttribute key_attr = op_code.attrs.findItem(
+			lib::equalAttr("key", "@key")
+		);
+		OpHtmlAttribute key_debug_attr = op_code.attrs.findItem(
+			lib::equalAttr("key", "@key_debug")
+		);
+		if (key_attr == null and key_debug_attr == null)
+		{
+			op_code.attrs.push(new OpHtmlAttribute{
+				"key": "@key_debug",
+				"value": new OpString{
+					"value": "widget_" ~ this.widget_inc,
+				},
+			});
+			this.widget_inc = this.widget_inc + 1;
+		}
+		this.addRenderKeys(op_code.items);
+	}
+	
+	
+	/**
+	 * Add render keys
+	 */
+	void addRenderKeys(Collection items)
+	{
+		if (not items) return;
+		if (items instanceof OpHtmlItems) items = items.items;
+		for (int i=0; i<items.count(); i++)
+		{
+			BaseOpCode item = items.get(i);
+			
+			/* Add render key to item */
+			if (rtl::is_instanceof(item, classof OpHtmlTag))
+			{
+				this.addRenderKey(item);
+			}
+		}
+	}
+	
+	
+	/**
 	 * Create widget
 	 */
-	void createWidget(string widget_name, Collection<int> path, string kind)
+	OpHtmlTag createWidget(string widget_name)
 	{
-		Collection<int> parent_path = path.slice(0, -1);
-		WidgetTreeItem parent_item = this.tree.root.get(parent_path);
-		WidgetTreeItem dest_item = this.tree.root.get(path);
-		
 		/* Add module */
 		string alias_name = this.addModule(widget_name);
 		
@@ -782,14 +801,6 @@ class WidgetEditPageModel extends BasePageModel
 					{
 						"value": css_name,
 					},
-				},
-				new OpHtmlAttribute
-				{
-					"key": "@key",
-					"value": new OpString
-					{
-						"value": css_name,
-					},
 				}
 			],
 			"items": new OpHtmlItems(),
@@ -799,57 +810,107 @@ class WidgetEditPageModel extends BasePageModel
 		/* Default template */
 		var content_window = this.getFrameWindow();
 		Callback f = new content_window.Runtime.Callback(widget_name, "getDefaultTemplate");
-		if (f.exists())
+		if (not f.exists()) return op_code;
+		
+		/* Get default template */
+		Dict templates = f.apply();
+		fn template_factory = templates.get("default");
+		
+		/* Get template content */
+		Dict template_info = template_factory();
+		string template_content = "<class>" ~ template_info.get("template") ~ "</class>";
+		
+		/* Parse default template */
+		OpModule default_template = null;
+		ParserBay parser = this.createParser();
+		try
 		{
-			/* Get default template */
-			string template_content = f.apply();
-			template_content = "<class>" ~ template_content ~ "</class>";
-			
-			/* Parse default template */
-			OpModule default_template = null;
-			ParserBay parser = this.createParser();
-			try
-			{
-				list res = parser::parse(parser, template_content);
-				parser = res.get(0);
-				default_template = res.get(1);
-			}
-			catch (var e)
-			{
-			}
-			
+			list res = parser::parse(parser, template_content);
+			parser = res.get(0);
+			default_template = res.get(1);
+		}
+		catch (var e)
+		{
+		}
+		
+		/* If default template is correct */
+		if (default_template != null)
+		{
 			/* Add default template */
-			if (default_template != null)
+			this.addDefaultTemplate(op_code, default_template);
+			
+			/* Add default CSS */
+			OpDeclareClass op_code_class = default_template.findClass();
+			if (op_code_class)
 			{
-				this.addDefaultTemplate(op_code, default_template);
+				OpHtmlStyle op_code_style = op_code_class.items.findItem(
+					lib::isInstance(classof OpHtmlStyle)
+				);
+				if (op_code_style)
+				{
+					this.item.setCSSValue("." ~ css_name, op_code_style.content);
+				}
 			}
 		}
 		
-		/* Default css */
-		Callback f = new content_window.Runtime.Callback(widget_name, "getDefaultCSS");
-		if (f.exists())
+		/* Add render key */
+		this.addRenderKey(op_code);
+		
+		return op_code;
+	}
+	
+	
+	/**
+	 * Add widget op_code
+	 */
+	void addOpCode(OpHtmlTag op_code, Collection<int> path, string kind)
+	{
+		Collection<int> parent_path = path ? path.slice(0, -1) : [];
+		WidgetTreeItem parent_item = this.tree.root.get(parent_path);
+		WidgetTreeItem dest_item = path ? this.tree.root.get(path) : null;
+		Vector new_src_path = [];
+		
+		/* If dest item is null */
+		if (dest_item == null)
 		{
-			string css_content = f.apply();
-			this.item.setCSSValue("." ~ css_name, css_content);
+			if (kind == "first") kind = "before";
+			if (kind == "last") kind = "after";
 		}
 		
 		/* Add items */
 		if (kind == "before" or kind == "after")
 		{
-			parent_item.op_code.items.addItem(op_code, dest_item ? dest_item.op_code : null, kind);
+			/* Add item */
+			int pos = parent_item.op_code.items.items.addItem(
+				op_code, dest_item ? dest_item.op_code : null, kind
+			);
+			
+			/* Create src new path */
+			new_src_path = parent_path.slice();
+			new_src_path.push(pos);
+			
+			/* Recreate tree items */
 			parent_item.items = [];
 			parent_item.addHtmlItems(parent_item.op_code.items);
 		}
 		else
 		{
+			/* Add item */
 			if (kind == "first") dest_item.op_code.items.items.insert(0, op_code);
 			else if (kind == "last") dest_item.op_code.items.items.push(op_code);
+			
+			/* Recreate tree items */
 			dest_item.items = [];
 			dest_item.addHtmlItems(dest_item.op_code.items);
+			
+			/* Create src new path */
+			int pos = dest_item.op_code.items.items.indexOf(op_code);
+			new_src_path = path.slice();
+			new_src_path.push(pos);
 		}
 		
-		/* Widget inc */
-		this.widget_inc = this.widget_inc + 1;
+		/* Select new item */
+		this.tree.selectItem(new_src_path);
 		
 		/* Set app is changed */
 		this.onAppChanged();
@@ -859,6 +920,8 @@ class WidgetEditPageModel extends BasePageModel
 		
 		/* Update CSS */
 		this.updateFrameCSS();
+		
+		return new_src_path;
 	}
 	
 	
@@ -901,8 +964,8 @@ class WidgetEditPageModel extends BasePageModel
 		if (not parent_item) return;
 		
 		WidgetTreeItem dest_item = this.tree.root.get(path);
-		parent_item.removeItem(dest_item);
-		parent_item.op_code.items.removeItem(dest_item.op_code);
+		parent_item.items.removeItem(dest_item);
+		parent_item.op_code.items.items.removeItem(dest_item.op_code);
 		
 		/* Set selected is null */
 		this.tree.selectItem(null);
@@ -927,14 +990,14 @@ class WidgetEditPageModel extends BasePageModel
 		TreeItem src_parent_item = params.get("src_parent_item");
 		
 		/* Move item */
-		src_parent_item.op_code.items.removeItem(src_item.op_code);
+		src_parent_item.op_code.items.items.removeItem(src_item.op_code);
 		if (kind == "into")
 		{
-			dest_parent_item.op_code.items.addItem(src_item.op_code, null, "before");
+			dest_parent_item.op_code.items.items.addItem(src_item.op_code, null, "before");
 		}
 		else
 		{
-			dest_parent_item.op_code.items.addItem(src_item.op_code, dest_item.op_code, kind);
+			dest_parent_item.op_code.items.items.addItem(src_item.op_code, dest_item.op_code, kind);
 		}
 		
 		/* Set app is changed */

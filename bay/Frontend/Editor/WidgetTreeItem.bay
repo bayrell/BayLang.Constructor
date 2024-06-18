@@ -90,9 +90,9 @@ class WidgetTreeItem extends TreeItem
 		)
 		{
 			WidgetTreeItem new_item = this.newInstance{ "op_code": op_code };
-			this.addItem(new_item);
 			new_item.updateLabel();
 			new_item.addHtmlItems(op_code.items);
+			this.items.push(new_item);
 		}
 	}
 	

@@ -8,6 +8,7 @@ use Runtime.Callback;
 use Runtime.Widget.ButtonModel;
 use Runtime.Widget.Dialog.ConfirmDialogModel;
 use BayLang.Constructor.Frontend.Editor.AddItemDialog;
+use BayLang.OpCodes.OpHtmlTag;
 
 
 class AddItemDialogModel extends ConfirmDialogModel
@@ -36,11 +37,9 @@ class AddItemDialogModel extends ConfirmDialogModel
 	 */
 	void selectItem(string widget_name)
 	{
-		this.parent_widget.createWidget(
-			widget_name,
-			this.selected_path,
-			this.kind
-		)
+		/* Create widget */
+		OpHtmlTag op_code = this.parent_widget.createWidget(widget_name);
+		this.parent_widget.addOpCode(op_code, this.selected_path, this.kind);
 		this.hide();
 	}
 	
@@ -50,7 +49,6 @@ class AddItemDialogModel extends ConfirmDialogModel
 	 */
 	void show(Collection<string> selected_path = null)
 	{
-		if (not selected_path) return;
 		this.current_widgets = this.parent_widget.getFrameWidgets();
 		this.selected_path = selected_path ? selected_path.slice() : null;
 		parent();

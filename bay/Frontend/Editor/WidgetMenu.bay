@@ -55,9 +55,9 @@
 		</div>
 		<div class="widget_menu__content">
 			<div class="widget_menu__item"
-				class={{ this.model.menu_selected != "tree" ? "hide" : "" }}
+				class={{ this.model.menu_selected != "styles" ? "hide" : "" }}
 			>
-				%render this.renderWidget(this.model.tree);
+				<WidgetStyles @model={{ this.model.item }} />
 			</div>
 			<div class="widget_menu__item"
 				class={{ this.model.menu_selected != "params" ? "hide" : "" }}
@@ -65,9 +65,9 @@
 				<WidgetParam @model={{ this.model.item }} />
 			</div>
 			<div class="widget_menu__item"
-				class={{ this.model.menu_selected != "styles" ? "hide" : "" }}
+				class={{ this.model.menu_selected != "tree" ? "hide" : "" }}
 			>
-				<WidgetStyles @model={{ this.model.item }} />
+				%render this.renderWidget(this.model.tree);
 			</div>
 		</div>
 	</div>
@@ -81,10 +81,9 @@
  */
 string getTitle()
 {
-	if (this.model.menu_selected == "css") return "CSS";
-	if (this.model.menu_selected == "hierarchy") return "Hierarchy";
-	if (this.model.menu_selected == "params") return "Parameters";
 	if (this.model.menu_selected == "styles") return "Styles";
+	if (this.model.menu_selected == "params") return "Parameters";
+	if (this.model.menu_selected == "tree") return "Tree";
 	return "";
 }
 

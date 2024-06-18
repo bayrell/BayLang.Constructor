@@ -172,6 +172,9 @@ class WidgetPageModel extends BasePageModel
 			this.selectItem(this.selected_path);
 			this.updateSelectedBox();
 		});
+		
+		/* Update selected box */
+		window.setTimeout(void (){ this.updateSelectedBox(); }, 10);
 	}
 	
 	
