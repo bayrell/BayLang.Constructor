@@ -86,6 +86,25 @@
 </style>
 
 
+<template name="renderSelectSize">
+	<div class="widget_edit_page__menu_item widget_edit_page__menu_item--select_size">
+		%for (int i=0; i<this.model.iframe_sizes.count(); i++)
+		{
+			%set Dict size = this.model.iframe_sizes.get(i);
+			<div class="widget_edit_page__iframe_size"
+				class={{ this.model.iframe_current_size == size.get("label") ? "selected" : "" }}
+				@event:click={{
+					void () use (size)
+					{
+						this.model.selectIFrameSize(size);
+					}
+				}}
+			>{{ size.get("label") }}</div>
+		}
+	</div>
+</template>
+
+
 <template name="renderMenu">
 	<div class="widget_edit_page__menu">
 		<div class="widget_edit_page__menu_item_gap">
@@ -104,21 +123,7 @@
 				{{ this.getAppStatusMessage() }}
 			</div>
 		</div>
-		<div class="widget_edit_page__menu_item widget_edit_page__menu_item--select_size">
-			%for (int i=0; i<this.model.iframe_sizes.count(); i++)
-			{
-				%set Dict size = this.model.iframe_sizes.get(i);
-				<div class="widget_edit_page__iframe_size"
-					class={{ this.model.iframe_current_size == size.get("label") ? "selected" : "" }}
-					@event:click={{
-						void () use (size)
-						{
-							this.model.selectIFrameSize(size);
-						}
-					}}
-				>{{ size.get("label") }}</div>
-			}
-		</div>
+		<!-- %render this.renderSelectSize(); -->
 		<div class="widget_edit_page__menu_item_gap widget_edit_page__menu--right">
 			<div class="widget_edit_page__menu_item widget_edit_page__menu_item--button"
 				class={{

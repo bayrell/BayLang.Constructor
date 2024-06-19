@@ -8,6 +8,8 @@ use Runtime.Callback;
 use Runtime.Widget.ButtonModel;
 use Runtime.Widget.Dialog.ConfirmDialogModel;
 use BayLang.Constructor.Frontend.Editor.AddItemDialog;
+use BayLang.Constructor.Frontend.Editor.Helper;
+use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
 use BayLang.OpCodes.OpHtmlTag;
 
 
@@ -16,8 +18,14 @@ class AddItemDialogModel extends ConfirmDialogModel
 	string component = classof AddItemDialog;
 	string widget_name = "add_item_dialog";
 	string kind = "after";
+	string widget_name_class = "";
+	string widget_name_value = "";
+	int step = 1;
 	Collection<string> current_widgets = null;
-	Collection<int> selected_path = null;
+	
+	/* Selected item */
+	Collection<int> selected_widget_path = null;
+	Dict selected_widget_info = null;
 	
 	
 	/**
@@ -26,9 +34,6 @@ class AddItemDialogModel extends ConfirmDialogModel
 	void initWidget(Dict params)
 	{
 		parent(params);
-		
-		/* Confirm button */
-		this.buttons.removeItemByName("confirm_button");
 	}
 	
 	
@@ -37,10 +42,24 @@ class AddItemDialogModel extends ConfirmDialogModel
 	 */
 	void selectItem(string widget_name)
 	{
-		/* Create widget */
-		OpHtmlTag op_code = this.parent_widget.createWidget(widget_name);
-		this.parent_widget.addOpCode(op_code, this.selected_path, this.kind);
-		this.hide();
+		this.widget_name_class = widget_name;
+		this.title = "Add item " ~ widget_name;
+		this.setStep(2);
+	}
+	
+	
+	/**
+	 * Set step
+	 */
+	void setStep(int step)
+	{
+		this.step = step;
+		if (step == 1)
+		{
+		}
+		else if (step == 2)
+		{
+		}
 	}
 	
 	
@@ -49,8 +68,37 @@ class AddItemDialogModel extends ConfirmDialogModel
 	 */
 	void show(Collection<string> selected_path = null)
 	{
+		this.step = 1;
+		this.widget_name_class = "";
+		this.widget_name_value = "item";
+		this.title = "Add item";
 		this.current_widgets = this.parent_widget.getFrameWidgets();
-		this.selected_path = selected_path ? selected_path.slice() : null;
+		this.selected_widget_path = selected_path ? selected_path.slice() : null;
+		this.selected_widget_info = null;
+		if (this.selected_widget_path)
+		{
+			WidgetTreeItem selected_item = this.parent_widget.tree.root.get(
+				this.selected_widget_path
+			);
+			this.selected_widget_info = Helper::getTagWidgetInfo(selected_item.op_code);
+			this.widget_name_value = this.selected_widget_info.get("widget_name") ~ "_item";
+		}
 		parent();
+	}
+	
+	
+	/**
+	 * Add confirm button click
+	 */
+	void onConfirmButtonClick()
+	{
+		if (this.step != 2) return;
+		
+		/* Create widget */
+		OpHtmlTag op_code = this.parent_widget.helper.createWidget(
+			this.widget_name_class, this.widget_name_value
+		);
+		this.parent_widget.addOpCode(op_code, this.selected_widget_path, this.kind);
+		this.hide();
 	}
 }

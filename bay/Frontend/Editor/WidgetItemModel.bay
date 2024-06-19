@@ -8,6 +8,7 @@ use Runtime.lib;
 use Runtime.Callback;
 use Runtime.Web.BaseModel;
 use Runtime.Web.Annotations.Param;
+use BayLang.Constructor.Frontend.Editor.Helper;
 use BayLang.Constructor.Frontend.Editor.WidgetCSS;
 use BayLang.Constructor.Frontend.Editor.WidgetEditPageModel;
 use BayLang.Constructor.Frontend.Editor.WidgetItemParam;
@@ -42,8 +43,6 @@ class WidgetItemModel extends BaseModel
 	/* Selected item */
 	Collection<int> selected_path = null;
 	WidgetTreeItem selected_item = null;
-	string selected_class_name = "";
-	string selected_widget_name = "";
 	
 	/* HTML Element */
 	bool is_component = false;
@@ -182,8 +181,6 @@ class WidgetItemModel extends BaseModel
 		this.param_class_name.value = [];
 		this.param_widget_name.op_attr = null;
 		this.param_widget_name.value = "";
-		this.selected_class_name = "";
-		this.selected_widget_name = "";
 		
 		/* Clear HTML params */
 		this.is_component = false;
@@ -315,8 +312,8 @@ class WidgetItemModel extends BaseModel
 		if (not (selected_item_op_code instanceof OpHtmlTag)) return;
 		
 		/* Setup widget name */
-		this.selected_widget_name = selected_item_op_code.tag_name;
-		if (not WidgetEditPageModel::isComponent(this.selected_widget_name))
+		string selected_tag_name = selected_item_op_code.tag_name;
+		if (not Helper::isComponent(selected_tag_name))
 		{
 			this.setupHtmlParams();
 			return;
@@ -325,17 +322,15 @@ class WidgetItemModel extends BaseModel
 		/* Set component */
 		this.is_component = true;
 		
-		/* Setup widget class name */
-		string class_name = this.parent_widget.getWidgetClassName(this.selected_widget_name);
-		if (not class_name) return;
-		this.selected_class_name = class_name;
-		
-		/* Get params */
+		/* Get callback functions from widget class */
 		var content_window = this.parent_widget.getFrameWindow();
-		var widget_class = content_window.Runtime.rtl.find_class(class_name);
-		Callback getFieldsList = new content_window.Runtime.Callback(class_name, "getFieldsList");
+		string module_class_name = this.parent_widget.helper.getModuleClassName(selected_tag_name);
+		var widget_class = content_window.Runtime.rtl.find_class(module_class_name);
+		Callback getFieldsList = new content_window.Runtime.Callback(
+			module_class_name, "getFieldsList"
+		);
 		Callback getFieldInfoByName = new content_window.Runtime.Callback(
-			class_name, "getFieldInfoByName"
+			module_class_name, "getFieldInfoByName"
 		);
 		
 		if (not getFieldsList.exists()) return;
@@ -443,13 +438,9 @@ class WidgetItemModel extends BaseModel
 		/* Change op code value */
 		this.changeOpCodeAttrValue(item, value);
 		
-		/* Set app is changed */
-		this.parent_widget.onAppChanged();
-		
 		/* Update render */
 		this.parent_widget.updateFrameRender();
 	}
-	
 	
 	
 	/**
@@ -476,9 +467,6 @@ class WidgetItemModel extends BaseModel
 				text_item.value.value = value;
 			}
 		}
-		
-		/* Set app is changed */
-		this.parent_widget.onAppChanged();
 		
 		/* Update render */
 		this.parent_widget.updateFrameRender();
@@ -525,9 +513,6 @@ class WidgetItemModel extends BaseModel
 			);
 		}
 		
-		/* Set app is changed */
-		this.parent_widget.onAppChanged();
-		
 		/* Update render */
 		this.parent_widget.updateFrameRender();
 	}
@@ -553,9 +538,6 @@ class WidgetItemModel extends BaseModel
 			this.selected_item.updateLabel();
 			this.parent_widget.updateFrameRender();
 		}
-		
-		/* Set app is changed */
-		this.parent_widget.onAppChanged();
 	}
 	
 	
@@ -582,9 +564,6 @@ class WidgetItemModel extends BaseModel
 	{
 		/* Set CSS Value */
 		this.setCSSValue(selector_name, value);
-		
-		/* Set app is changed */
-		this.parent_widget.onAppChanged();
 		
 		/* Update CSS */
 		this.parent_widget.updateFrameCSS();

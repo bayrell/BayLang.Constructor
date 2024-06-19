@@ -7,6 +7,7 @@
 >
 
 <use name="Runtime.Web.Annotations.Widget" />
+<use name="Runtime.Widget.Input" component="true" />
 <use name="Runtime.Widget.Select" component="true" />
 
 
@@ -29,54 +30,91 @@
 .list_item:hover{
 	background-color: var(--widget-color-hover);
 }
+.list_item.selected{
+	background-color: var(--widget-color-primary);
+    color: var(--widget-color-primary-text);
+}
 .row{
+	margin-bottom: 20px;
+}
+.row_flex{
 	display: flex;
 	align-items: center;
-	margin-bottom: 20px;
+}
+.row:last-child{
+	margin-bottom: 0px;
 }
 .row_label{
 	margin-right: 10px;
 }
+.selected_widget_label{
+	padding-left: 10px;
+}
 </style>
-
-
-<template name="renderTitle">
-	<div class='widget_dialog__title'>Add dialog item</div>
-</template>
 
 
 <template name="renderContent">
 	<div class="widget_dialog__content">
-		<div class="row">
-			<div class="row_label">Kind</div>
-			<div class="row_content">
-				<Select
-					value={{ this.model.kind }}
-					options=[
-						{"value": "after", "label": "Add after"},
-						{"value": "before", "label": "Add before"},
-						{"value": "first", "label": "Insert fisrt"},
-						{"value": "last", "label": "Insert last"},
-					]
-					@event:valueChange={{ void (string value){ this.model.kind = value; } }}
-				/>
-			</div>
-		</div>
-		<div class="list_title">Select component</div>
-		<div class="list_items">
-		%if (this.model.current_widgets)
+		%if (this.model.step == 1)
 		{
-			%for (int i=0; i<this.model.current_widgets.count(); i++)
-			{
-				%set Widget widget = this.model.current_widgets.get(i);
-				<div class="list_item"
-					@event:click={{
-						void () use (widget) { this.model.selectItem(widget.name) }
-					}}
-				>{{ widget.name }}</div>
-			}
+			<div class="row" @key="select_component">
+				<div class="list_title">Select component</div>
+				<div class="list_items">
+				%if (this.model.current_widgets)
+				{
+					%for (int i=0; i<this.model.current_widgets.count(); i++)
+					{
+						%set Widget widget = this.model.current_widgets.get(i);
+						<div class="list_item"
+							class={{ this.model.select_name == widget.name ? "selected" : "" }}
+							@event:click={{
+								void () use (widget)
+								{
+									this.model.selectItem(widget.name);
+								}
+							}}
+						>{{ widget.name }}</div>
+					}
+				}
+				</div>
+			</div>
 		}
-		</div>
+		%else if (this.model.step == 2)
+		{
+			<div class="row row_flex" @key="kind">
+				<div class="row_item row_label">Kind</div>
+				<div class="row_item row_content">
+					<Select
+						value={{ this.model.kind }}
+						options=[
+							{"value": "after", "label": "Add after"},
+							{"value": "before", "label": "Add before"},
+							{"value": "first", "label": "Insert fisrt"},
+							{"value": "last", "label": "Insert last"},
+						]
+						@event:valueChange={{ void (string value){ this.model.kind = value; } }}
+					/>
+				</div>
+				%if (this.model.selected_widget_info)
+				{
+					<div class="row_item selected_widget_label">
+						{{ this.model.selected_widget_info.get("label") }}
+					</div>
+				}
+			</div>
+			<div class="row row_flex" @key="widget_name">
+				<div class="row_item row_label">Widget name</div>
+				<div class="row_item row_content">
+					<Input
+						value={{ this.model.widget_name_value }}
+						@event:valueChange={{ void (string value)
+						{
+							this.model.widget_name_value = value;
+						} }}
+					/>
+				</div>
+			</div>
+		}
 	</div>
 </template>
 
