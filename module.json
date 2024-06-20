@@ -8,6 +8,7 @@
 		"Frontend/Editor/AddItemDialog.bay",
 		"Frontend/Editor/AddItemDialogModel.bay",
 		"Frontend/Editor/Breadcrumbs.bay",
+		"Frontend/Editor/WidgetCSS.bay",
 		"Frontend/Editor/WidgetEditPage.bay",
 		"Frontend/Editor/WidgetEditPageModel.bay",
 		"Frontend/Editor/WidgetItemModel.bay",

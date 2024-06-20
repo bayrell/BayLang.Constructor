@@ -83,9 +83,9 @@ body, html {
 <script>
 
 /**
- * Returns widget
+ * Returns component
  */
-Collection<int> getWidget(var elem)
+Collection<int> getComponent(var elem)
 {
 	#ifcode JAVASCRIPT then
 	while (elem != null)
@@ -94,15 +94,9 @@ Collection<int> getWidget(var elem)
 		{
 			return elem;
 		}
-		if (elem.__vnode.component && elem.__vnode.component.vnode)
+		if (elem.__component__)
 		{
-			var elem_component = elem.__vnode.component.vnode.el;
-			if (elem_component == elem) return elem;
-		}
-		if (elem.__vueParentComponent && elem.__vueParentComponent.vnode)
-		{
-			var elem_component = elem.__vueParentComponent.vnode.el;
-			if (elem_component == elem) return elem;
+			return elem;
 		}
 		elem = elem.parentElement;
 	}
@@ -116,25 +110,12 @@ Collection<int> getWidget(var elem)
  */
 Collection<int> getWidgetPath(var elem)
 {
-	#ifcode JAVASCRIPT then
-	if (!elem) return null;
-	if (!elem.__vnode) return null;
-	if (elem.__vnode.component && elem.__vnode.component.vnode)
+	elem = this.getComponent(elem);
+	if (elem.hasAttribute("data-widget-path"))
 	{
-		if (elem == elem.__vnode.component.vnode.el)
-		{
-			return elem.__vnode.component.ctx.data_widget_path;
-		}
+		return elem.getAttribute("data-widget-path");
 	}
-	if (elem.__vueParentComponent && elem.__vueParentComponent.vnode)
-	{
-		if (elem == elem.__vueParentComponent.vnode.el)
-		{
-			return elem.__vueParentComponent.vnode.component.ctx.data_widget_path;
-		}
-	}
-	return elem.getAttribute("data-widget-path");
-	#endif
+	return elem.__component__.data_widget_path;
 }
 
 
@@ -144,18 +125,17 @@ Collection<int> getWidgetPath(var elem)
 void onClick(var e)
 {
 	var elem = e.target;
-	elem = this.getWidget(elem);
-	if (not elem) return;
 	
+	/* Get widget path */
+	string widget_path_str = this.getWidgetPath(elem);
+	if (not widget_path_str) return;
+	
+	/* Get page model */
 	var page_model = this.model.getEditPageModel();
 	if (not page_model) return;
 	
 	/* Prevent default */
 	e.preventDefault();
-	
-	/* Send select item */
-	string widget_path_str = this.getWidgetPath(elem);
-	if (not rtl::exists(widget_path_str)) return;
 	
 	Collection<int> widget_path = rs::split(".", widget_path_str);
 	Collection<int> path = this.model.convertWidgetToTreePath(widget_path);
@@ -170,9 +150,12 @@ void onClick(var e)
 void onContextMenu(var e)
 {
 	var elem = e.target;
-	elem = this.getWidget(elem);
-	if (not elem) return;
 	
+	/* Get widget path */
+	string widget_path_str = this.getWidgetPath(elem);
+	if (not widget_path_str) return;
+	
+	/* Get page model */
 	var page_model = this.model.getEditPageModel();
 	if (not page_model) return;
 	
@@ -180,9 +163,6 @@ void onContextMenu(var e)
 	e.preventDefault();
 	
 	/* Send select item */
-	string widget_path_str = this.getWidgetPath(elem);
-	if (not widget_path_str) return;
-	
 	Collection<int> widget_path = rs::split(".", widget_path_str);
 	Collection<int> path = this.model.convertWidgetToTreePath(widget_path);
 	page_model.tree.selectItem(path);

@@ -32,7 +32,7 @@ class WidgetItemModel extends BaseModel
 {
 	string component = classof WidgetCSS;
 	string widget_name = "item";
-	Collection<Dict> styles = {};
+	Collection<WidgetItemStyle> styles = {};
 	OpHtmlStyle main_style_item = null;
 	
 	/* Params */
@@ -60,7 +60,7 @@ class WidgetItemModel extends BaseModel
 		for (int i=0; i<selectors.count(); i++)
 		{
 			string selector_name = selectors.get(i);
-			Dict item = this.styles.get(selector_name);
+			WidgetItemStyle item = this.styles.get(selector_name);
 			items.push(item.content);
 		}
 		return rs::join("\n", items);
@@ -93,7 +93,7 @@ class WidgetItemModel extends BaseModel
 			WidgetItemStyle item_style = new WidgetItemStyle();
 			item_style.op_code = item;
 			item_style.selector_name = selector_name;
-			item_style.parent_widget = this.parent_widget;
+			item_style.parent_widget = this;
 			this.styles.set(selector_name, item_style);
 		}
 		

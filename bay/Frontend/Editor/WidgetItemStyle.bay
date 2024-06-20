@@ -15,18 +15,19 @@ use BayLang.OpCodes.OpHtmlStyle;
 
 class WidgetItemStyle extends BaseObject
 {
-    WidgetEditPageModel parent_widget = null;
-    OpHtmlStyle op_code = null;
-    Dict css_values = {};
-    string selector_name = "";
-    string source = "";
-    string content = "";
-    
-    
-    /**
+	WidgetEditPageModel parent_widget = null;
+	OpHtmlStyle op_code = null;
+	string selector_name = "";
+	string source = "";
+	string content = "";
+	string css_ignore = "";
+	Dict<string> css_values = {};
+	
+	
+	/**
 	 * Translate CSS
 	 */
-	list translateCSS(ParserBay parser, TranslatorES6 translator, string source)
+	pure list translateCSS(ParserBay parser, TranslatorES6 translator, string source)
 	{
 		/* Parse source */
 		BaseOpCode op_code = null;
@@ -51,32 +52,148 @@ class WidgetItemStyle extends BaseObject
 		string content = window.eval(rs::join("\n", items));
 		return content;
 	}
-    
-    
-    /**
-     * Update CSS values
-     */
-    void updateCSSValues()
-    {
-        this.css_values = {};
-    }
-    
-    
-    /**
-     * Set source
-     */
-    void setSource(string source)
-    {
-        ParserBay parser = this.parent_widget.createParser();
-		TranslatorES6 translator = this.parent_widget.createTranslator();
+	
+	
+	/**
+	 * Parse CSS
+	 */
+	pure list parseCSS(string content)
+	{
+		int content_sz = rs::strlen(content);
+		int pos = 0;
+		int start = 0;
+		Collection css_values = [];
+		Collection css_ignore = [];
+		while (pos < content_sz)
+		{
+			string ch = rs::charAt(content, pos);
+			if (ch == "{")
+			{
+				int level = 1;
+				if (start != pos)
+				{
+					string s = rs::substr(content, start, pos - start);
+					Collection<string> items = rs::split(";", s);
+					if (items.count() > 1)
+					{
+						css_values.push(rs::join(";", items.slice(0, -1)) ~ ";");
+					}
+					css_ignore.push(rs::trim(items.last()));
+				}
+				start = pos;
+				while (pos < content_sz and (
+					ch != "}" and level == 0 or level > 0)
+				)
+				{
+					pos = pos + 1;
+					ch = rs::charAt(content, pos);
+					if (ch == "{") level = level + 1;
+					if (ch == "}") level = level - 1;
+				}
+				if (start != pos) css_ignore.push(rs::substr(content, start, pos - start + 1));
+				if (pos < content_sz) start = pos + 1;
+			}
+			else
+			{
+				pos = pos + 1;
+			}
+		}
+		if (start != pos) css_values.push(rs::substr(content, start, pos - start));
+		return
+		[
+			rs::join("", css_values),
+			rs::join("", css_ignore)
+		];
+	}
+	
+	
+	/**
+	 * Build source
+	 */
+	string buildSource()
+	{
+		Collection items = [];
+		Collection keys = this.css_values.keys().sort();
+		for (int i=0; i<keys.count(); i++)
+		{
+			string key = keys.get(i);
+			string value = this.css_values.get(key);
+			items.push(key ~ ": " ~ value);
+		}
+		string source = rs::join(";\n", items);
+		return source ~ "\n" ~ this.css_ignore;
+	}
+	
+	
+	/**
+	 * Set css value
+	 */
+	void setCSSValue(string key, string value)
+	{
+		/* Set value */
+		value = rs::trim(value);
+		if (value == "")
+		{
+			this.css_values.remove(key);
+		}
+		else
+		{
+			this.css_values.set(key, value);
+		}
+		
+		/* Update source */
+		string source = this.buildSource();
+		this.setSource(source, false);
+		
+		/* Update CSS */
+		this.parent_widget.parent_widget.updateFrameCSS();
+	}
+	
+	
+	/**
+	 * Update CSS values
+	 */
+	void updateCSSValues()
+	{
+		string content = this.source;
+		list res = static::parseCSS(content);
+		
+		/* CSS Values */
+		this.css_values = {};
+		Collection items = rs::split(";", res.get(0));
+		for (int i=0; i<items.count(); i++)
+		{
+			string item = items.get(i);
+			Collection item_arr = rs::split(":", item);
+			if (item_arr.count() == 2)
+			{
+				this.css_values.set(rs::trim(item_arr.get(0)), rs::trim(item_arr.get(1)));
+			}
+		}
+		
+		/* CSS Ignore */
+		this.css_ignore = rs::trim(res.get(1));
+	}
+	
+	
+	/**
+	 * Set source
+	 */
+	void setSource(string source, bool update_css = true)
+	{
+		ParserBay parser = this.parent_widget.parent_widget.createParser();
+		TranslatorES6 translator = this.parent_widget.parent_widget.createTranslator();
 		
 		/* Parse CSS */
-        string css_code = this.selector_name ~ "{" ~ source ~ "}";
-		string content = this.translateCSS(parser, translator, css_code);
+		string css_code = this.selector_name ~ "{" ~ source ~ "}";
+		string content = static::translateCSS(parser, translator, css_code);
 		
 		/* Set content */
 		this.source = source;
-        this.content = content;
-        this.updateCSSValues();
-    }
+		this.content = content;
+		if (update_css)
+		{
+			this.updateCSSValues();
+		}
+	}
 }

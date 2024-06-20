@@ -125,33 +125,19 @@
 		</div>
 		<!-- %render this.renderSelectSize(); -->
 		<div class="widget_edit_page__menu_item_gap widget_edit_page__menu--right">
-			<div class="widget_edit_page__menu_item widget_edit_page__menu_item--button"
+			%for (int i=0; i<this.menu_items.count(); i++)
+			{
+				%set Dict item = this.menu_items.get(i);
+				<div class="widget_edit_page__menu_item widget_edit_page__menu_item--button"
 				class={{
-					this.model.menu_selected == "styles"
+					this.model.menu_selected == item.get("value")
 					? "widget_edit_page__menu_item--selected"
 					: ""
 				}}
 				@event:onClick={{
-					void(var e){ this.toggleMenu(e, "styles"); }
-				}}>Styles</div>
-			<div class="widget_edit_page__menu_item widget_edit_page__menu_item--button"
-				class={{
-					this.model.menu_selected == "params"
-					? "widget_edit_page__menu_item--selected"
-					: ""
-				}}
-				@event:onClick={{
-					void(var e){ this.toggleMenu(e, "params"); }
-				}}>Params</div>
-			<div class="widget_edit_page__menu_item widget_edit_page__menu_item--button"
-				class={{
-					this.model.menu_selected == "tree"
-					? "widget_edit_page__menu_item--selected"
-					: ""
-				}}
-				@event:onClick={{
-					void(var e){ this.toggleMenu(e, "tree"); }
-				}}>Tree</div>
+					void(var e) use (item){ this.toggleMenu(e, item.get("value")); }
+				}}>{{ item.get("label") }}</div>
+			}
 		</div>
 	</div>
 </template>
@@ -182,6 +168,14 @@
 
 
 <script>
+
+Collection<string> menu_items = [
+	{"label": "Styles", "value": "styles"},
+	{"label": "CSS", "value": "css"},
+	{"label": "Params", "value": "params"},
+	{"label": "Tree", "value": "tree"},
+];
+
 
 /**
  * Returns app status message

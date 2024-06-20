@@ -14,6 +14,7 @@
 <use name="Runtime.Widget.Dialog.PromptDialog" component="true" />
 <use name="Runtime.Widget.Dialog.PromptDialogModel" />
 <use name="BayLang.Constructor.Frontend.Editor.WidgetItemParam" />
+<use name="BayLang.Constructor.Frontend.Editor.WidgetStyle" component="true" />
 
 
 <style>
@@ -101,21 +102,6 @@
 </template>
 
 
-<template name="renderCSS">
-	%set string selector_name = this.model.getCurrentSelector();
-	<div class="widget_param__row">
-		<div class="widget_param__title">
-			CSS
-		</div>
-		<TextEditable value={{ this.model.getCSSContent(selector_name) }}
-			@event:valueChange={{ void (var value) use (selector_name) {
-				this.model.changeCSSContent(selector_name, value)
-			} }}
-		/>
-	</div>
-</template>
-
-
 <template name="renderComponentParams">
 	%for (int i=0; i<this.model.params.count(); i++)
 	{
@@ -195,9 +181,6 @@
 			{
 				%render this.renderHtmlParams();
 			}
-			
-			<!-- Render CSS -->
-			%render this.renderCSS();
 			
 			<!-- Render dialog -->
 			%render this.renderWidget(this.edit_dialog);

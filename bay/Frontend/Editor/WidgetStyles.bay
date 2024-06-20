@@ -71,7 +71,7 @@
 		</div>
 		<div class="widget_style__content">
 			<TextEditable
-				class="widget_style__editable"
+				class="widget_style__editable overflow"
 				name={{ selector_name }}
 				value={{ this.model.getCSSContent(selector_name) }}
 				@event:valueChange={{ void (var value) use (selector_name) {
