@@ -9,9 +9,6 @@
 <use name="Runtime.Widget.Select" component="true" />
 <use name="Runtime.Widget.Tag" component="true" />
 <use name="Runtime.Widget.TextEditable" component="true" />
-<use name="Runtime.Widget.Dialog.DialogModelException" />
-<use name="Runtime.Widget.Dialog.PromptDialog" component="true" />
-<use name="Runtime.Widget.Dialog.PromptDialogModel" />
 <use name="BayLang.Constructor.Frontend.Editor.WidgetItemStyle" />
 
 
@@ -97,7 +94,10 @@
 					Name
 				</div>
 				<div class="widget_param__text_button"
-					@event:click={{ this.onEditClickName }}
+					@event:click={{ void ()
+					{
+						this.model.parent_widget.renameSelectedItem();
+					} }}
 				>
 					[Edit]
 				</div>
@@ -258,9 +258,6 @@
 					} }}
 				/>
 			}
-			
-			<!-- Render dialog -->
-			%render this.renderWidget(this.edit_dialog);
 		}
 	</div>
 </template>
@@ -269,17 +266,6 @@
 <script>
 
 bool show_styles = true;
-
-/* Dialogs */
-PromptDialogModel edit_dialog = new PromptDialogModel{
-	"widget_name": "edit_dialog",
-	"confirm_button": "Rename",
-	"title": "Rename name",
-	"events": {
-		"confirm": new Callback(this, "onRename")
-	},
-};
-
 
 /**
  * Returns css value
@@ -305,40 +291,6 @@ void setValue(WidgetItemStyle item_style, string key, string value = "")
 	{
 		string selector_name = this.model.getCurrentSelector();
 		this.model.changeCSSContent(selector_name, key ~ ": " ~ value);
-	}
-}
-
-
-/**
- * Add click
- */
-void onEditClickName()
-{
-	this.old_widget_name = this.model.param_widget_name.value;
-	this.edit_dialog.setTitle("Rename " ~ this.old_widget_name);
-	this.edit_dialog.setValue(this.old_widget_name);
-	this.edit_dialog.show();
-}
-
-
-/**
- * Rename
- */
-void onRename(string new_widget_name)
-{
-	if (this.old_widget_name == new_widget_name) return;
-	
-	string new_selector_name = new_widget_name;
-	if (rs::charAt(new_selector_name, 0) != ".") new_selector_name = "." ~ new_selector_name;
-	
-	/* Rename widget */
-	this.model.changeAttrContent("widget_name", new_widget_name);
-	
-	/* Create new style */
-	if (not this.model.styles.has(new_selector_name))
-	{
-		string css_content = this.model.getCSSContent("." ~ this.old_widget_name)
-		this.model.changeCSSContent(new_selector_name, css_content);
 	}
 }
 

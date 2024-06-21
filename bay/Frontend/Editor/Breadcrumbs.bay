@@ -86,6 +86,26 @@
 							selected_path.slice(0, pos + 1)
 						);
 					}
+					this.model.context_menu.hide();
+				}
+			}}
+			@event:contextmenu={{
+				void (var e) use (selected_path, pos, is_menu)
+				{
+					e.preventDefault();
+					
+					/* Select item */
+					this.model.breadcrumbs_selected = -1;
+					this.model.tree.selectItem(
+						selected_path.slice(0, pos + 1)
+					);
+					
+					/* Show context menu */
+					int x = e.clientX;
+					int y = e.clientY;
+					this.model.context_menu.show(x, y);
+					
+					return false;
 				}
 			}}
 		>{{ (item != null) ? item.label : "Select value" }}</span>
@@ -99,24 +119,6 @@
 				}}
 			>@raw{{ "&#9661;" }}</div>
 		}
-	</div>
-</template>
-
-
-<template name="renderRowAddWidget" args="WidgetTreeItem item, int pos">
-	%set Collection<int> selected_path = this.model.item.selected_path;
-	<div class="breadcrumbs__item_row">
-		<span class="breadcrumbs__item_name"
-			@event:click={{
-				void () use (selected_path, pos)
-				{
-					this.model.tree.selectItem(
-						selected_path.slice(0, pos)
-					);
-					this.model.add_item_dialog.show();
-				}
-			}}
-		>+ Add Widget</span>
 	</div>
 </template>
 
@@ -139,6 +141,7 @@
 						this.model.tree.selectItem(
 							selected_path.slice(0, pos).pushIm(j)
 						);
+						this.model.context_menu.hide();
 					}
 				}}
 			>

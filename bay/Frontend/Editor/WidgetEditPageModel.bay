@@ -17,6 +17,7 @@ use Runtime.Web.Annotations.Widget;
 use Runtime.Widget.ButtonModel;
 use Runtime.Widget.ContextMenu.ContextMenuModel;
 use Runtime.Widget.Dialog.ConfirmDialogModel;
+use Runtime.Widget.Dialog.PromptDialogModel;
 use Runtime.Widget.Tree.TreeItem;
 use Runtime.Widget.Tree.TreeModel;
 use BayLang.LangBay.ParserBay;
@@ -98,6 +99,7 @@ class WidgetEditPageModel extends BasePageModel
 	ContextMenuModel context_menu = null;
 	AddItemDialogModel add_item_dialog = null;
 	AddItemDialogModel remove_item_dialog = null;
+	PromptDialogModel rename_item_dialog = null;
 	
 	
 	/**
@@ -181,10 +183,24 @@ class WidgetEditPageModel extends BasePageModel
 		this.helper = this.addWidget(classof Helper);
 		
 		/* Add item dialog model */
-		this.add_item_dialog = this.addWidget(classof AddItemDialogModel);
+		this.add_item_dialog = this.addWidget(classof AddItemDialogModel, {
+			"widget_name": "add_item_dialog",
+		});
 		
 		/* Remove item dialog model */
-		this.remove_item_dialog = this.addWidget(classof ConfirmDialogModel);
+		this.remove_item_dialog = this.addWidget(classof ConfirmDialogModel, {
+			"widget_name": "remove_item_dialog",
+		});
+		
+		/* Rename item dialog model */
+		this.rename_item_dialog = this.addWidget(classof PromptDialogModel, {
+			"widget_name": "rename_item_dialog",
+			"confirm_button": "Rename",
+			"title": "Rename name",
+			"events": {
+				"confirm": new Callback(this, "onRename")
+			},
+		});
 		
 		/* Remove button */
 		ButtonModel confirm_button = this.remove_item_dialog.buttons.getWidget("confirm_button");
@@ -203,6 +219,10 @@ class WidgetEditPageModel extends BasePageModel
 		this.context_menu.addItem({
 			"label": "Insert item",
 			"key": "insert"
+		});
+		this.context_menu.addItem({
+			"label": "Rename item",
+			"key": "rename"
 		});
 		this.context_menu.addItem({
 			"label": "Duplicate item",
@@ -380,6 +400,12 @@ class WidgetEditPageModel extends BasePageModel
 		{
 			this.add_item_dialog.kind = "last";
 			this.add_item_dialog.show(this.item.selected_path);
+		}
+		
+		/* Rename item */
+		if (item_key == "rename")
+		{
+			this.renameSelectedItem();
 		}
 		
 		/* Duplicate item */
@@ -673,6 +699,40 @@ class WidgetEditPageModel extends BasePageModel
 		{
 			result.setValue(false);
 		}*/
+	}
+	
+	
+	/**
+	 * Rename item
+	 */
+	void renameSelectedItem()
+	{
+		this.rename_item_dialog.old_value = this.item.param_widget_name.value;
+		this.rename_item_dialog.setTitle("Rename " ~ this.rename_item_dialog.old_value);
+		this.rename_item_dialog.setValue(this.rename_item_dialog.old_value);
+		this.rename_item_dialog.show();
+	}
+	
+	
+	/**
+	 * On rename item
+	 */
+	void onRename(string new_widget_name)
+	{
+		if (this.rename_item_dialog.old_value == new_widget_name) return;
+		
+		string new_selector_name = new_widget_name;
+		if (rs::charAt(new_selector_name, 0) != ".") new_selector_name = "." ~ new_selector_name;
+		
+		/* Rename widget */
+		this.item.changeAttrContent("widget_name", new_widget_name);
+		
+		/* Create new style */
+		if (not this.item.styles.has(new_selector_name))
+		{
+			string css_content = this.item.getCSSContent("." ~ this.rename_item_dialog.old_value)
+			this.item.changeCSSContent(new_selector_name, css_content);
+		}
 	}
 	
 	

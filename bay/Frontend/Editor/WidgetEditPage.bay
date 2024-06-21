@@ -155,6 +155,7 @@
 		%render this.renderWidget(this.model.add_item_dialog);
 		%render this.renderWidget(this.model.context_menu);
 		%render this.renderWidget(this.model.remove_item_dialog);
+		%render this.renderWidget(this.model.rename_item_dialog);
 	</div>
 </template>
 
