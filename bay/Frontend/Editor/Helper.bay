@@ -66,7 +66,7 @@ class Helper extends BaseModel
 		if (not component_op_code.hasModule(alias_name))
 		{
 			component_op_code.addModule(widget_name, is_component, alias_name);
-			this.updateFrameGlobalCSS();
+			this.parent_widget.updateFrameGlobalCSS();
 		}
 		else if (component_op_code.uses.get(alias_name) != widget_name)
 		{

@@ -12,6 +12,7 @@ use Runtime.Serializer;
 use Runtime.Web.ApiResult;
 use Runtime.Web.BaseModel;
 use Runtime.Web.BasePageModel;
+use Runtime.Web.RenderContainer;
 use Runtime.Web.RenderProvider;
 use Runtime.Web.Annotations.Widget;
 use Runtime.Widget.ButtonModel;
@@ -56,7 +57,6 @@ class WidgetEditPageModel extends BasePageModel
 	
 	/* Variables */
 	string component = classof WidgetEditPage;
-	string project_id = "";
 	string current_widget = "";
 	string model_content = "";
 	string component_class_name = "";
@@ -142,8 +142,7 @@ class WidgetEditPageModel extends BasePageModel
 	 * Returns widget frame page
 	 */
 	string getFramePageUrl() =>
-		"/project/" ~ this.project_id ~
-		"/open/widget.php?widget_name=" ~ this.current_widget
+		"/open/widget?widget_name=" ~ this.current_widget
 	;
 	
 	
@@ -169,7 +168,6 @@ class WidgetEditPageModel extends BasePageModel
 		
 		this.layout.setLayoutName("default");
 		this.current_widget = this.layout.route.matches.get("widget_name");
-		this.project_id = this.layout.route.matches.get("project_id");
 		this.item = this.addWidget(classof WidgetItemModel);
 		
 		/* Create Tree */
@@ -238,6 +236,15 @@ class WidgetEditPageModel extends BasePageModel
 	
 	
 	/**
+	 * Build title
+	 */
+	void buildTitle(RenderContainer container)
+	{
+		this.layout.setPageTitle(this.current_widget);
+	}
+	
+	
+	/**
 	 * Load widget
 	 */
 	async void loadWidget()
@@ -246,7 +253,6 @@ class WidgetEditPageModel extends BasePageModel
 			"api_name": "admin.constructor.widget",
 			"method_name": "getOpCode",
 			"data": {
-				"project_id": this.project_id,
 				"current_widget": this.current_widget,
 			}
 		});
@@ -336,7 +342,6 @@ class WidgetEditPageModel extends BasePageModel
 			"api_name": "admin.constructor.widget",
 			"method_name": "save",
 			"data": {
-				"project_id": this.project_id,
 				"current_widget": this.current_widget,
 				"content": content,
 			}

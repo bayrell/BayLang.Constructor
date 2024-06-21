@@ -30,17 +30,14 @@ class WidgetApi extends BaseApi
 	@ApiMethod
 	async void getOpCode()
 	{
-		string project_id = this.post_data.get("project_id");
+		string project_path = @.env("project_path");
 		string current_widget = this.post_data.get("current_widget");
 		
 		/* Find project */
-		Project project = await Project::readProject(
-			fs::join([@.env("constructor_path"), "projects", project_id])
-		);
+		Project project = await Project::readProject(project_path);
 		if (not project)
 		{
-			throw new ApiError( new ItemNotFound(project_id, "Project") );
-			return;
+			throw new ApiError( new ItemNotFound(project_path, "Project") );
 		}
 		
 		/* Load project */
@@ -51,7 +48,6 @@ class WidgetApi extends BaseApi
 		if (not widget)
 		{
 			throw new ApiError( new ItemNotFound(current_widget, "Widget") );
-			return;
 		}
 		
 		/* Load widget */
@@ -64,7 +60,6 @@ class WidgetApi extends BaseApi
 			throw new ApiError(
 				new RuntimeException("Failed to load widget '" ~ current_widget ~ "'")
 			);
-			return;
 		}
 		
 		/* Get widget op code */
@@ -89,17 +84,14 @@ class WidgetApi extends BaseApi
 	@ApiMethod
 	async void save()
 	{
-		string project_id = this.post_data.get("project_id");
+		string project_path = @.env("project_path");
 		string current_widget = this.post_data.get("current_widget");
 		
 		/* Find project */
-		Project project = await Project::readProject(
-			fs::join([@.env("constructor_path"), "projects", project_id])
-		);
+		Project project = await Project::readProject(project_path);
 		if (not project)
 		{
-			throw new ApiError( new ItemNotFound(project_id, "Project") );
-			return;
+			throw new ApiError( new ItemNotFound(project_path, "Project") );
 		}
 		
 		/* Load project */
@@ -110,7 +102,6 @@ class WidgetApi extends BaseApi
 		if (not widget)
 		{
 			throw new ApiError( new ItemNotFound(current_widget, "Widget") );
-			return;
 		}
 		
 		/* Load widget */
@@ -123,7 +114,6 @@ class WidgetApi extends BaseApi
 			throw new ApiError(
 				new RuntimeException("Failed to load widget '" ~ current_widget ~ "'")
 			);
-			return;
 		}
 		
 		/* Save widget content */

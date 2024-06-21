@@ -74,7 +74,6 @@ class WidgetTableModel extends TableDialogModel
 					return this.layout.url(
 						"baylang:project:widget",
 						{
-							"project_id": this.storage.foreign_value,
 							"widget_name": item.get("name")
 						}
 					);

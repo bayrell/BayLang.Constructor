@@ -78,11 +78,13 @@ class WidgetCrudApi extends CrudApi
 		this.page = 1;
 		this.items = [];
 		
-		string project_id = this.post_data.get("project_id");
-		this.project = await Project::readProject(
-			fs::join([@.env("constructor_path"), "projects", project_id])
-		);
-		if (not this.project) return;
+		string module_path = @.env("module_path");
+		string project_path = @.env("project_path");
+		this.project = await Project::readProject(project_path);
+		if (not this.project)
+		{
+			throw new ApiError( new ItemNotFound(project_path, "Project") );
+		}
 		
 		/* Load project */
 		await this.project.load();
@@ -94,6 +96,7 @@ class WidgetCrudApi extends CrudApi
 			{
 				string module_name = modules.get(i);
 				Module module = this.project.modules.get(module_name);
+				if (module.path != module_path) continue;
 				this.items.appendItems(
 					module.getWidgets().map(
 						Dict (Widget widget) use (module_name) => {

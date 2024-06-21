@@ -2,8 +2,6 @@
 	"name": "BayLang.Constructor",
 	"assets":
 	[
-		"Frontend/Blocks/Menu.bay",
-		"Frontend/Blocks/MenuModel.bay",
 		"Frontend/Editor/Helper.bay",
 		"Frontend/Editor/AddItemDialog.bay",
 		"Frontend/Editor/AddItemDialogModel.bay",
@@ -31,11 +29,6 @@
 		"Frontend/Widget/WidgetFormModel.bay",
 		"Frontend/Widget/WidgetPageModel.bay",
 		"Frontend/Widget/WidgetTableModel.bay",
-		"Frontend/AppHook.bay",
-		"Frontend/DefaultLayout.bay",
-		"Frontend/LayoutModel.bay",
-		"Frontend/NotFoundPage.bay",
-		"Frontend/WebApp.bay",
 		"Frontend/ModuleDescription.bay"
 	],
 	"groups": [

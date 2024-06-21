@@ -43,10 +43,6 @@ class RoutePageModel extends CrudPageModel
 	 */
 	void buildTitle(RenderContainer container)
 	{
-		/* Set menu project_id */
-		MenuModel menu = this.layout.getWidget("menu");
-		menu.project_id = this.layout.route.matches.get("project_id");
-		
 		/* Set title */
 		if (this.action == "index")
 		{

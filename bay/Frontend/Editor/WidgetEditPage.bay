@@ -109,10 +109,7 @@
 	<div class="widget_edit_page__menu">
 		<div class="widget_edit_page__menu_item_gap">
 			<a class="widget_edit_page__menu_item nolink"
-				href={{ this.layout.url(
-					"baylang:project:widgets",
-					{ "project_id": this.model.project_id }
-				) }}>Back</a>
+				href={{ this.layout.url("baylang:project:widgets") }}>Back</a>
 			<div class="widget_edit_page__menu_item"
 				@event:onClick={{
 					void(var e){ this.model.saveWidget(); }
