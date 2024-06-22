@@ -120,8 +120,9 @@ class WidgetItemStyle extends BaseObject
 			string value = this.css_values.get(key);
 			items.push(key ~ ": " ~ value);
 		}
+		items.push(this.css_ignore);
 		string source = rs::join(";\n", items);
-		return source ~ "\n" ~ this.css_ignore;
+		return rs::trim(source);
 	}
 	
 	

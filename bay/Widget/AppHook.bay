@@ -57,6 +57,9 @@ class AppHook extends BaseAppHook
 			{
 				mounted: function () {
 					this.$el.__component__ = this;
+				},
+				updated: function () {
+					this.$el.__component__ = this;
 				}
 			};
 			return {

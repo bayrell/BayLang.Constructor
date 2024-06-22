@@ -61,11 +61,6 @@
 				<WidgetStyles @model={{ this.model.item }} />
 			</div>
 			<div class="widget_menu__item"
-				class={{ this.model.menu_selected != "css" ? "hide" : "" }}
-			>
-				<WidgetCSS @model={{ this.model.item }} />
-			</div>
-			<div class="widget_menu__item"
 				class={{ this.model.menu_selected != "params" ? "hide" : "" }}
 			>
 				<WidgetParam @model={{ this.model.item }} />

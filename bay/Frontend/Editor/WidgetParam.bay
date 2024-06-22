@@ -11,6 +11,7 @@
 <use name="Runtime.Widget.TextArea" component="true" />
 <use name="Runtime.Widget.TextEditable" component="true" />
 <use name="BayLang.Constructor.Frontend.Editor.WidgetItemParam" />
+<use name="BayLang.Constructor.Frontend.Editor.WidgetItemStyle" />
 <use name="BayLang.Constructor.Frontend.Editor.WidgetStyle" component="true" />
 
 
@@ -51,7 +52,89 @@
 	font-family: 'PT Mono';
 	line-height: 1.5;
 }
+.widget_param__tabs{
+	display: flex;
+	align-items: center;
+    justify-content: center;
+	margin-bottom: 10px;
+}
+.widget_param__tabs_item{
+	padding: 5px;
+	cursor: pointer;
+}
+.widget_param__tabs_item.selected{
+	background-color: var(--widget-color-primary);
+	color: var(--widget-color-primary-text);
+}
+.widget_param__tabs_content{
+	display: none;
+	padding-bottom: 5px;
+}
+.widget_param__tabs_content.selected{
+	display: block;
+}
+.widget_css__label{
+	text-align: center;
+	background-color: aliceblue;
+	padding: 5px;
+	margin-bottom: 5px;
+}
+.widget_css__row{
+	display: flex;
+	align-items: center;
+	margin-bottom: 5px;
+}
+.widget_css__key{
+	width: 100px;
+}
+.widget_css__value{
+	width: calc(100% - 100px);
+}
 </style>
+
+
+<template name="renderInput" args="
+	WidgetItemStyle item_style, string key,
+	string label, string default_value = ''"
+>
+	%set string value = this.getCSSValue(item_style, key, default_value);
+	<div class="widget_css__row">
+		<div class="widget_css__key">{{ label ? label : key }}</div>
+		<div class="widget_css__value">
+			<Input value={{ value }}
+				@event:valueChange={{
+					void (string value) use (item_style, key)
+					{
+						this.setCSSValue(item_style, key, value);
+					}
+				}}
+			/>
+		</div>
+	</div>
+</template>
+
+
+<template name="renderSelect" args="
+	WidgetItemStyle item_style, string key,
+	string label, Collection options"
+>
+	%set string value = this.getCSSValue(item_style, key);
+	<div class="widget_css__row">
+		<div class="widget_css__key">{{ label ? label : key }}</div>
+		<div class="widget_css__value">
+			<Select
+				value={{ value }}
+				options={{ options }}
+				@event:valueChange={{
+					void (string value) use (item_style, key)
+					{
+						this.setCSSValue(item_style, key, value);
+					}
+				}}
+			/>
+		</div>
+	</div>
+</template>
 
 
 <template name="renderComponentName">
@@ -102,7 +185,10 @@
 </template>
 
 
-<template name="renderComponentParams">
+<template name="renderParams">
+	<div class="widget_param__tabs_content"
+		class={{ this.current_tab == "params" ? "selected" : "" }}
+	>
 	%for (int i=0; i<this.model.params.count(); i++)
 	{
 		%set WidgetItemParam item = this.model.params.get(i);
@@ -124,6 +210,7 @@
 			</div>
 		</div>
 	}
+	</div>
 </template>
 
 
@@ -163,6 +250,119 @@
 </template>
 
 
+<template name="renderStyles">
+	<div class="widget_param__tabs_content widget_css"
+		class={{ this.current_tab == "styles" ? "selected" : "" }}
+	>
+		%set string selector_name = this.model.getCurrentSelector();
+		%set WidgetItemStyle item_style = this.model.styles.get(selector_name);
+		<div class="widget_css__content">
+			<div class="widget_css__label">Common</div>
+			<div class="widget_css__items">
+				%render this.renderInput(item_style, "width", "");
+				%render this.renderInput(item_style, "height", "");
+				%render this.renderInput(item_style, "min-width", "");
+				%render this.renderInput(item_style, "min-height", "");
+			</div>
+		</div>
+		<div class="widget_css__content">
+			<div class="widget_css__label">Padding</div>
+			<div class="widget_css__items">
+				%render this.renderInput(item_style, "padding-top", "");
+				%render this.renderInput(item_style, "padding-bottom", "");
+				%render this.renderInput(item_style, "padding-left", "");
+				%render this.renderInput(item_style, "padding-right", "");
+			</div>
+		</div>
+		<div class="widget_css__content">
+			<div class="widget_css__label">Margin</div>
+			<div class="widget_css__items">
+				%render this.renderInput(item_style, "margin-top", "");
+				%render this.renderInput(item_style, "margin-bottom", "");
+				%render this.renderInput(item_style, "margin-left", "");
+				%render this.renderInput(item_style, "margin-right", "");
+			</div>
+		</div>
+		<div class="widget_css__content">
+			<div class="widget_css__label">Font</div>
+			<div class="widget_css__items">
+				%render this.renderInput(item_style, "font-size", "");
+				%render this.renderSelect(item_style, "font-weight", "", [
+					{"label": "light", "value": "lighter"},
+					{"label": "normal", "value": "normal"},
+					{"label": "bold", "value": "bold"},
+					{"label": "bolder", "value": "bolder"},
+				]);
+				%render this.renderSelect(item_style, "text-align", "", [
+					{"label": "left", "value": "left"},
+					{"label": "center", "value": "center"},
+					{"label": "right", "value": "right"},
+					{"label": "justify", "value": "justify"},
+				]);
+				%render this.renderSelect(item_style, "text-transform", "", [
+					{"label": "capitalize", "value": "capitalize"},
+					{"label": "lowercase", "value": "lowercase"},
+					{"label": "uppercase", "value": "uppercase"},
+					{"label": "inherit", "value": "inherit"},
+					{"label": "none", "value": "none"},
+				]);
+				%render this.renderInput(item_style, "line-height", "");
+			</div>
+		</div>
+		<div class="widget_css__content">
+			<div class="widget_css__label">Background</div>
+			<div class="widget_css__items">
+				%render this.renderInput(item_style, "background-color", "Color");
+				%render this.renderInput(item_style, "background-image", "Image");
+				%render this.renderInput(item_style, "background-position", "Position");
+				%render this.renderSelect(item_style, "background-repeat", "Repeat", [
+					{"label": "repeat", "value": "repeat"},
+					{"label": "repeat-x", "value": "repeat-x"},
+					{"label": "repeat-y", "value": "repeat-y"},
+					{"label": "no-repeat", "value": "no-repeat"},
+				]);
+				%render this.renderSelect(item_style, "background-size", "Size", [
+					{"label": "contain", "value": "contain"},
+					{"label": "cover", "value": "cover"},
+				]);
+			</div>
+		</div>
+	</div>
+</template>
+
+
+<template name="renderCSS">
+	<div class="widget_param__tabs_content"
+		class={{ this.current_tab == "css" ? "selected" : "" }}
+	>
+		%set string selector_name = this.model.getCurrentSelector();
+		<TextEditable class="overflow"
+			value={{ this.model.getCSSContent(selector_name) }}
+			@event:valueChange={{ void (var value) use (selector_name) {
+				this.model.changeCSSContent(selector_name, value)
+			} }}
+		/>
+	</div>
+</template>
+
+
+<template name="renderTabs">
+	<div class="widget_param__tabs">
+		%for (int i=0; i<this.tabs_items.count(); i++)
+		{
+			%set Dict tab = this.tabs_items.get(i);
+			<div class="widget_param__tabs_item"
+				class={{ tab.get("value") == this.current_tab ? "selected" : "" }}
+				@event:click={{ void() use (tab){ this.current_tab = tab.get("value"); } }}
+			>{{ tab.get("label") }}</div>
+		}
+	</div>
+	%render this.renderParams();
+	%render this.renderStyles();
+	%render this.renderCSS();
+</template>
+
+
 <template>
 	<div class="widget_param">
 		%if (this.model.selected_item)
@@ -172,21 +372,22 @@
 			%render this.renderWidgetName();
 			%render this.renderClassName();
 			
-			<!-- Render params -->
-			%if (this.model.is_component)
-			{
-				%render this.renderComponentParams();
-			}
-			%else
-			{
-				%render this.renderHtmlParams();
-			}
+			<!-- Render tabs -->
+			%render this.renderTabs();
 		}
 	</div>
 </template>
 
 
 <script>
+
+string current_tab = "params";
+Collection<string> tabs_items = [
+	{"label": "Params", "value": "params"},
+	{"label": "Styles", "value": "styles"},
+	{"label": "CSS", "value": "css"},
+];
+
 
 /**
  * Returns true if class name is allowed
@@ -199,6 +400,34 @@ bool isAllowClassName(string class_name)
 	if (class_name == "Runtime.Widget.Tag") return true;
 	if (class_name == "Runtime.Widget.TextEditable") return true;
 	return false;
+}
+
+
+/**
+ * Returns css value
+ */
+string getCSSValue(WidgetItemStyle item_style, string key, string default_value = "")
+{
+	if (item_style == null) return default_value;
+	if (not item_style.css_values.has(key)) return default_value;
+	return item_style.css_values.get(key);
+}
+
+
+/**
+ * Set css value
+ */
+void setCSSValue(WidgetItemStyle item_style, string key, string value = "")
+{
+	if (item_style)
+	{
+		item_style.setCSSValue(key, value);
+	}
+	else
+	{
+		string selector_name = this.model.getCurrentSelector();
+		this.model.changeCSSContent(selector_name, key ~ ": " ~ value);
+	}
 }
 
 </script>

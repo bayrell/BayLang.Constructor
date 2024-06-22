@@ -131,22 +131,25 @@
 			: ""
 		}}
 	>
-		%for (int j=0; j<parent_item.items.count(); j++)
+		%if (parent_item and parent_item.items)
 		{
-			%set WidgetTreeItem menu_item = parent_item.items.get([j]);
-			<div class="breadcrumbs__item_menu_name"
-				@event:click={{
-					void () use (selected_path, pos, j)
-					{
-						this.model.tree.selectItem(
-							selected_path.slice(0, pos).pushIm(j)
-						);
-						this.model.context_menu.hide();
-					}
-				}}
-			>
-				{{ menu_item.label }}
-			</div>
+			%for (int j=0; j<parent_item.items.count(); j++)
+			{
+				%set WidgetTreeItem menu_item = parent_item.items.get([j]);
+				<div class="breadcrumbs__item_menu_name"
+					@event:click={{
+						void () use (selected_path, pos, j)
+						{
+							this.model.tree.selectItem(
+								selected_path.slice(0, pos).pushIm(j)
+							);
+							this.model.context_menu.hide();
+						}
+					}}
+				>
+					{{ menu_item.label }}
+				</div>
+			}
 		}
 		%if (is_last)
 		{

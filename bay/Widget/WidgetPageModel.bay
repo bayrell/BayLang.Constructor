@@ -211,10 +211,7 @@ class WidgetPageModel extends BasePageModel
 		string css = this.layout::getCss(components);
 		
 		/* Update style CSS */
-		var style_element = document
-			.getElementsByTagName("head").item(0)
-			.getElementsByTagName("style").item(0)
-		;
+		var style_element = document.querySelector("style.components");
 		style_element.innerText = css;
 	}
 	
