@@ -13,7 +13,7 @@ class WidgetItemParam extends BaseObject
 {
 	string label = "";
 	string name = "";
-	string value = null;
+	var value = null;
 	OpHtmlAttribute op_attr = null;
 	Param param = null;
 	

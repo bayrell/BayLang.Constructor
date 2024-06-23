@@ -11,6 +11,7 @@
 <use name="Runtime.Widget.Tag" component="true" />
 <use name="Runtime.Widget.TextArea" component="true" />
 <use name="Runtime.Widget.TextEditable" component="true" />
+<use name="Runtime.Widget.Blocks.FormFields" component="true" />
 <use name="BayLang.Constructor.Frontend.Editor.WidgetItemParam" />
 <use name="BayLang.Constructor.Frontend.Editor.WidgetItemStyle" />
 <use name="BayLang.Constructor.Frontend.Editor.WidgetStyle" component="true" />
@@ -416,12 +417,13 @@ Collection<string> tabs_items = [
  */
 bool isAllowClassName(string class_name)
 {
-	return true;
 	if (class_name == "Runtime.Widget.Input") return true;
 	if (class_name == "Runtime.Widget.Select") return true;
 	if (class_name == "Runtime.Widget.SortableList") return true;
 	if (class_name == "Runtime.Widget.Tag") return true;
+	if (class_name == "Runtime.Widget.TextArea") return true;
 	if (class_name == "Runtime.Widget.TextEditable") return true;
+	if (class_name == "Runtime.Widget.Blocks.FormFields") return true;
 	return false;
 }
 

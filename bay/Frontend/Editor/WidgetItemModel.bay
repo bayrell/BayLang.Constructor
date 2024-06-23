@@ -19,6 +19,8 @@ use BayLang.LangBay.ParserBay;
 use BayLang.LangES6.TranslatorES6;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpCollection;
+use BayLang.OpCodes.OpDict;
+use BayLang.OpCodes.OpDictPair;
 use BayLang.OpCodes.OpHtmlAttribute;
 use BayLang.OpCodes.OpHtmlContent;
 use BayLang.OpCodes.OpHtmlSlot;
@@ -369,7 +371,7 @@ class WidgetItemModel extends BaseModel
 		this.params = fields.filter(lib::equalNot(null));
 	}
 	
-		
+	
 	/**
 	 * Change attr op_code value
 	 */
@@ -403,8 +405,36 @@ class WidgetItemModel extends BaseModel
 			item.op_attr.value = new OpCollection
 			{
 				"values": value.map(
-					OpString (string s) => new OpString{
-						"value": s,
+					OpString (var value)
+					{
+						if (rtl::isString(value)) return new OpString{
+							"value": value,
+						};
+						if (value instanceof Dict)
+						{
+							Collection values = [];
+							Collection keys = value.keys();
+							for (int i=0; i<keys.count(); i++)
+							{
+								string key = keys.get(i);
+								values.push
+								(
+									new OpDictPair
+									{
+										"key": key,
+										"value": new OpString
+										{
+											"value": value.get(key),
+										}
+									}
+								);
+							}
+							return new OpDict
+							{
+								"values": values,
+							};
+						}
+						return null;
 					}
 				)
 			};
@@ -424,7 +454,23 @@ class WidgetItemModel extends BaseModel
 		if (rtl::is_instanceof(op_attr.value, classof OpCollection))
 		{
 			return op_attr.value.values.map(
-				string (OpString value) => value.value
+				string (OpString value)
+				{
+					if (value instanceof OpString) return value.value;
+					if (value instanceof OpDict)
+					{
+						Dict result = {};
+						for (int i=0; i<value.values.count(); i++)
+						{
+							OpDictPair op_dict_item = value.values.get(i);
+							string key = op_dict_item.key;
+							OpString item = op_dict_item.value;
+							result.set(key, item.value);
+						}
+						return result;
+					}
+					return null;
+				}
 			);
 		}
 	}
