@@ -7,6 +7,7 @@
 <use name="Runtime.Callback" />
 <use name="Runtime.Widget.Input" component="true" />
 <use name="Runtime.Widget.Select" component="true" />
+<use name="Runtime.Widget.SortableList" component="true" />
 <use name="Runtime.Widget.Tag" component="true" />
 <use name="Runtime.Widget.TextArea" component="true" />
 <use name="Runtime.Widget.TextEditable" component="true" />
@@ -286,6 +287,7 @@
 		<div class="widget_css__content">
 			<div class="widget_css__label">Font</div>
 			<div class="widget_css__items">
+				%render this.renderInput(item_style, "color", "");
 				%render this.renderInput(item_style, "font-size", "");
 				%render this.renderSelect(item_style, "font-weight", "", [
 					{"label": "light", "value": "lighter"},
@@ -307,6 +309,26 @@
 					{"label": "none", "value": "none"},
 				]);
 				%render this.renderInput(item_style, "line-height", "");
+			</div>
+		</div>
+		<div class="widget_css__content">
+			<div class="widget_css__label">Border</div>
+			<div class="widget_css__items">
+				%render this.renderInput(item_style, "border-color", "");
+				%render this.renderSelect(item_style, "border-style", "", [
+					{"label": "dashed", "value": "dashed"},
+					{"label": "dotted", "value": "dotted"},
+					{"label": "double", "value": "double"},
+					{"label": "hidden", "value": "hidden"},
+					{"label": "inset", "value": "inset"},
+					{"label": "none", "value": "none"},
+					{"label": "outset", "value": "outset"},
+					{"label": "solid", "value": "solid"},
+					{"label": "inherit", "value": "inherit"},
+					{"label": "unset", "value": "unset"},
+				]);
+				%render this.renderInput(item_style, "border-width", "");
+				%render this.renderInput(item_style, "border-radius", "");
 			</div>
 		</div>
 		<div class="widget_css__content">
@@ -394,6 +416,7 @@ Collection<string> tabs_items = [
  */
 bool isAllowClassName(string class_name)
 {
+	return true;
 	if (class_name == "Runtime.Widget.Input") return true;
 	if (class_name == "Runtime.Widget.Select") return true;
 	if (class_name == "Runtime.Widget.SortableList") return true;
