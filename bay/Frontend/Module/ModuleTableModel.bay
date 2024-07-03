@@ -32,7 +32,7 @@ class ModuleTableModel extends TableDialogModel
 	/**
 	 * Init widget settings
 	 */
-	void initWidget(Dict params)
+	void init(Dict params)
 	{
 		parent(params);
 		

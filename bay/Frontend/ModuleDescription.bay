@@ -4,6 +4,8 @@
 
 namespace BayLang.Constructor.Frontend;
 
+use Runtime.Web.Annotations.Route;
+
 
 static class ModuleDescription
 {

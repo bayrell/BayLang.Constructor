@@ -7,7 +7,7 @@ namespace BayLang.Constructor.Frontend.Widget;
 use Runtime.Widget.ButtonModel;
 use Runtime.Widget.Label;
 use Runtime.Widget.Crud.CrudApiStorage;
-use Runtime.Widget.Table.TableDialogModel;
+use Runtime.Widget.Crud.Table.TableDialogModel;
 use BayLang.Constructor.Frontend.Widget.WidgetFormModel;
 
 
@@ -32,7 +32,7 @@ class WidgetTableModel extends TableDialogModel
 	/**
 	 * Init widget settings
 	 */
-	void initWidget(Dict params)
+	void init(Dict params)
 	{
 		parent(params);
 		

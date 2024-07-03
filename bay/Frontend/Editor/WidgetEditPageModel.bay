@@ -142,7 +142,7 @@ class WidgetEditPageModel extends BasePageModel
 	 * Returns widget frame page
 	 */
 	string getFramePageUrl() =>
-		"/open/widget?widget_name=" ~ this.current_widget
+		"/iframe/open/widget?widget_name=" ~ this.current_widget
 	;
 	
 	
@@ -162,7 +162,7 @@ class WidgetEditPageModel extends BasePageModel
 	/**
 	 * Init widget settings
 	 */
-	void initWidget(Dict params)
+	void init(Dict params)
 	{
 		parent(params);
 		
@@ -172,10 +172,10 @@ class WidgetEditPageModel extends BasePageModel
 		
 		/* Create Tree */
 		this.tree = this.addWidget(classof TreeModel);
-		this.tree.events.add("canDrag", new Callback(this, "canTreeDrop"));
-		this.tree.events.add("dragElement", new Callback(this, "treeDragElement"));
-		this.tree.events.add("selectItem", new Callback(this, "treeSelectItem"));
-		this.tree.events.add("contextMenuClick", new Callback(this, "treeContextMenuClick"));
+		this.tree.addListener("canDrag", new Callback(this, "canTreeDrop"));
+		this.tree.addListener("dragElement", new Callback(this, "treeDragElement"));
+		this.tree.addListener("selectItem", new Callback(this, "treeSelectItem"));
+		this.tree.addListener("contextMenuClick", new Callback(this, "treeContextMenuClick"));
 		
 		/* Create helper */
 		this.helper = this.addWidget(classof Helper);
@@ -203,10 +203,10 @@ class WidgetEditPageModel extends BasePageModel
 		/* Remove button */
 		ButtonModel confirm_button = this.remove_item_dialog.buttons.getWidget("confirm_button");
 		confirm_button.content = "Remove";
-		confirm_button.events.clear("onClick");
-		confirm_button.events.add("onClick", new Callback(this, "onRemoveItemConfirm"));
+		confirm_button.clearListener("click");
+		confirm_button.addListener("click", new Callback(this, "onRemoveItemConfirm"));
 		confirm_button.styles.add("danger");
-		confirm_button.styles.remove("primary");
+		confirm_button.styles.removeItem("primary");
 		
 		/* Create ContextMenu */
 		this.context_menu = this.addWidget(classof ContextMenuModel);
@@ -230,7 +230,7 @@ class WidgetEditPageModel extends BasePageModel
 			"label": "Remove item",
 			"key": "remove"
 		});
-		this.context_menu.events.add("onClickItem", new Callback(this, "onContextClickItem"));
+		this.context_menu.addListener("clickItem", new Callback(this, "onContextClickItem"));
 		this.tree.setContextMenu(this.context_menu);
 	}
 	

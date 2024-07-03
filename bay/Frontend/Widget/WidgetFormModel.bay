@@ -7,7 +7,7 @@ namespace BayLang.Constructor.Frontend.Widget;
 use Runtime.Widget.Input;
 use Runtime.Widget.TextArea;
 use Runtime.Widget.Crud.CrudApiStorage;
-use Runtime.Widget.Form.FormModel;
+use Runtime.Widget.Crud.Form.FormModel;
 
 
 class WidgetFormModel extends FormModel
@@ -28,7 +28,7 @@ class WidgetFormModel extends FormModel
 	/**
 	 * Init widget settings
 	 */
-	void initWidget(Dict params)
+	void init(Dict params)
 	{
 		parent(params);
 		

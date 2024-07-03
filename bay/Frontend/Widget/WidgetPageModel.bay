@@ -15,7 +15,7 @@ class WidgetPageModel extends CrudPageModel
 	/**
 	 * Init widget settings
 	 */
-	void initWidget(Dict params)
+	void init(Dict params)
 	{
 		parent(params);
 		
@@ -28,9 +28,6 @@ class WidgetPageModel extends CrudPageModel
 			WidgetTableModel table = this.addWidget(
 				classof WidgetTableModel,
 				{
-					"foreign_key": {
-						"project_id": this.layout.route.matches.get("project_id")
-					},
 				}
 			);
 			this.render_list.addItem(table);

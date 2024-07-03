@@ -30,7 +30,7 @@ class ProjectFormModel extends FormModel
 	/**
 	 * Init widget settings
 	 */
-	void initWidget(Dict params)
+	void init(Dict params)
 	{
 		parent(params);
 		
