@@ -4,9 +4,8 @@
 
 <class name="BayLang.Constructor.Frontend.Editor.WidgetMenu">
 
-<use name="BayLang.Constructor.Frontend.Editor.WidgetCSS" component="true" />
-<use name="BayLang.Constructor.Frontend.Editor.WidgetParam" component="true" />
-<use name="BayLang.Constructor.Frontend.Editor.WidgetStyles" component="true" />
+<use name="BayLang.Constructor.Frontend.Editor.SelectedItem" component="true" />
+<use name="BayLang.Constructor.Frontend.Editor.Styles" component="true" />
 
 
 <style>
@@ -58,12 +57,12 @@
 			<div class="widget_menu__item"
 				class={{ this.model.menu_selected != "styles" ? "hide" : "" }}
 			>
-				<WidgetStyles @model={{ this.model.item }} />
+				<Styles @model={{ this.model.styles }} />
 			</div>
 			<div class="widget_menu__item"
 				class={{ this.model.menu_selected != "params" ? "hide" : "" }}
 			>
-				<WidgetParam @model={{ this.model.item }} />
+				<SelectedItem @model={{ this.model.selected }} />
 			</div>
 			<div class="widget_menu__item"
 				class={{ this.model.menu_selected != "tree" ? "hide" : "" }}

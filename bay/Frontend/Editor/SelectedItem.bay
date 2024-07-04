@@ -2,7 +2,7 @@
  *  BayLang Constructor
 -->
 
-<class name="BayLang.Constructor.Frontend.Editor.WidgetParam">
+<class name="BayLang.Constructor.Frontend.Editor.SelectedItem">
 
 <use name="Runtime.Callback" />
 <use name="Runtime.Widget.Input" component="true" />
@@ -12,7 +12,7 @@
 <use name="Runtime.Widget.TextArea" component="true" />
 <use name="Runtime.Widget.TextEditable" component="true" />
 <use name="Runtime.Widget.Blocks.FormFields" component="true" />
-<use name="BayLang.Constructor.Frontend.Editor.WidgetItemParam" />
+<use name="BayLang.Constructor.Frontend.Editor.Parameter" />
 <use name="BayLang.Constructor.Frontend.Editor.WidgetItemStyle" />
 <use name="BayLang.Constructor.Frontend.Editor.WidgetStyle" component="true" />
 
@@ -143,7 +143,7 @@
 	<div class="widget_param__row">
 		<div class="widget_param__label">Component</div>
 		<div class="widget_param__content">
-			{{ this.model.selected_item.op_code.tag_name }}
+			{{ this.model.item.op_code.tag_name }}
 		</div>
 	</div>
 </template>
@@ -193,18 +193,18 @@
 	>
 	%for (int i=0; i<this.model.params.count(); i++)
 	{
-		%set WidgetItemParam item = this.model.params.get(i);
-		%set Dict item_props = item.param.get("props");
-		%set string class_name = item.param.get("name");
+		%set Parameter param = this.model.params.get(i);
+		%set Dict item_props = param.get("props");
+		%set string class_name = param.get("name");
 		<div class="widget_param__row">
-			<div class="widget_param__label">{{ item.param.get("label") }}</div>
+			<div class="widget_param__label">{{ param.label }}</div>
 			<div class="widget_param__content">
 				%if (this.isAllowClassName(class_name))
 				{
 					<{class_name}
-						value={{ item.value }}
-						@event:valueChange={{ void (var value) use (item) {
-							this.model.changeParam(item, value);
+						value={{ param.value }}
+						@event:valueChange={{ void (var value) use (param) {
+							this.model.changeParameterValue(param, value);
 						} }}
 						...item_props
 					/>
@@ -388,15 +388,15 @@
 
 <template>
 	<div class="widget_param">
-		%if (this.model.selected_item)
+		%if (this.model.item)
 		{
 			<!-- Render info -->
-			%render this.renderComponentName();
-			%render this.renderWidgetName();
-			%render this.renderClassName();
+			<!-- %render this.renderComponentName(); -->
+			<!-- %render this.renderWidgetName(); -->
+			<!-- %render this.renderClassName(); -->
 			
 			<!-- Render tabs -->
-			%render this.renderTabs();
+			<!-- %render this.renderTabs(); -->
 		}
 	</div>
 </template>

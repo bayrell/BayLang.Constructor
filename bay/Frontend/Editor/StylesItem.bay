@@ -13,7 +13,7 @@ use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpHtmlStyle;
 
 
-class WidgetItemStyle extends BaseObject
+class StylesItem extends BaseObject
 {
 	WidgetEditPageModel parent_widget = null;
 	OpHtmlStyle op_code = null;

@@ -161,7 +161,7 @@ class WidgetPageModel extends BasePageModel
 		if (not page_model) return;
 		
 		/* Get content */
-		string content = page_model.buildRenderContent("render");
+		string content = page_model.code.buildComponentRender("render");
 		
 		/* log(content); */
 		this.widget_component.render = window.eval("fn_new = " + content + ";");
@@ -187,7 +187,7 @@ class WidgetPageModel extends BasePageModel
 		if (not page_model) return;
 		
 		/* Get css content */
-		this.widget_css = page_model.item.getCSS();
+		this.widget_css = page_model.styles.getCSS();
 		
 		/* Update selected box */
 		RenderProvider::nextTick(void(){
@@ -205,7 +205,7 @@ class WidgetPageModel extends BasePageModel
 		if (not page_model) return;
 		
 		/* Get components */
-		Collection<string> components = page_model.getComponents();
+		Collection<string> components = page_model.code.getComponents();
 		components = this.layout.getComponents(components);
 		components.removeValue(this.widget_model.component);
 		string css = this.layout::getCss(components);

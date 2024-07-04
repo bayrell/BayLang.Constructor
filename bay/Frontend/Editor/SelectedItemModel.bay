@@ -1,0 +1,252 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Editor;
+
+use Runtime.lib;
+use Runtime.Callback;
+use Runtime.Web.BaseModel;
+use Runtime.Web.Annotations.Param;
+use BayLang.Constructor.Frontend.Editor.CodeModel;
+use BayLang.Constructor.Frontend.Editor.Parameter;
+use BayLang.Constructor.Frontend.Editor.WidgetCSS;
+use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
+use BayLang.Exceptions.ParserUnknownError;
+use BayLang.OpCodes.BaseOpCode;
+use BayLang.OpCodes.OpHtmlAttribute;
+use BayLang.OpCodes.OpHtmlContent;
+use BayLang.OpCodes.OpHtmlSlot;
+use BayLang.OpCodes.OpHtmlTag;
+use BayLang.OpCodes.OpHtmlValue;
+use BayLang.OpCodes.OpString;
+
+
+class SelectedItemModel extends BaseModel
+{
+	string component = classof WidgetCSS;
+	string widget_name = "selected";
+	
+	/* Params */
+	Collection<Parameter> params = [];
+	Parameter param_class_name = new Parameter{ "name": "class_name" };
+	Parameter param_widget_name = new Parameter{ "name": "widget_name" };
+	
+	/* Selected item */
+	Collection<int> path = null;
+	WidgetTreeItem item = null;
+	
+	/* HTML Element */
+	bool is_component = false;
+	bool is_raw = false;
+	string html_content = "";
+	
+	
+	/**
+	 * Returns CSS Content
+	 */
+	string getCurrentSelector() => "." ~ this.param_widget_name.value;
+	
+	
+	/**
+	 * Select item
+	 */
+	void selectItem(Collection<int> path)
+	{
+		/* Get item */
+		WidgetTreeItem item = this.parent_widget.tree.root.get(path);
+		if (item == this.item) return;
+		
+		/* Set item */
+		this.item = this.parent_widget.tree.root.get(path);
+		this.path = path ? path.slice() : null;
+		
+		/* Select tree */
+		this.parent_widget.tree.selectItem(path);
+		
+		/* Clear params */
+		this.attrs = [];
+		this.params = [];
+		this.param_class_name.op_attr = null;
+		this.param_class_name.value = [];
+		this.param_widget_name.op_attr = null;
+		this.param_widget_name.value = "";
+		this.params.add(this.param_widget_name);
+		this.params.add(this.param_class_name);
+		
+		/* Clear HTML params */
+		this.is_component = false;
+		this.is_raw = false;
+		this.html_content = "";
+		
+		if (not this.item) return;
+		
+		/* Setup params */
+		this.setupParams();
+		
+		/* Setup attributes */
+		this.setupAttrs();
+		
+		/* Create class attribute */
+		if (this.param_class_name.op_attr == null)
+		{
+			OpHtmlAttribute op_attr = new OpHtmlAttribute
+			{
+				"key": "class",
+			};
+			this.param_class_name.op_attr = op_attr;
+			this.param_widget_name.op_attr = op_attr;
+		}
+	}
+	
+	
+	/**
+	 * Setup attrs
+	 */
+	void setupAttrs()
+	{
+		BaseOpCode tree_item_op_code = this.item.op_code;
+		if (
+			not (tree_item_op_code instanceof OpHtmlTag) and
+			not (tree_item_op_code instanceof OpHtmlSlot)
+		)
+		{
+			return;
+		}
+		
+		Collection<OpHtmlAttribute> attrs = this.item.op_code.attrs;
+		if (not attrs) return;
+		
+		/* Setup paremeters values */
+		for (int i=0; i<attrs.count(); i++)
+		{
+			OpHtmlAttribute op_attr = attrs.get(i);
+			for (int j=0; j<this.params.count(); j++)
+			{
+				Parameter param = this.params.get(j);
+				if (param.name == op_attr.key)
+				{
+					param.setHtmlAttribute(op_attr);
+				}
+			}
+		}
+	}
+	
+	
+	/**
+	 * Setup HTML Params
+	 */
+	bool setupHtmlParams()
+	{
+		this.is_component = false;
+		this.is_raw = false;
+		this.html_content = "";
+		
+		/* Get op_code */
+		OpHtmlTag tree_item_op_code = this.item.op_code;
+		BaseOpCode text_item = tree_item_op_code.items.items.get(0);
+		
+		/* Setup text */
+		if (text_item instanceof OpHtmlContent)
+		{
+			this.html_content = text_item.value;
+		}
+		else if (text_item instanceof OpHtmlValue)
+		{
+			this.is_raw = text_item.kind == "raw";
+			if (text_item.value instanceof OpString)
+			{
+				this.html_content = text_item.value.value;
+			}
+		}
+	}
+	
+	
+	/**
+	 * Setup params
+	 */
+	void setupParams()
+	{
+		BaseOpCode item_op_code = this.item.op_code;
+		if (not (item_op_code instanceof OpHtmlTag)) return;
+		
+		/* Setup widget name */
+		string selected_tag_name = item_op_code.tag_name;
+		if (not CodeModel::isComponent(selected_tag_name))
+		{
+			this.setupHtmlParams();
+			return;
+		}
+		
+		/* Set component */
+		this.is_component = true;
+		
+		
+		return;
+		
+		/* Get callback functions from widget class */
+		var content_window = this.parent_widget.getFrameWindow();
+		string module_class_name = this.parent_widget.helper.getModuleClassName(selected_tag_name);
+		var widget_class = content_window.Runtime.rtl.find_class(module_class_name);
+		Callback getFieldsList = new content_window.Runtime.Callback(
+			module_class_name, "getFieldsList"
+		);
+		Callback getFieldInfoByName = new content_window.Runtime.Callback(
+			module_class_name, "getFieldInfoByName"
+		);
+		
+		if (not getFieldsList.exists()) return;
+		if (not getFieldInfoByName.exists()) return;
+		
+		/* Get fields params */
+		Collection<string> fields = getFieldsList.apply();
+		fields = fields.map(
+			Dict (string field_name) use (getFieldInfoByName)
+			{
+				Dict info = getFieldInfoByName.apply([field_name])
+				info.set("name", field_name);
+				return info;
+			}
+		)
+		fields = fields.map(
+			Dict (Dict item) use (widget_class)
+			{
+				Collection annotations = item.get("annotations");
+				Param param = annotations.findItem(
+					bool (var annotation) =>
+						rtl::is_instanceof(annotation, classof Param)
+				);
+				
+				string field_name = item.get("name");
+				var value = widget_class.props[field_name].default;
+				
+				return new Parameter
+				{
+					"name": field_name,
+					"value": value,
+					"param": param,
+				};
+			}
+		);
+		this.params = fields.filter(lib::equalNot(null));
+	}
+	
+	
+	/**
+	 * Change param
+	 */
+	void changeParameterValue(Parameter param, var value)
+	{
+		/* Change html attr value */
+		param.setValue(value);
+		
+		/* Update label */
+		if (param.name == "widget_name")
+		{
+			this.item.updateLabel();
+		}
+		
+		/* Update render */
+		this.parent_widget.updateFrameRender();
+	}
+}

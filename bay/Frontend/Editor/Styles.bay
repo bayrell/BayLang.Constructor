@@ -2,7 +2,7 @@
  *  BayLang Constructor
 -->
 
-<class name="BayLang.Constructor.Frontend.Editor.WidgetStyles">
+<class name="BayLang.Constructor.Frontend.Editor.Styles">
 
 <use name="Runtime.Callback" />
 <use name="Runtime.Widget.Button" component="true" />

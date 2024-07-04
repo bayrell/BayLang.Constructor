@@ -1,0 +1,29 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Providers;
+
+use Runtime.BaseObject;
+use Runtime.BaseProvider;
+use BayLang.Constructor.Frontend.Annotations.WidgetManagerAnnotation;
+
+
+class EditorProvider extends BaseProvider
+{
+	Collection<BaseObject> managers = [];
+	
+	
+	/**
+	 * Init provider
+	 */
+	async void init()
+	{
+		Vector<WidgetManagerAnnotation> managers = @.getEntities(classof WidgetManagerAnnotation);
+		for (int i=0; i<managers.count(); i++)
+		{
+			WidgetManagerAnnotation annotation = managers.get(i);
+			this.managers.push(annotation.factory());
+		}
+	}
+}

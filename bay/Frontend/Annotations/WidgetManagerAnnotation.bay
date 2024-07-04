@@ -1,0 +1,12 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Annotations;
+
+use Runtime.Entity.Factory;
+
+
+class WidgetManagerAnnotation extends Factory
+{
+}

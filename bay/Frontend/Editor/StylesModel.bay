@@ -1,0 +1,183 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Editor;
+
+use Runtime.lib;
+use Runtime.Callback;
+use Runtime.Web.BaseModel;
+use BayLang.Constructor.Frontend.Editor.Styles;
+use BayLang.Constructor.Frontend.Editor.StylesItem;
+use BayLang.OpCodes.BaseOpCode;
+use BayLang.OpCodes.OpDeclareClass;
+use BayLang.OpCodes.OpHtmlStyle;
+use BayLang.OpCodes.OpModule;
+use BayLang.OpCodes.OpString;
+
+
+class StylesModel extends BaseModel
+{
+	string component = classof Styles;
+	string widget_name = "styles";
+	Dict<StylesItem> styles = {};
+	OpHtmlStyle main_style_item = null;
+	
+	
+	/**
+	 * Returns CSS content
+	 */
+	void getCSS()
+	{
+		Vector items = [];
+		Collection selectors = this.styles.keys().sort();
+		for (int i=0; i<selectors.count(); i++)
+		{
+			string selector_name = selectors.get(i);
+			StylesItem item = this.styles.get(selector_name);
+			items.push(item.content);
+		}
+		return rs::join("\n", items);
+	}
+	
+	
+	/**
+	 * Returns source
+	 */
+	pure string getCSSCode(string selector_name, string source)
+	{
+		return selector_name ~ "{" ~ source ~ "}";
+	}
+	
+	
+	/**
+	 * Returns CSS Content
+	 */
+	string getCSSValue(string selector_name)
+	{
+		if (not this.styles.has(selector_name)) return "";
+		return this.styles.get(selector_name).source;
+	}
+	
+	
+	/**
+	 * Set CSS value
+	 */
+	void setCSSValue(string selector_name, string source, OpHtmlStyle item = null)
+	{
+		/* Default item */
+		if (item == null)
+		{
+			item = this.main_style_item;
+		}
+		
+		/* Add style if does not exists */
+		if (not this.styles.has(selector_name))
+		{
+			StylesItem item_style = new StylesItem();
+			item_style.op_code = item;
+			item_style.selector_name = selector_name;
+			item_style.parent_widget = this;
+			this.styles.set(selector_name, item_style);
+		}
+		
+		/* Set content */
+		StylesItem item_style = this.styles.get(selector_name);
+		item_style.setSource(source);
+	}
+	
+	
+	/**
+	 * Clear styles
+	 */
+	void clearStyles()
+	{
+		this.styles = {};
+	}
+	
+	
+	/**
+	 * Setup styles
+	 */
+	void setupStyles(OpModule op_code)
+	{
+		OpDeclareClass op_code_class = op_code.findClass();
+		if (not op_code_class) return;
+		
+		for (int i=0; i<op_code_class.items.count(); i++)
+		{
+			BaseOpCode item = op_code_class.items.get(i);
+			if (item instanceof OpHtmlStyle)
+			{
+				this.addHtmlStyle(item);
+			}
+		}
+	}
+	
+	
+	/**
+	 * Add HTML style
+	 */
+	void addHtmlStyle(OpHtmlStyle item)
+	{
+		if (this.main_style_item == null)
+		{
+			this.main_style_item = item;
+		}
+		
+		Dict styles = item.readStyles();
+		Collection selectors = styles.keys();
+		for (int i=0; i<selectors.count(); i++)
+		{
+			string selector_name = selectors.get(i);
+			if (this.styles.has(selector_name)) continue;
+			
+			/* Set CSS Value */
+			string source = styles.get(selector_name);
+			this.setCSSValue(selector_name, source, item);
+		}
+	}
+	
+	
+	/**
+	 * Update HTML Style
+	 */
+	void updateHtmlStyle(OpHtmlStyle item)
+	{
+		/* Build style source */
+		Vector source = [];
+		Collection selectors = this.styles.keys().sort();
+		for (int i=0; i<selectors.count(); i++)
+		{
+			string selector_name = selectors.get(i);
+			StylesItem item_style = this.styles.get(selector_name);
+			if (item_style.op_code != item) continue;
+			source.push(selector_name ~ "{");
+			Collection lines = rs::split("\n", item_style.source);
+			lines = lines.map(string (string s) => "\t" ~ s);
+			source.appendItems(lines);
+			source.push("}");
+		}
+		
+		/* Set content to html style op_code */
+		string content = rs::join("\n", source);
+		item.content = content;
+		if (item.value instanceof OpString)
+		{
+			item.value.value = content;
+		}
+	}
+	
+	
+	/**
+	 * Change CSS
+	 */
+	void changeCSSContent(string selector_name, string value)
+	{
+		/* Set CSS Value */
+		this.setCSSValue(selector_name, value);
+		
+		/* Update CSS */
+		this.parent_widget.updateFrameCSS();
+	}
+}
