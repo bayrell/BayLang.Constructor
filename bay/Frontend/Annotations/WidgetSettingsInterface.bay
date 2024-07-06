@@ -1,0 +1,20 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Annotations;
+
+
+interface WidgetSettingsInterface
+{
+	/**
+	 * Returns widgets list
+	 */
+	Collection<string> getWidgets();
+	
+	
+	/**
+	 * Returns params
+	 */
+	Collection<string> getParams();
+}

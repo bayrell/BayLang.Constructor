@@ -177,9 +177,9 @@
 	<div class="widget_param__row">
 		<div class="widget_param__label">Class</div>
 		<div class="widget_param__content">
-			<Tag value={{ this.model.param_class_name.value }}
+			<Tag value={{ this.model.param_class_name.value.slice() }}
 				@event:valueChange={{ void (var value) {
-					this.model.changeAttrContent("class_name", value);
+					this.model.changeParameterValue(this.model.param_class_name, value);
 				} }}
 			/>
 		</div>
@@ -388,12 +388,12 @@
 
 <template>
 	<div class="widget_param">
-		%if (this.model.item)
+		%if (this.model.item and this.model.is_component)
 		{
 			<!-- Render info -->
-			<!-- %render this.renderComponentName(); -->
-			<!-- %render this.renderWidgetName(); -->
-			<!-- %render this.renderClassName(); -->
+			%render this.renderComponentName();
+			%render this.renderWidgetName();
+			%render this.renderClassName();
 			
 			<!-- Render tabs -->
 			<!-- %render this.renderTabs(); -->

@@ -182,8 +182,8 @@ class StylesItem extends BaseObject
 	 */
 	void setSource(string source, bool update_css = true)
 	{
-		ParserBay parser = this.parent_widget.parent_widget.createParser();
-		TranslatorES6 translator = this.parent_widget.parent_widget.createTranslator();
+		ParserBay parser = this.parent_widget.parent_widget.code.createParser();
+		TranslatorES6 translator = this.parent_widget.parent_widget.code.createTranslator();
 		
 		/* Parse CSS */
 		string css_code = this.selector_name ~ "{" ~ source ~ "}";

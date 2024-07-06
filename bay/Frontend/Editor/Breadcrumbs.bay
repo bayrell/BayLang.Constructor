@@ -82,7 +82,7 @@
 					else
 					{
 						this.model.breadcrumbs_selected = -1;
-						this.model.tree.selectItem(
+						this.model.selectItem(
 							selected_path.slice(0, pos + 1)
 						);
 					}
@@ -96,7 +96,7 @@
 					
 					/* Select item */
 					this.model.breadcrumbs_selected = -1;
-					this.model.tree.selectItem(
+					this.model.selectItem(
 						selected_path.slice(0, pos + 1)
 					);
 					
@@ -140,7 +140,7 @@
 					@event:click={{
 						void () use (selected_path, pos, j)
 						{
-							this.model.tree.selectItem(
+							this.model.selectItem(
 								selected_path.slice(0, pos).pushIm(j)
 							);
 							this.model.context_menu.hide();

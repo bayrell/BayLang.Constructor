@@ -8,7 +8,6 @@
 		"ModuleDescription.bay"
 	],
 	"groups": [
-		"baylang"
 	],
 	"src": "./",
 	"dest":

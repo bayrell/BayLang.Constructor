@@ -1,0 +1,16 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Annotations;
+
+use BayLang.Constructor.Frontend.Annotations.WidgetSettingsInterface;
+
+
+interface WidgetManagerInterface
+{
+	/**
+	 * Returns list of widget settings
+	 */
+	Collection<WidgetSettingsInterface> getWidgetSettings();
+}

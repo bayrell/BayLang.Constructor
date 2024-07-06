@@ -6,7 +6,8 @@ namespace BayLang.Constructor.Frontend.Editor;
 
 use Runtime.BaseObject;
 use Runtime.Web.Annotations.Param;
-use BayLang.Constructor.Frontend.Editor.OpCodeModel;
+use BayLang.Constructor.Frontend.Editor.CodeModel;
+use BayLang.Constructor.Frontend.Editor.SelectedItemModel;
 use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
 use BayLang.OpCodes.OpHtmlAttribute;
 
@@ -19,10 +20,7 @@ class Parameter extends BaseObject
 	bool display = false;
 	OpHtmlAttribute op_attr = null;
 	Param param = null;
-	
-	/* Selected item */
-	Collection<int> path = null;
-	WidgetTreeItem item = null;
+	SelectedItemModel selected = null;
 	
 	
 	/**
@@ -41,7 +39,7 @@ class Parameter extends BaseObject
 	void setHtmlAttribute(OpHtmlAttribute op_attr)
 	{
 		this.op_attr = op_attr;
-		this.value = OpCodeModel::getValueFromOpCode(op_attr.value);
+		this.value = CodeModel::getValueFromOpCode(op_attr.value);
 		
 		if (op_attr.key == "class")
 		{
@@ -55,9 +53,6 @@ class Parameter extends BaseObject
 	 */
 	void setValue(var value)
 	{
-		/* Set value */
-		this.value = value;
-		
 		/* Create html attribute */
 		if (this.op_attr == null)
 		{
@@ -68,13 +63,24 @@ class Parameter extends BaseObject
 			this.item.op_code.attrs.prepend(this.op_attr);
 		}
 		
-		/* Change class name value */
-		if (this.name == "class_name")
+		/* Change widget name value */
+		if (this.name == "widget_name")
 		{
-			value = rs::join(" ", value);
+			this.value = value.get(0);
 		}
 		
-		/* Set html attribute value */
-		this.op_attr.value = OpCodeModel::getOpCodeByValue(value);
+		/* Change class name value */
+		else if (this.name == "class_name")
+		{
+			this.value = value.slice(1);
+			this.op_attr.value = CodeModel::getOpCodeByValue(rs::join(" ", value));
+		}
+		
+		/* Set value */
+		else
+		{
+			this.value = value;
+			this.op_attr.value = CodeModel::getOpCodeByValue(value);
+		}
 	}
 }

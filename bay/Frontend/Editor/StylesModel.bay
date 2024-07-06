@@ -20,7 +20,7 @@ class StylesModel extends BaseModel
 {
 	string component = classof Styles;
 	string widget_name = "styles";
-	Dict<StylesItem> styles = {};
+	Dict<StylesItem> items = {};
 	OpHtmlStyle main_style_item = null;
 	
 	
@@ -30,11 +30,11 @@ class StylesModel extends BaseModel
 	void getCSS()
 	{
 		Vector items = [];
-		Collection selectors = this.styles.keys().sort();
+		Collection selectors = this.items.keys().sort();
 		for (int i=0; i<selectors.count(); i++)
 		{
 			string selector_name = selectors.get(i);
-			StylesItem item = this.styles.get(selector_name);
+			StylesItem item = this.items.get(selector_name);
 			items.push(item.content);
 		}
 		return rs::join("\n", items);
@@ -55,8 +55,8 @@ class StylesModel extends BaseModel
 	 */
 	string getCSSValue(string selector_name)
 	{
-		if (not this.styles.has(selector_name)) return "";
-		return this.styles.get(selector_name).source;
+		if (not this.items.has(selector_name)) return "";
+		return this.items.get(selector_name).source;
 	}
 	
 	
@@ -72,17 +72,17 @@ class StylesModel extends BaseModel
 		}
 		
 		/* Add style if does not exists */
-		if (not this.styles.has(selector_name))
+		if (not this.items.has(selector_name))
 		{
 			StylesItem item_style = new StylesItem();
 			item_style.op_code = item;
 			item_style.selector_name = selector_name;
 			item_style.parent_widget = this;
-			this.styles.set(selector_name, item_style);
+			this.items.set(selector_name, item_style);
 		}
 		
 		/* Set content */
-		StylesItem item_style = this.styles.get(selector_name);
+		StylesItem item_style = this.items.get(selector_name);
 		item_style.setSource(source);
 	}
 	
@@ -92,7 +92,7 @@ class StylesModel extends BaseModel
 	 */
 	void clearStyles()
 	{
-		this.styles = {};
+		this.items = {};
 	}
 	
 	
@@ -130,7 +130,7 @@ class StylesModel extends BaseModel
 		for (int i=0; i<selectors.count(); i++)
 		{
 			string selector_name = selectors.get(i);
-			if (this.styles.has(selector_name)) continue;
+			if (this.items.has(selector_name)) continue;
 			
 			/* Set CSS Value */
 			string source = styles.get(selector_name);
@@ -146,11 +146,11 @@ class StylesModel extends BaseModel
 	{
 		/* Build style source */
 		Vector source = [];
-		Collection selectors = this.styles.keys().sort();
+		Collection selectors = this.items.keys().sort();
 		for (int i=0; i<selectors.count(); i++)
 		{
 			string selector_name = selectors.get(i);
-			StylesItem item_style = this.styles.get(selector_name);
+			StylesItem item_style = this.items.get(selector_name);
 			if (item_style.op_code != item) continue;
 			source.push(selector_name ~ "{");
 			Collection lines = rs::split("\n", item_style.source);
@@ -172,7 +172,7 @@ class StylesModel extends BaseModel
 	/**
 	 * Change CSS
 	 */
-	void changeCSSContent(string selector_name, string value)
+	void changeCSSValue(string selector_name, string value)
 	{
 		/* Set CSS Value */
 		this.setCSSValue(selector_name, value);

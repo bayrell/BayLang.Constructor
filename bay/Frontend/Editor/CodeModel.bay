@@ -496,7 +496,7 @@ class CodeModel extends BaseModel
 	/**
 	 * Returns op code value
 	 */
-	BaseOpCode getOpCodeByValue(var value)
+	pure BaseOpCode getOpCodeByValue(var value)
 	{
 		if (rtl::isString(value))
 		{
@@ -541,7 +541,7 @@ class CodeModel extends BaseModel
 	/**
 	 * Returns op code value
 	 */
-	var getValueFromOpCode(BaseOpCode op_attr)
+	pure var getValueFromOpCode(BaseOpCode op_attr)
 	{
 		if (op_attr instanceof OpString)
 		{

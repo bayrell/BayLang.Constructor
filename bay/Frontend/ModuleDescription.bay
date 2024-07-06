@@ -42,6 +42,6 @@ static class ModuleDescription
 	 */
 	pure Collection<Dict> entities() =>
 	[
-		new Provider("editor", classof EditorProvider),
+		new Provider(classof EditorProvider),
 	];
 }

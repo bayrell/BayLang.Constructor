@@ -9,6 +9,7 @@
 <use name="Runtime.Widget.ButtonModel" />
 <use name="Runtime.Widget.TextEditable" component="true" />
 <use name="Runtime.Widget.Dialog.ConfirmDialogModel" />
+<use name="Runtime.Widget.Dialog.DialogMessage" />
 <use name="Runtime.Widget.Dialog.DialogModelException" />
 <use name="Runtime.Widget.Dialog.PromptDialog" component="true" />
 <use name="Runtime.Widget.Dialog.PromptDialogModel" />
@@ -73,9 +74,9 @@
 			<TextEditable
 				class="widget_style__editable overflow"
 				name={{ selector_name }}
-				value={{ this.model.getCSSContent(selector_name) }}
+				value={{ this.model.getCSSValue(selector_name) }}
 				@event:valueChange={{ void (var value) use (selector_name) {
-					this.model.changeCSSContent(selector_name, value);
+					this.model.changeCSSValue(selector_name, value);
 				} }}
 			/>
 		</div>
@@ -91,7 +92,7 @@
 			>Add</Button>
 		</div>
 		<div class="widget_styles__items">
-			%set Collection<string> keys = this.model.styles.keys().sort();
+			%set Collection<string> keys = this.model.items.keys().sort();
 			%for (int i=0; i<keys.count(); i++)
 			{
 				%render this.renderStyle(keys.get(i));
@@ -171,33 +172,35 @@ void onDeleteClick(string selector_name)
 /**
  * Add style
  */
-void onAddStyle(string selector_name)
+void onAddStyle(DialogMessage message)
 {
+	string selector_name = message.value;
 	if (rs::charAt(selector_name, 0) != ".") selector_name = "." ~ selector_name;
-	if (this.model.styles.has(selector_name))
+	if (this.model.items.has(selector_name))
 	{
 		throw new DialogModelException("selector " ~ selector_name ~ " allready exists");
 	}
-	this.model.changeCSSContent(selector_name, "");
+	this.model.changeCSSValue(selector_name, "");
 }
 
 
 /**
  * Rename style
  */
-void onRenameStyle(string new_selector_name)
+void onRenameStyle(DialogMessage message)
 {
+	string new_selector_name = message.value;
 	if (rs::charAt(new_selector_name, 0) != ".") new_selector_name = "." ~ new_selector_name;
-	if (this.model.styles.has(new_selector_name))
+	if (this.model.items.has(new_selector_name))
 	{
 		throw new DialogModelException(new_selector_name ~ " allready exists");
 		return;
 	}
 	
 	/* Rename style */
-	string css_content = this.model.getCSSContent(this.old_selector_name)
-	this.model.styles.remove(this.old_selector_name);
-	this.model.changeCSSContent(new_selector_name, css_content);
+	string css_content = this.model.getCSSValue(this.old_selector_name)
+	this.model.items.remove(this.old_selector_name);
+	this.model.changeCSSValue(new_selector_name, css_content);
 }
 
 
@@ -206,8 +209,8 @@ void onRenameStyle(string new_selector_name)
  */
 void onDeleteStyle()
 {
-	this.model.changeCSSContent(this.old_selector_name, "");
-	this.model.styles.remove(this.old_selector_name);
+	this.model.changeCSSValue(this.old_selector_name, "");
+	this.model.items.remove(this.old_selector_name);
 }
 
 
