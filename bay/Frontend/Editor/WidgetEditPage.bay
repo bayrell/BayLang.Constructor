@@ -169,6 +169,7 @@
 
 Collection<string> menu_items = [
 	{"label": "Styles", "value": "styles"},
+	{"label": "CSS", "value": "css"},
 	{"label": "Params", "value": "params"},
 	{"label": "Tree", "value": "tree"},
 ];

@@ -14,12 +14,11 @@ use BayLang.OpCodes.OpHtmlAttribute;
 
 class Parameter extends BaseObject
 {
-	string label = "";
 	string name = "";
 	var value = null;
 	bool display = false;
+	Param annotation = null;
 	OpHtmlAttribute op_attr = null;
-	Param param = null;
 	SelectedItemModel selected = null;
 	
 	
@@ -60,7 +59,7 @@ class Parameter extends BaseObject
 			{
 				"key": this.name,
 			};
-			this.item.op_code.attrs.prepend(this.op_attr);
+			this.selected.item.op_code.attrs.prepend(this.op_attr);
 		}
 		
 		/* Change widget name value */

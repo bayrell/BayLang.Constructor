@@ -299,10 +299,9 @@ class CodeModel extends BaseModel
 	ParserBay createParser()
 	{
 		/* Setup parser params */
-		Collection<string> current_class_name = rs::split(".", this.component_class_name);
 		Dict params = {
-			"current_namespace_name": rs::join(".", current_class_name.slice(0, -1))
-			"current_class_name": current_class_name.last(),
+			"current_namespace_name": this.component_namespace,
+			"current_class_name": this.component_class_name,
 			"uses": this.component.uses
 		};
 		

@@ -13,7 +13,7 @@ use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpHtmlStyle;
 
 
-class StylesItem extends BaseObject
+class StyleItem extends BaseObject
 {
 	WidgetEditPageModel parent_widget = null;
 	OpHtmlStyle op_code = null;
@@ -145,6 +145,16 @@ class StylesItem extends BaseObject
 		/* Update source */
 		string source = this.buildSource();
 		this.setSource(source, false);
+	}
+	
+	
+	/**
+	 * Change css value
+	 */
+	void changeCSSValue(string key, string value)
+	{
+		/* Set CSS Value */
+		this.setCSSValue(key, value);
 		
 		/* Update CSS */
 		this.parent_widget.parent_widget.updateFrameCSS();

@@ -100,7 +100,7 @@ class SelectedItemModel extends BaseModel
 	
 	
 	/**
-	 * Setup attrs
+	 * Setup attributes
 	 */
 	void setupAttrs()
 	{
@@ -220,7 +220,7 @@ class SelectedItemModel extends BaseModel
 				Parameter (Param param) => new Parameter{
 					"name": param.name,
 					"value": param.default,
-					"param": param,
+					"annotation": param,
 					"selected": this,
 				}
 			)

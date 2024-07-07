@@ -31,14 +31,11 @@
 	border-bottom: 1px var(--widget-color-border) solid;
 	height: 32px;
 }
-.widget_menu__content{
-	padding: 10px;
-	flex: 1;
-	overflow-y: auto;
-	width: 100%;
-}
 .widget_menu__item{
-	height: 100%;
+	padding: 10px;
+	overflow-y: auto;
+	height: calc(100% - 32px);
+	width: 100%;
 }
 .widget_menu__item.hide{
 	display: none;
@@ -53,22 +50,25 @@
 		<div class="widget_menu__title">
 			{{ this.getTitle() }}
 		</div>
-		<div class="widget_menu__content">
-			<div class="widget_menu__item"
-				class={{ this.model.menu_selected != "styles" ? "hide" : "" }}
-			>
-				<Styles @model={{ this.model.styles }} />
-			</div>
-			<div class="widget_menu__item"
-				class={{ this.model.menu_selected != "params" ? "hide" : "" }}
-			>
-				<SelectedItem @model={{ this.model.selected }} />
-			</div>
-			<div class="widget_menu__item"
-				class={{ this.model.menu_selected != "tree" ? "hide" : "" }}
-			>
-				%render this.renderWidget(this.model.tree);
-			</div>
+		<div class="widget_menu__item"
+			class={{ this.model.menu_selected != "styles" ? "hide" : "" }}
+		>
+			<Styles @model={{ this.model.styles }} />
+		</div>
+		<div class="widget_menu__item"
+			class={{ this.model.menu_selected != "css" ? "hide" : "" }}
+		>
+			<SelectedItem @model={{ this.model }} type="css" />
+		</div>
+		<div class="widget_menu__item"
+			class={{ this.model.menu_selected != "params" ? "hide" : "" }}
+		>
+			<SelectedItem @model={{ this.model }} type="params" />
+		</div>
+		<div class="widget_menu__item"
+			class={{ this.model.menu_selected != "tree" ? "hide" : "" }}
+		>
+			%render this.renderWidget(this.model.tree);
 		</div>
 	</div>
 </template>

@@ -7,8 +7,8 @@ namespace BayLang.Constructor.Frontend.Editor;
 use Runtime.lib;
 use Runtime.Callback;
 use Runtime.Web.BaseModel;
+use BayLang.Constructor.Frontend.Editor.StyleItem;
 use BayLang.Constructor.Frontend.Editor.Styles;
-use BayLang.Constructor.Frontend.Editor.StylesItem;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpDeclareClass;
 use BayLang.OpCodes.OpHtmlStyle;
@@ -20,8 +20,8 @@ class StylesModel extends BaseModel
 {
 	string component = classof Styles;
 	string widget_name = "styles";
-	Dict<StylesItem> items = {};
-	OpHtmlStyle main_style_item = null;
+	Dict<StyleItem> items = {};
+	OpHtmlStyle main_style_code = null;
 	
 	
 	/**
@@ -34,7 +34,7 @@ class StylesModel extends BaseModel
 		for (int i=0; i<selectors.count(); i++)
 		{
 			string selector_name = selectors.get(i);
-			StylesItem item = this.items.get(selector_name);
+			StyleItem item = this.items.get(selector_name);
 			items.push(item.content);
 		}
 		return rs::join("\n", items);
@@ -61,29 +61,52 @@ class StylesModel extends BaseModel
 	
 	
 	/**
+	 * Create style item
+	 */
+	StyleItem createStyleItem(string selector_name, OpHtmlStyle op_code = null)
+	{
+		StyleItem style_item = new StyleItem();
+		style_item.op_code = op_code;
+		style_item.selector_name = selector_name;
+		style_item.parent_widget = this;
+		this.items.set(selector_name, style_item);
+		return style_item;
+	}
+	
+	
+	/**
 	 * Set CSS value
 	 */
-	void setCSSValue(string selector_name, string source, OpHtmlStyle item = null)
+	void setCSSValue(string selector_name, string source, OpHtmlStyle op_code = null)
 	{
 		/* Default item */
-		if (item == null)
+		if (op_code == null)
 		{
-			item = this.main_style_item;
+			op_code = this.main_style_code;
 		}
 		
-		/* Add style if does not exists */
+		/* Create style item if does not exists */
 		if (not this.items.has(selector_name))
 		{
-			StylesItem item_style = new StylesItem();
-			item_style.op_code = item;
-			item_style.selector_name = selector_name;
-			item_style.parent_widget = this;
-			this.items.set(selector_name, item_style);
+			this.createStyleItem(selector_name, op_code);
 		}
 		
 		/* Set content */
-		StylesItem item_style = this.items.get(selector_name);
-		item_style.setSource(source);
+		StyleItem style_item = this.items.get(selector_name);
+		style_item.setSource(source);
+	}
+	
+	
+	/**
+	 * Change CSS
+	 */
+	void changeCSSValue(string selector_name, string value)
+	{
+		/* Set CSS Value */
+		this.setCSSValue(selector_name, value);
+		
+		/* Update CSS */
+		this.parent_widget.updateFrameCSS();
 	}
 	
 	
@@ -118,14 +141,14 @@ class StylesModel extends BaseModel
 	/**
 	 * Add HTML style
 	 */
-	void addHtmlStyle(OpHtmlStyle item)
+	void addHtmlStyle(OpHtmlStyle op_code)
 	{
-		if (this.main_style_item == null)
+		if (this.main_style_code == null)
 		{
-			this.main_style_item = item;
+			this.main_style_code = op_code;
 		}
 		
-		Dict styles = item.readStyles();
+		Dict styles = op_code.readStyles();
 		Collection selectors = styles.keys();
 		for (int i=0; i<selectors.count(); i++)
 		{
@@ -134,7 +157,7 @@ class StylesModel extends BaseModel
 			
 			/* Set CSS Value */
 			string source = styles.get(selector_name);
-			this.setCSSValue(selector_name, source, item);
+			this.setCSSValue(selector_name, source, op_code);
 		}
 	}
 	
@@ -142,7 +165,7 @@ class StylesModel extends BaseModel
 	/**
 	 * Update HTML Style
 	 */
-	void updateHtmlStyle(OpHtmlStyle item)
+	void updateHtmlStyle(OpHtmlStyle op_code)
 	{
 		/* Build style source */
 		Vector source = [];
@@ -150,10 +173,12 @@ class StylesModel extends BaseModel
 		for (int i=0; i<selectors.count(); i++)
 		{
 			string selector_name = selectors.get(i);
-			StylesItem item_style = this.items.get(selector_name);
-			if (item_style.op_code != item) continue;
+			StyleItem style_item = this.items.get(selector_name);
+			if (style_item.op_code != op_code) continue;
+			
+			/* Add content to source */
 			source.push(selector_name ~ "{");
-			Collection lines = rs::split("\n", item_style.source);
+			Collection lines = rs::split("\n", style_item.source);
 			lines = lines.map(string (string s) => "\t" ~ s);
 			source.appendItems(lines);
 			source.push("}");
@@ -161,23 +186,10 @@ class StylesModel extends BaseModel
 		
 		/* Set content to html style op_code */
 		string content = rs::join("\n", source);
-		item.content = content;
-		if (item.value instanceof OpString)
+		op_code.content = content;
+		if (op_code.value instanceof OpString)
 		{
-			item.value.value = content;
+			op_code.value.value = content;
 		}
-	}
-	
-	
-	/**
-	 * Change CSS
-	 */
-	void changeCSSValue(string selector_name, string value)
-	{
-		/* Set CSS Value */
-		this.setCSSValue(selector_name, value);
-		
-		/* Update CSS */
-		this.parent_widget.updateFrameCSS();
 	}
 }
