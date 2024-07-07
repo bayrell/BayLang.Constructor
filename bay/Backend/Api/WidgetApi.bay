@@ -5,6 +5,8 @@
 namespace BayLang.Constructor.Backend.Api;
 
 use Runtime.fs;
+use Runtime.Serializer;
+use Runtime.SerializerBase64;
 use Runtime.Exceptions.ApiError;
 use Runtime.Exceptions.ItemNotFound;
 use Runtime.Exceptions.RuntimeException;
@@ -13,7 +15,9 @@ use Runtime.Web.Annotations.ApiMethod;
 use BayLang.Helper.Module;
 use BayLang.Helper.Project;
 use BayLang.Helper.Widget;
+use BayLang.LangBay.TranslatorBay;
 use BayLang.OpCodes.BaseOpCode;
+use BayLang.OpCodes.OpModule;
 
 
 class WidgetApi extends BaseApi
@@ -116,9 +120,17 @@ class WidgetApi extends BaseApi
 			);
 		}
 		
+		Serializer serializer = new SerializerBase64();
+		serializer.setFlag(Serializer::ALLOW_OBJECTS);
+		OpModule component = serializer.decode(this.post_data.get("component"));
+		
+		/* Translate widget */
+		TranslatorBay translator = new TranslatorBay();
+		list res = translator::translate(translator, component);
+		string content = res.get(1);
+		
 		/* Save widget content */
 		string file_path = widget.getComponetPath();
-		string content = this.post_data.get("content");
 		await fs::saveFile(file_path, content);
 		
 		/* Compile file */

@@ -4,12 +4,16 @@
 
 namespace BayLang.Constructor.Frontend.Editor;
 
+use Runtime.lib;
 use Runtime.Callback;
 use Runtime.Widget.ButtonModel;
 use Runtime.Widget.Dialog.ConfirmDialogModel;
+use BayLang.Constructor.Frontend.Annotations.WidgetSettingsInterface;
 use BayLang.Constructor.Frontend.Editor.AddItemDialog;
-use BayLang.Constructor.Frontend.Editor.Helper;
+use BayLang.Constructor.Frontend.Editor.CodeModel;
 use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
+use BayLang.Constructor.Frontend.Providers.EditorProvider;
+use BayLang.OpCodes.OpHtmlAttribute;
 use BayLang.OpCodes.OpHtmlTag;
 
 
@@ -21,7 +25,7 @@ class AddItemDialogModel extends ConfirmDialogModel
 	string widget_name_class = "";
 	string widget_name_value = "";
 	int step = 1;
-	Collection<string> current_widgets = null;
+	Collection<WidgetSettingsInterface> current_widgets = null;
 	
 	/* Selected item */
 	Collection<int> selected_widget_path = null;
@@ -64,6 +68,48 @@ class AddItemDialogModel extends ConfirmDialogModel
 	
 	
 	/**
+	 * Returns widget label
+	 */
+	string getTagWidgetInfo(OpHtmlTag op_code)
+	{
+		OpHtmlAttribute class_name_attr = op_code.attrs.findItem(
+			lib::equalAttr("key", "class")
+		);
+		if (not class_name_attr)
+		{
+			return
+			{
+				"label": op_code.tag_name,
+				"tag_name": op_code.tag_name,
+				"class_name": "",
+				"widget_name": "",
+			};
+		};
+		
+		string class_name = class_name_attr.value.value;
+		Collection attrs = rs::split(" ", class_name);
+		attrs = attrs.filter(lib::equalNot(""));
+		return
+		{
+			"label": op_code.tag_name ~ "." ~ attrs.first(),
+			"tag_name": op_code.tag_name,
+			"class_name": class_name,
+			"widget_name": attrs.first(),
+		};
+	}
+	
+	
+	/**
+	 * Returns frame widgets
+	 */
+	Collection<WidgetSettingsInterface> getFrameWidgets()
+	{
+		EditorProvider editor = @.provider(classof EditorProvider);
+		return editor.getWidgets();
+	}
+	
+	
+	/**
 	 * Show dialog
 	 */
 	void show(Collection<string> selected_path = null)
@@ -72,7 +118,7 @@ class AddItemDialogModel extends ConfirmDialogModel
 		this.widget_name_class = "";
 		this.widget_name_value = "item";
 		this.title = "Add item";
-		this.current_widgets = this.parent_widget.getFrameWidgets();
+		this.current_widgets = this.getFrameWidgets();
 		this.selected_widget_path = selected_path ? selected_path.slice() : null;
 		this.selected_widget_info = null;
 		if (this.selected_widget_path)
@@ -80,7 +126,7 @@ class AddItemDialogModel extends ConfirmDialogModel
 			WidgetTreeItem selected_item = this.parent_widget.tree.root.get(
 				this.selected_widget_path
 			);
-			this.selected_widget_info = Helper::getTagWidgetInfo(selected_item.op_code);
+			this.selected_widget_info = this.getTagWidgetInfo(selected_item.op_code);
 			this.widget_name_value = this.selected_widget_info.get("widget_name") ~ "_item";
 		}
 		parent();
@@ -95,7 +141,7 @@ class AddItemDialogModel extends ConfirmDialogModel
 		if (this.step != 2) return;
 		
 		/* Create widget */
-		OpHtmlTag op_code = this.parent_widget.helper.createWidget(
+		OpHtmlTag op_code = this.parent_widget.code.createWidget(
 			this.widget_name_class, this.widget_name_value
 		);
 		this.parent_widget.addOpCode(op_code, this.selected_widget_path, this.kind);

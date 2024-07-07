@@ -12,7 +12,8 @@ use BayLang.Constructor.Frontend.Annotations.WidgetSettingsInterface;
 
 class EditorProvider extends BaseProvider
 {
-	Collection<WidgetSettingsInterface> managers = [];
+	Collection<WidgetManagerAnnotation> managers = [];
+	Collection<WidgetSettingsInterface> widgets = [];
 	Dict<WidgetSettingsInterface> settings = {};
 	
 	
@@ -36,23 +37,26 @@ class EditorProvider extends BaseProvider
 			Collection<string> widgets = manager.getWidgetSettings();
 			for (int j=0; j<widgets.count(); j++)
 			{
-				WidgetSettingsInterface settings = widgets.get(j);
-				Collection<string> names = settings.getWidgets();
-				for (int k=0; k<names.count(); k++)
-				{
-					string class_name = names.get(k);
-					this.settings.set(class_name, settings);
-				}
+				WidgetSettingsInterface widget = widgets.get(j);
+				
+				/* Add widget */
+				this.widgets.push(widget);
+				
+				/* Add widget by name */
+				this.settings.set(widget.getName(), widget);
 			}
 		}
 	}
 	
 	
 	/**
-	 * Find settings
+	 * Returns widgets list
 	 */
-	WidgetSettingsInterface findSettings(string class_name)
-	{
-		return this.settings.get(class_name);
-	}
+	Collection<WidgetSettingsInterface> getWidgets() => this.widgets.slice();
+	
+	
+	/**
+	 * Get widget by name
+	 */
+	WidgetSettingsInterface getWidget(string class_name) => this.settings.get(class_name);
 }

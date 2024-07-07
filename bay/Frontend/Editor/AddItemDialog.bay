@@ -9,6 +9,7 @@
 <use name="Runtime.Web.Annotations.Widget" />
 <use name="Runtime.Widget.Input" component="true" />
 <use name="Runtime.Widget.Select" component="true" />
+<use name="BayLang.Constructor.Frontend.Annotations.WidgetSettingsInterface" />
 
 
 <style>
@@ -64,16 +65,17 @@
 				{
 					%for (int i=0; i<this.model.current_widgets.count(); i++)
 					{
-						%set Widget widget = this.model.current_widgets.get(i);
+						%set WidgetSettingsInterface widget = this.model.current_widgets.get(i);
+						%set string widget_name = widget.getName();
 						<div class="list_item"
-							class={{ this.model.select_name == widget.name ? "selected" : "" }}
+							class={{ this.model.select_name == widget_name ? "selected" : "" }}
 							@event:click={{
-								void () use (widget)
+								void () use (widget_name)
 								{
-									this.model.selectItem(widget.name);
+									this.model.selectItem(widget_name);
 								}
 							}}
-						>{{ widget.name }}</div>
+						>{{ widget_name }}</div>
 					}
 				}
 				</div>
@@ -87,10 +89,10 @@
 					<Select
 						value={{ this.model.kind }}
 						options=[
-							{"value": "after", "label": "Add after"},
-							{"value": "before", "label": "Add before"},
-							{"value": "first", "label": "Insert fisrt"},
-							{"value": "last", "label": "Insert last"},
+							{"key": "after", "value": "Add after"},
+							{"key": "before", "value": "Add before"},
+							{"key": "first", "value": "Insert fisrt"},
+							{"key": "last", "value": "Insert last"},
 						]
 						@event:valueChange={{ void (string value){ this.model.kind = value; } }}
 					/>

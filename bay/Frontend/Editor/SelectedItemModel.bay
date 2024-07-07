@@ -60,7 +60,7 @@ class SelectedItemModel extends BaseModel
 		if (item == this.item) return;
 		
 		/* Set item */
-		this.item = this.parent_widget.tree.root.get(path);
+		this.item = item;
 		this.path = path ? path.slice() : null;
 		
 		/* Clear params */
@@ -207,7 +207,7 @@ class SelectedItemModel extends BaseModel
 		
 		/* Find component settings */
 		string component_class_name = this.parent_widget.code.getModuleClassName(selected_tag_name);
-		WidgetSettingsInterface component_settings = editor.findSettings(component_class_name);
+		WidgetSettingsInterface component_settings = editor.getWidget(component_class_name);
 		if (not component_settings) return;
 		
 		/* Setup settings */

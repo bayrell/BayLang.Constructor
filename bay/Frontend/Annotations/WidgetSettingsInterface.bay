@@ -8,13 +8,19 @@ namespace BayLang.Constructor.Frontend.Annotations;
 interface WidgetSettingsInterface
 {
 	/**
-	 * Returns widgets list
+	 * Returns widget name
 	 */
-	Collection<string> getWidgets();
+	string getName();
 	
 	
 	/**
 	 * Returns params
 	 */
 	Collection<string> getParams();
+	
+	
+	/**
+	 * Returns default template
+	 */
+	Dict<fn> getDefaultTemplate();
 }

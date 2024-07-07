@@ -9,6 +9,7 @@ use Runtime.Callback;
 use Runtime.Context;
 use Runtime.Reference;
 use Runtime.Serializer;
+use Runtime.SerializerBase64;
 use Runtime.Web.ApiResult;
 use Runtime.Web.BaseModel;
 use Runtime.Web.BasePageModel;
@@ -16,6 +17,7 @@ use Runtime.Web.RenderContainer;
 use Runtime.Web.RenderProvider;
 use Runtime.Web.Annotations.Widget;
 use Runtime.Widget.ButtonModel;
+use Runtime.Widget.ContextMenu.ContextMenuMessage;
 use Runtime.Widget.ContextMenu.ContextMenuModel;
 use Runtime.Widget.Dialog.ConfirmDialogModel;
 use Runtime.Widget.Dialog.DialogMessage;
@@ -52,9 +54,7 @@ class WidgetEditPageModel extends BasePageModel
 	/* Variables */
 	string component = classof WidgetEditPage;
 	string current_widget = "";
-	string model_content = "";
 	string component_class_name = "";
-	string component_content = "";
 	string menu_selected = "css";
 	string iframe_current_size = "";
 	int app_status = static::STATUS_LOADING;
@@ -112,19 +112,6 @@ class WidgetEditPageModel extends BasePageModel
 	string getFramePageUrl() =>
 		"/iframe/open/widget?widget_name=" ~ this.current_widget
 	;
-	
-	
-	/**
-	 * Returns frame widgets
-	 */
-	Collection<Widget> getFrameWidgets()
-	{
-		if (not this.isLoaded()) return null;
-		if (not this.iframe) return null;
-		if (not this.iframe.contentWindow) return null;
-		Context context = this.iframe.contentWindow.Runtime.rtl.getContext();
-		return context.getEntities(classof Widget);
-	}
 	
 	
 	/**
@@ -199,7 +186,7 @@ class WidgetEditPageModel extends BasePageModel
 			"label": "Remove item",
 			"key": "remove"
 		});
-		this.context_menu.addListener("clickItem", new Callback(this, "onContextClickItem"));
+		this.context_menu.addListener("click", new Callback(this, "onContextClickItem"));
 		this.tree.setContextMenu(this.context_menu);
 	}
 	
@@ -231,8 +218,7 @@ class WidgetEditPageModel extends BasePageModel
 			/* Setup op code */
 			this.code.setupOpCode({
 				"component": res.data.get("component_op_code"),
-				"component_content": res.data.get("component_content"),
-				"model_content": res.data.get("model_content"),
+				"model": null,
 			});
 			
 			/* Setup CSS styles */
@@ -252,7 +238,6 @@ class WidgetEditPageModel extends BasePageModel
 	 */
 	async void saveWidget()
 	{
-		return;
 		/*if (not this.isLoaded()) return;*/
 		if (not this.code.component) return;
 		
@@ -265,14 +250,14 @@ class WidgetEditPageModel extends BasePageModel
 			BaseOpCode op_code = op_code_class.items.get(i);
 			if (op_code instanceof OpHtmlStyle)
 			{
-				this.selected.updateHtmlStyle(op_code);
+				this.styles.updateHtmlStyle(op_code);
 			}
 		}
 		
-		/* Translate widget */
-		TranslatorBay translator = new TranslatorBay();
-		list res = translator::translate(translator, this.code.component);
-		string content = res.get(1);
+		/* Serialize component */
+		Serializer serializer = new SerializerBase64();
+		serializer.setFlag(Serializer::ALLOW_OBJECTS);
+		string component = serializer.encode(this.code.component);
 		
 		/* Save content */
 		this.app_status = static::STATUS_SAVE_PROCESS;
@@ -281,7 +266,7 @@ class WidgetEditPageModel extends BasePageModel
 			"method_name": "save",
 			"data": {
 				"current_widget": this.current_widget,
-				"content": content,
+				"component": component,
 			}
 		});
 		
@@ -326,8 +311,9 @@ class WidgetEditPageModel extends BasePageModel
 	/**
 	 * Context menu item click
 	 */
-	void onContextClickItem(Dict item)
+	void onContextClickItem(ContextMenuMessage message)
 	{
+		Dict item = message.item;
 		string item_key = item.get("key");
 		this.context_menu.hide();
 		
@@ -335,14 +321,14 @@ class WidgetEditPageModel extends BasePageModel
 		if (item_key == "append")
 		{
 			this.add_item_dialog.kind = "after";
-			this.add_item_dialog.show(this.selected.selected_path);
+			this.add_item_dialog.show(this.selected.path);
 		}
 		
 		/* Insert item */
 		if (item_key == "insert")
 		{
 			this.add_item_dialog.kind = "last";
-			this.add_item_dialog.show(this.selected.selected_path);
+			this.add_item_dialog.show(this.selected.path);
 		}
 		
 		/* Rename item */
@@ -372,7 +358,7 @@ class WidgetEditPageModel extends BasePageModel
 	 */
 	void onRemoveItemConfirm()
 	{
-		this.removeWidget(this.selected.selected_path);
+		this.removeWidget(this.selected.path);
 		this.remove_item_dialog.hide();
 	}
 	
@@ -645,7 +631,7 @@ class WidgetEditPageModel extends BasePageModel
 		}
 		
 		/* Select new item */
-		this.selected.selectItem(new_src_path);
+		this.selectItem(new_src_path);
 		
 		/* Update frame render */
 		this.updateFrameRender();
@@ -662,14 +648,14 @@ class WidgetEditPageModel extends BasePageModel
 	 */
 	void duplicateWidget()
 	{
-		if (not this.selected.selected_item) return;
+		if (not this.selected.item) return;
 		
-		Collection<int> parent_path = this.selected.selected_path.slice(0, -1);
+		Collection<int> parent_path = this.selected.path.slice(0, -1);
 		WidgetTreeItem parent_item = this.tree.root.get(parent_path);
-		WidgetTreeItem dest_item = this.selected.selected_item;
+		WidgetTreeItem dest_item = this.selected.item;
 		
 		/* Duplicate */
-		OpHtmlTag op_code = Serializer::copy(this.selected.selected_item.op_code);
+		OpHtmlTag op_code = Serializer::copy(this.selected.item.op_code);
 		
 		/* Add items */
 		parent_item.op_code.items.items.addItem(
@@ -699,7 +685,7 @@ class WidgetEditPageModel extends BasePageModel
 		parent_item.op_code.items.items.removeItem(dest_item.op_code);
 		
 		/* Set selected is null */
-		this.selected.selectItem(null);
+		this.selectItem(null);
 		
 		/* Update frame render */
 		this.updateFrameRender();
@@ -709,13 +695,13 @@ class WidgetEditPageModel extends BasePageModel
 	/**
 	 * Drag & Drop
 	 */
-	void onTreeDragElement(Dict params)
+	void onTreeDragElement(TreeMessage message)
 	{
-		TreeItem dest_item = params.get("dest_item");
-		TreeItem dest_parent_item = params.get("dest_parent_item");
-		TreeItem kind = params.get("kind");
-		TreeItem src_item = params.get("src_item");
-		TreeItem src_parent_item = params.get("src_parent_item");
+		string kind = message.kind;
+		TreeItem dest_item = message.dest_item;
+		TreeItem dest_parent_item = message.dest_parent_item;
+		TreeItem src_item = message.src_item;
+		TreeItem src_parent_item = message.src_parent_item;
 		
 		/* Move item */
 		src_parent_item.op_code.items.items.removeItem(src_item.op_code);
@@ -727,6 +713,9 @@ class WidgetEditPageModel extends BasePageModel
 		{
 			dest_parent_item.op_code.items.items.addItem(src_item.op_code, dest_item.op_code, kind);
 		}
+		
+		/* Select new item */
+		this.selectItem(message.new_src_path);
 		
 		/* Update frame render */
 		this.updateFrameRender();
