@@ -2,7 +2,6 @@
 	"name": "BayLang.Constructor",
 	"assets":
 	[
-		"Frontend/Annotations/Param.bay",
 		"Frontend/Annotations/WidgetManagerAnnotation.bay",
 		"Frontend/Annotations/WidgetManagerInterface.bay",
 		"Frontend/Annotations/WidgetSettingsInterface.bay",
@@ -11,6 +10,8 @@
 		"Frontend/Editor/Breadcrumbs.bay",
 		"Frontend/Editor/CodeModel.bay",
 		"Frontend/Editor/Parameter.bay",
+		"Frontend/Editor/ParameterClassName.bay",
+		"Frontend/Editor/ParameterWidgetName.bay",
 		"Frontend/Editor/SelectedItem.bay",
 		"Frontend/Editor/SelectedItemModel.bay",
 		"Frontend/Editor/StyleItem.bay",

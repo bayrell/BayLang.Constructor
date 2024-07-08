@@ -7,10 +7,11 @@ namespace BayLang.Constructor.Frontend.Editor;
 use Runtime.lib;
 use Runtime.Callback;
 use Runtime.Web.BaseModel;
-use BayLang.Constructor.Frontend.Annotations.Param;
 use BayLang.Constructor.Frontend.Annotations.WidgetSettingsInterface;
 use BayLang.Constructor.Frontend.Editor.CodeModel;
 use BayLang.Constructor.Frontend.Editor.Parameter;
+use BayLang.Constructor.Frontend.Editor.ParameterClassName;
+use BayLang.Constructor.Frontend.Editor.ParameterWidgetName;
 use BayLang.Constructor.Frontend.Editor.WidgetCSS;
 use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
 use BayLang.Constructor.Frontend.Providers.EditorProvider;
@@ -31,8 +32,8 @@ class SelectedItemModel extends BaseModel
 	
 	/* Params */
 	Collection<Parameter> params = [];
-	Parameter param_class_name = new Parameter{ "name": "class_name", "selected": this };
-	Parameter param_widget_name = new Parameter{ "name": "widget_name", "selected": this };
+	Parameter param_class_name = null;
+	Parameter param_widget_name = null;
 	
 	/* Selected item */
 	Collection<int> path = null;
@@ -48,6 +49,27 @@ class SelectedItemModel extends BaseModel
 	 * Returns CSS Content
 	 */
 	string getCurrentSelector() => "." ~ this.param_widget_name.value;
+	
+	
+	/**
+	 * Init widget
+	 */
+	void init(Dict params)
+	{
+		parent(params);
+		
+		/* Create params */
+		this.param_class_name = new ParameterClassName
+		{
+			"selected": this,
+		};
+		this.param_widget_name = new ParameterWidgetName
+		{
+			"selected": this,
+		};
+		this.param_class_name.param_widget_name = this.param_widget_name;
+		this.param_widget_name.param_class_name = this.param_class_name;
+	}
 	
 	
 	/**
@@ -120,37 +142,15 @@ class SelectedItemModel extends BaseModel
 		for (int i=0; i<attrs.count(); i++)
 		{
 			OpHtmlAttribute op_attr = attrs.get(i);
-			if (op_attr.key == "class")
+			for (int j=0; j<this.params.count(); j++)
 			{
-				this.setupClass(op_attr);
-			}
-			else
-			{
-				for (int j=0; j<this.params.count(); j++)
+				Parameter param = this.params.get(j);
+				if (param.isAttribute(op_attr))
 				{
-					Parameter param = this.params.get(j);
-					if (param.name == op_attr.key)
-					{
-						param.setHtmlAttribute(op_attr);
-					}
+					param.setHtmlAttribute(op_attr);
 				}
 			}
 		}
-	}
-	
-	
-	/**
-	 * Setup class
-	 */
-	void setupClass(OpHtmlAttribute op_attr)
-	{
-		string param_class_name = op_attr.value.value;
-		Collection<string> value = rs::split(" ", param_class_name);
-		value = value.filter(bool (string s) => s != "");
-		this.param_class_name.op_attr = op_attr;
-		this.param_class_name.setValue(value);
-		this.param_widget_name.op_attr = op_attr;
-		this.param_widget_name.setValue(value);
 	}
 	
 	
@@ -217,11 +217,10 @@ class SelectedItemModel extends BaseModel
 		/* Setup params */
 		this.params.appendItems(
 			component_settings.getParams().map(
-				Parameter (Param param) => new Parameter{
-					"name": param.name,
-					"value": param.default,
-					"annotation": param,
-					"selected": this,
+				Parameter (Parameter param)
+				{
+					param.selected = this;
+					return param;
 				}
 			)
 		);
@@ -233,28 +232,8 @@ class SelectedItemModel extends BaseModel
 	 */
 	void changeParameterValue(Parameter param, var value)
 	{
-		/* Change widget name value */
-		if (param.name == "widget_name")
-		{
-			Collection arr = this.param_class_name.value.insertIm(0, value);
-			this.param_class_name.setValue(arr);
-			this.param_widget_name.setValue(arr);
-		}
-		
-		/* Change class name value */
-		else if (param.name == "class_name")
-		{
-			Collection arr = [ this.param_widget_name.value ];
-			arr.appendItems(value);
-			this.param_class_name.setValue(arr);
-			this.param_widget_name.setValue(arr);
-		}
-		
 		/* Change attr value */
-		else
-		{
-			param.setValue(value);
-		}
+		param.setValue(value);
 		
 		/* Update label */
 		if (param.name == "widget_name")

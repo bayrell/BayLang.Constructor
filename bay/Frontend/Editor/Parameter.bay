@@ -5,7 +5,6 @@
 namespace BayLang.Constructor.Frontend.Editor;
 
 use Runtime.BaseObject;
-use Runtime.Web.Annotations.Param;
 use BayLang.Constructor.Frontend.Editor.CodeModel;
 use BayLang.Constructor.Frontend.Editor.SelectedItemModel;
 use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
@@ -15,9 +14,13 @@ use BayLang.OpCodes.OpHtmlAttribute;
 class Parameter extends BaseObject
 {
 	string name = "";
+	string label = "";
+	string component = "";
+	string tab = "params";
+	bool display = true;
 	var value = null;
-	bool display = false;
-	Param annotation = null;
+	var default = null;
+	Dict props = null;
 	OpHtmlAttribute op_attr = null;
 	SelectedItemModel selected = null;
 	
@@ -33,17 +36,34 @@ class Parameter extends BaseObject
 	
 	
 	/**
+	 * Is attribute
+	 */
+	void isAttribute(OpHtmlAttribute op_attr)
+	{
+		return this.name == op_attr.key;
+	}
+	
+	
+	/**
 	 * Set attribute
 	 */
 	void setHtmlAttribute(OpHtmlAttribute op_attr)
 	{
 		this.op_attr = op_attr;
 		this.value = CodeModel::getValueFromOpCode(op_attr.value);
-		
-		if (op_attr.key == "class")
+	}
+	
+	
+	/**
+	 * Create attribute
+	 */
+	void createHtmlAttribute()
+	{
+		this.op_attr = new OpHtmlAttribute
 		{
-			this.value = rs::split(" ", this.value);
-		}
+			"key": this.name,
+		};
+		this.selected.item.op_code.attrs.prepend(this.op_attr);
 	}
 	
 	
@@ -55,31 +75,11 @@ class Parameter extends BaseObject
 		/* Create html attribute */
 		if (this.op_attr == null)
 		{
-			this.op_attr = new OpHtmlAttribute
-			{
-				"key": this.name,
-			};
-			this.selected.item.op_code.attrs.prepend(this.op_attr);
-		}
-		
-		/* Change widget name value */
-		if (this.name == "widget_name")
-		{
-			this.value = value.get(0);
-		}
-		
-		/* Change class name value */
-		else if (this.name == "class_name")
-		{
-			this.value = value.slice(1);
-			this.op_attr.value = CodeModel::getOpCodeByValue(rs::join(" ", value));
+			this.createHtmlAttribute();
 		}
 		
 		/* Set value */
-		else
-		{
-			this.value = value;
-			this.op_attr.value = CodeModel::getOpCodeByValue(value);
-		}
+		this.value = value;
+		this.op_attr.value = CodeModel::getOpCodeByValue(value);
 	}
 }

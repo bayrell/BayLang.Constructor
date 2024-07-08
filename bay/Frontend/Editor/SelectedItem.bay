@@ -170,12 +170,12 @@
 	%for (int i=0; i<this.model.selected.params.count(); i++)
 	{
 		%set Parameter param = this.model.selected.params.get(i);
-		%if (param.annotation)
+		%if (param.display)
 		{
-			%set Dict item_props = param.annotation.props;
-			%set string class_name = param.annotation.component;
+			%set Dict item_props = param.props;
+			%set string class_name = param.component;
 			<div class="widget_param__row">
-				<div class="widget_param__label">{{ param.annotation.label }}</div>
+				<div class="widget_param__label">{{ param.label }}</div>
 				<div class="widget_param__content">
 					%if (this.isAllowClassName(class_name))
 					{

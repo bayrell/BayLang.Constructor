@@ -1,0 +1,63 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Editor;
+
+use Runtime.BaseObject;
+use BayLang.Constructor.Frontend.Editor.CodeModel;
+use BayLang.Constructor.Frontend.Editor.Parameter;
+use BayLang.Constructor.Frontend.Editor.ParameterWidgetName;
+use BayLang.Constructor.Frontend.Editor.SelectedItemModel;
+use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
+use BayLang.OpCodes.OpHtmlAttribute;
+
+
+class ParameterClassName extends Parameter
+{
+	bool display = false;
+	string name = "class_name";
+	Collection<string> value = [];
+	ParameterWidgetName param_widget_name = null;
+	
+	
+	/**
+	 * Is attribute
+	 */
+	void isAttribute(OpHtmlAttribute op_attr)
+	{
+		return op_attr.key == "class";
+	}
+	
+	
+	/**
+	 * Set attribute
+	 */
+	void setHtmlAttribute(OpHtmlAttribute op_attr)
+	{
+		string class_name = CodeModel::getValueFromOpCode(op_attr.value);
+		Collection<string> value = rs::split(" ", class_name);
+		value = value.filter(bool (string s) => s != "");
+		this.value = value.slice(1);
+		this.op_attr = op_attr;
+	}
+	
+	
+	/**
+	 * Set value
+	 */
+	void setValue(Collection<string> value)
+	{
+		/* Create html attribute */
+		if (this.op_attr == null)
+		{
+			this.createHtmlAttribute();
+		}
+		
+		/* Set value */
+		Collection arr = [ this.param_widget_name.value ];
+		arr.appendItems(value);
+		this.value = arr.slice(1);
+		this.op_attr.value = CodeModel::getOpCodeByValue(rs::join(" ", arr));
+	}
+}
