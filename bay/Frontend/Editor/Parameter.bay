@@ -63,7 +63,7 @@ class Parameter extends BaseObject
 		{
 			"key": this.name,
 		};
-		this.selected.item.op_code.attrs.prepend(this.op_attr);
+		this.selected.item.code.attrs.prepend(this.op_attr);
 	}
 	
 	

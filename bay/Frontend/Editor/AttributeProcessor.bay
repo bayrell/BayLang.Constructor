@@ -1,0 +1,139 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Editor;
+
+use Runtime.lib;
+use Runtime.BaseObject;
+use BayLang.OpCodes.BaseOpCode;
+use BayLang.OpCodes.OpHtmlAttribute;
+use BayLang.OpCodes.OpHtmlItems;
+use BayLang.OpCodes.OpHtmlSlot;
+use BayLang.OpCodes.OpHtmlTag;
+use BayLang.OpCodes.OpString;
+
+
+class AttributeProcessor extends BaseObject
+{
+	int widget_inc = 1;
+	
+	
+	/**
+	 * Generate widget name
+	 */
+	string generateWidgetName(string widget_name, string item)
+	{
+		if (rs::substr(item, 0, 2) != "[&") return widget_name;
+		if (rs::substr(item, -1) != "]") return widget_name;
+		item = rs::substr(item, 2, -1);
+		return widget_name ~ item;
+	}
+	
+	
+	/**
+	 * Add op_code tag attrs
+	 */
+	void processHtmlTag(OpHtmlTag op_code, string widget_name)
+	{
+		string css_name = null;
+		
+		/* Generate css name */
+		fn generateCssName = string () use (css_name)
+		{
+			if (css_name == null)
+			{
+				css_name = "widget_" ~ this.widget_inc;
+				this.widget_inc = this.widget_inc + 1;
+			}
+			return css_name;
+		};
+		
+		/* Generate widget name */
+		fn generateWidgetName = string(string item) use (widget_name)
+		{
+			widget_name = this.generateWidgetName(widget_name, item);
+			return widget_name;
+		}
+		
+		/* Add render key */
+		OpHtmlAttribute key_attr = op_code.attrs.findItem(
+			lib::equalAttr("key", "@key")
+		);
+		OpHtmlAttribute key_debug_attr = op_code.attrs.findItem(
+			lib::equalAttr("key", "@key_debug")
+		);
+		if (key_attr == null and key_debug_attr == null)
+		{
+			/* Add key debug */
+			op_code.attrs.push(new OpHtmlAttribute{
+				"key": "@key_debug",
+				"value": new OpString{
+					"value": generateCssName(),
+				},
+			});
+		}
+		
+		/* Change widget name */
+		OpHtmlAttribute class_name_attr = op_code.attrs.findItem(
+			lib::equalAttr("key", "class")
+		);
+		if (class_name_attr and class_name_attr.value instanceof OpString)
+		{
+			string class_name = class_name_attr.value.value;
+			Collection attrs = rs::split(" ", class_name);
+			attrs = attrs.filter(lib::equalNot(""));
+			attrs = attrs.map(
+				string (string item) use (generateCssName, generateWidgetName)
+				{
+					if (item == "[widget_name]")
+					{
+						return generateCssName();
+					}
+					if (rs::substr(item, 0, 2) == "[&" and rs::substr(item, -1) == "]")
+					{
+						return generateWidgetName(item);
+					}
+					return item;
+				}
+			);
+			class_name_attr.value.value = rs::join(" ", attrs);
+		}
+		
+		/* Generate html items attrs */
+		this.processHtmlItems(op_code.items, widget_name);
+	}
+	
+	
+	/**
+	 * Add op_code slot attrs
+	 */
+	void processHtmSlot(OpHtmlTag op_code, string widget_name)
+	{
+		this.processHtmlItems(op_code.items, widget_name);
+	}
+	
+	
+	/**
+	 * Generate html items attrs
+	 */
+	void processHtmlItems(Collection items, string widget_name = "")
+	{
+		if (not items) return;
+		if (items instanceof OpHtmlItems) items = items.items;
+		for (int i=0; i<items.count(); i++)
+		{
+			BaseOpCode item = items.get(i);
+			
+			/* Add render key to item */
+			if (rtl::is_instanceof(item, classof OpHtmlTag))
+			{
+				this.processHtmlTag(item, widget_name);
+			}
+			else if (rtl::is_instanceof(item, classof OpHtmlSlot))
+			{
+				this.processHtmSlot(item, widget_name);
+			}
+		}
+	}
+}

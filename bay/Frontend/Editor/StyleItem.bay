@@ -5,6 +5,7 @@
 namespace BayLang.Constructor.Frontend.Editor;
 
 use Runtime.BaseObject;
+use BayLang.Constructor.Frontend.Editor.ComponentProcessor;
 use BayLang.Constructor.Frontend.Editor.WidgetEditPageModel;
 use BayLang.Exceptions.ParserUnknownError;
 use BayLang.LangBay.ParserBay;
@@ -192,8 +193,9 @@ class StyleItem extends BaseObject
 	 */
 	void setSource(string source, bool update_css = true)
 	{
-		ParserBay parser = this.parent_widget.parent_widget.code.createParser();
-		TranslatorES6 translator = this.parent_widget.parent_widget.code.createTranslator();
+		ComponentProcessor component_processor = this.parent_widget.parent_widget.component_processor;
+		ParserBay parser = component_processor.createParser();
+		TranslatorES6 translator = component_processor.createTranslator();
 		
 		/* Parse CSS */
 		string css_code = this.selector_name ~ "{" ~ source ~ "}";

@@ -75,8 +75,8 @@ class WidgetApi extends BaseApi
 		this.success({
 			"data": {
 				"model_content": model_content,
+				"component": component_op_code,
 				"component_content": component_content,
-				"component_op_code": component_op_code,
 			},
 		});
 	}

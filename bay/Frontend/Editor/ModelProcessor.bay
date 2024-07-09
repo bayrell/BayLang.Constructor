@@ -1,0 +1,13 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Editor;
+
+use BayLang.Constructor.Frontend.Editor.CodeModel;
+
+
+class ModelProcessor extends CodeModel
+{
+    string widget_name = "model_processor";
+}

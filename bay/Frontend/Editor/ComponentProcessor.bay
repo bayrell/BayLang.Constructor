@@ -1,0 +1,494 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Editor;
+
+use Runtime.lib;
+use Runtime.Callback;
+use Runtime.HashMap;
+use Runtime.Serializer;
+use Runtime.Widget.Tree.TreeModel;
+use BayLang.SaveOpCode;
+use BayLang.Constructor.Frontend.Annotations.WidgetSettingsInterface;
+use BayLang.Constructor.Frontend.Editor.AttributeProcessor;
+use BayLang.Constructor.Frontend.Editor.CodeModel;
+use BayLang.Constructor.Frontend.Editor.Widget;
+use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
+use BayLang.Constructor.Frontend.Providers.EditorProvider;
+use BayLang.LangBay.ParserBay;
+use BayLang.LangES6.TranslatorES6;
+use BayLang.OpCodes.BaseOpCode;
+use BayLang.OpCodes.OpCollection;
+use BayLang.OpCodes.OpDeclareClass;
+use BayLang.OpCodes.OpDeclareFunction;
+use BayLang.OpCodes.OpDict;
+use BayLang.OpCodes.OpDictPair;
+use BayLang.OpCodes.OpHtmlAttribute;
+use BayLang.OpCodes.OpHtmlItems;
+use BayLang.OpCodes.OpHtmlSlot;
+use BayLang.OpCodes.OpHtmlStyle;
+use BayLang.OpCodes.OpHtmlTag;
+use BayLang.OpCodes.OpModule;
+use BayLang.OpCodes.OpNamespace;
+use BayLang.OpCodes.OpString;
+use BayLang.OpCodes.OpUse;
+
+
+class ComponentProcessor extends CodeModel
+{
+	AttributeProcessor attribute = new AttributeProcessor;
+	OpModule component = null;
+	OpModule model = null;
+	HashMap<BaseOpCode, Widget> hash = new HashMap;
+	string component_namespace = "";
+	string component_class_name = "";
+	string widget_name = "component_processor";
+	
+	
+	/**
+	 * Setup op code
+	 */
+	void setupOpCode(OpModule code)
+	{
+		parent(code);
+		
+		/* Process op_code attrs */
+		OpDeclareFunction op_code_render = this.getComponentRender("render");
+		if (not op_code_render) return;
+		
+		/* Process attributes */
+		BaseOpCode op_code_expression = op_code_render.getExpression();
+		this.attribute.processHtmlItems(op_code_expression);
+		
+		/* Load items */
+		this.loadItems();
+	}
+	
+	
+	/**
+	 * Get op_code by path
+	 */
+	BaseOpCode getOpCode(Collection<int> path)
+	{
+		WidgetTreeItem item = this.parent_widget.tree.root.get(path);
+		return item.code;
+	}
+	
+	
+	/**
+	 * Get widget by path
+	 */
+	BaseOpCode getWidget(Collection<int> path)
+	{
+		BaseOpCode op_code = this.getOpCode(path);
+		return this.hash.get(op_code);
+	}
+	
+	
+	/**
+	 * Get styles op_code
+	 */
+	Collection<OpHtmlStyle> getStyleOpCode()
+	{
+		if (not this.code) return null;
+		
+		OpDeclareClass op_code_class = this.code.findClass();
+		if (not op_code_class) return null;
+		
+		return op_code_class.items.filter(lib::isInstance(classof OpHtmlStyle));
+	}
+	
+	
+	/**
+	 * Get component render expression
+	 */
+	OpDeclareFunction getComponentRender(string render_name = "render")
+	{
+		if (not this.code) return null;
+		
+		OpDeclareClass op_code_class = this.code.findClass();
+		if (not op_code_class) return null;
+		
+		OpDeclareFunction op_code_render = op_code_class.findFunction(render_name);
+		return op_code_render;
+	}
+	
+	
+	/**
+	 * Build render function
+	 */
+	string buildComponentRender(string render_name = "render")
+	{
+		OpDeclareFunction op_code_render = this.getComponentRender(render_name);
+		if (not op_code_render) return "";
+		
+		/* Create translator */
+		TranslatorES6 t = this.createTranslator();
+		Collection<SaveOpCode> save_op_codes = t.save_op_codes;
+		
+		/* Translate expression */
+		list res = t.expression::OpDeclareFunction(t, op_code_render, false);
+		t = res.get(0);
+		
+		/* Output save op code */
+		string content = "";
+		string save = t::outputSaveOpCode(t, save_op_codes.count());
+		if (save != "") content ~= save;
+		content ~= res.get(1);
+		content = t.program::removeContext(content);
+		content = rs::trim(content);
+		
+		return content;
+	}
+	
+	
+	/**
+	 * Add default template
+	 */
+	void addDefaultTemplate(OpHtmlTag op_code, string widget_name, string template_content)
+	{
+		/* Parse default template */
+		OpModule default_template = null;
+		ParserBay parser = this.createParser();
+		try
+		{
+			list res = parser::parse(parser, template_content);
+			parser = res.get(0);
+			default_template = res.get(1);
+		}
+		catch (var e)
+		{
+		}
+		
+		/* If default template is correct */
+		if (not default_template) return;
+			
+		/* Add default CSS */
+		OpDeclareClass op_code_class = default_template.findClass();
+		if (op_code_class)
+		{
+			OpHtmlStyle op_code_style = op_code_class.items.findItem(
+				lib::isInstance(classof OpHtmlStyle)
+			);
+			if (op_code_style)
+			{
+				this.parent_widget.styles.setCSSValue("." ~ widget_name, op_code_style.content);
+			}
+		}
+		
+		/* Add uses */
+		Collection modules = default_template.uses.keys();
+		for (int i=0; i<default_template.items.count(); i++)
+		{
+			BaseOpCode item = default_template.items.get(i);
+			if (item instanceof OpUse)
+			{
+				this.addModule(item.name, item.alias, item.is_component);
+			}
+		}
+		
+		OpDeclareClass op_code_class = default_template.findClass();
+		if (not op_code_class) return null;
+		
+		OpDeclareFunction op_code_render = op_code_class.findFunction("render");
+		if (not op_code_render) return null;
+		if (not op_code_render.expression) return null;
+		if (not (op_code_render.expression instanceof OpHtmlItems)) return null;
+		
+		/* Add items */
+		op_code.items = op_code_render.expression;
+	}
+	
+	
+	/**
+	 * Create widget
+	 */
+	OpHtmlTag createWidget(string class_name, string widget_name)
+	{
+		/* Add module */
+		string alias_name = this.addModule(class_name);
+		
+		/* Create op_code */
+		string css_name = "widget_" ~ this.widget_inc;
+		this.widget_inc = this.widget_inc + 1;
+		OpHtmlTag op_code = new OpHtmlTag
+		{
+			"attrs":
+			[
+				new OpHtmlAttribute
+				{
+					"key": "class",
+					"value": new OpString
+					{
+						"value": widget_name,
+					},
+				},
+				new OpHtmlAttribute
+				{
+					"key": "@key_debug",
+					"value": new OpString
+					{
+						"value": css_name,
+					},
+				}
+			],
+			"items": new OpHtmlItems(),
+			"tag_name": alias_name,
+		};
+		
+		/* Default template */
+		EditorProvider editor = @.provider(classof EditorProvider);
+		WidgetSettingsInterface widget = editor.getWidget(class_name);
+		if (not widget) return op_code;
+		
+		/* Get default template */
+		Dict template_info = widget.getDefaultTemplate();
+		fn template_factory = template_info.get("default");
+		if (not template_factory) return op_code;
+		
+		/* Get template content */
+		Dict template_info = template_factory();
+		string template_content = "<class>" ~ template_info.get("template") ~ "</class>";
+		
+		/* Add default template */
+		this.addDefaultTemplate(op_code, widget_name, template_content);
+		
+		/* Add op_code attrs */
+		this.attribute.processHtmlTag(op_code, widget_name);
+		
+		return op_code;
+	}
+	
+	
+	/**
+	 * Load items
+	 */
+	void loadItems()
+	{
+		OpDeclareFunction op_code_render = this.getComponentRender("render");
+		if (not op_code_render) return;
+		
+		BaseOpCode op_code_expression = op_code_render.getExpression();
+		if (not op_code_expression) return;
+		if (not (op_code_expression instanceof OpHtmlItems)) return;
+		if (not op_code_expression.items.get(0)) return;
+		
+		BaseOpCode op_code = op_code_expression.items.get(0);
+		if (not (op_code.items instanceof OpHtmlItems)) return;
+		
+		/* Create root widget */
+		Widget widget = this.registerWidget(op_code);
+		
+		/* Setup tree root item */
+		TreeModel tree = this.parent_widget.tree;
+		tree.root = widget.item;
+	}
+	
+	
+	/**
+	 * Register op_code
+	 */
+	Widget registerOpCode(BaseOpCode op_code, BaseOpCode parent_code = null)
+	{
+		/* Create widget */
+		if (not this.hash.has(op_code))
+		{
+			this.hash.set(op_code, new Widget(op_code));
+		}
+		
+		/* Setup widget */
+		Widget widget = this.hash.get(op_code);
+		widget.parent_code = parent_code;
+		
+		/* Create tree item */
+		if (widget.item == null)
+		{
+			widget.item = new WidgetTreeItem(op_code);
+			widget.item.updateLabel();
+		}
+		
+		/* Return widget */
+		return widget;
+	}
+	
+	
+	/**
+	 * Remove op code
+	 */
+	void unregisterOpCode(BaseOpCode op_code)
+	{
+		if (not this.hash.has(op_code)) return;
+		
+		/* Remove op_code */
+		this.hash.remove(op_code);
+		
+		/* Remove op_code items */
+		for (int i=0; i<op_code.items.items.count(); i++)
+		{
+			this.unregisterOpCode(op_code.items.items.get(i));
+		}
+	}
+	
+	
+	/**
+	 * Register widget items
+	 */
+	void registerWidgetItems(Widget parent_widget, bool recursive = true)
+	{
+		OpHtmlItems op_code_items = parent_widget.code.items;
+		if (op_code_items == null) return;
+		if (op_code_items.items == null) return;
+		
+		/* Clear tree items */
+		parent_widget.item.items = [];
+		
+		/* Add op_code items */
+		for (int i=0; i<op_code_items.items.count(); i++)
+		{
+			BaseOpCode op_code = op_code_items.items.get(i);
+			this.registerWidget(op_code, parent_widget, recursive);
+		}
+	}
+	
+	
+	/**
+	 * Register widget
+	 */
+	Widget registerWidget(BaseOpCode op_code, Widget parent_widget, bool recursive = true)
+	{
+		if (
+			op_code instanceof OpHtmlTag or
+			op_code instanceof OpHtmlSlot
+		)
+		{
+			Widget new_widget = this.registerOpCode(
+				op_code, parent_widget ? parent_widget.code : null
+			);
+			if (parent_widget) parent_widget.item.items.push(new_widget.item);
+			if (recursive) this.registerWidgetItems(new_widget);
+			return new_widget;
+		}
+	}
+	
+	
+	/**
+	 * Add op_code
+	 */
+	int addOpCode(BaseOpCode new_op_code, BaseOpCode dest_op_code, string kind)
+	{
+		/* Get widgets */
+		Widget dest_widget = this.hash.get(dest_op_code);
+		Widget parent_widget = this.hash.get(dest_widget.parent_code);
+		if (not dest_widget) return;
+		if (not parent_widget) return;
+		
+		/* Insert first */
+		if (kind == "first")
+		{
+			parent_widget = dest_widget;
+			dest_op_code = null;
+			kind = "before";
+		}
+		
+		/* Insert last */
+		else if (kind == "last")
+		{
+			parent_widget = dest_widget;
+			dest_op_code = null;
+			kind = "after";
+		}
+		
+		/* Add item */
+		int pos = parent_widget.code.items.items.addItem(new_op_code, dest_op_code, kind);
+		
+		/* Update tree items */
+		this.registerWidgetItems(parent_widget, false);
+		
+		return pos;
+	}
+	
+	
+	/**
+	 * Move op_code
+	 */
+	void moveOpCode(BaseOpCode src_op_code, BaseOpCode dest_op_code, string kind)
+	{
+		/* Get widgets */
+		Widget src_widget = this.hash.get(src_op_code);
+		Widget dest_widget = this.hash.get(dest_op_code);
+		if (not src_widget) return;
+		if (not dest_widget) return;
+		
+		/* Get parent widget */
+		Widget parent_src_widget = this.hash.get(src_widget.parent_code);
+		Widget parent_dest_widget = this.hash.get(dest_widget.parent_code);
+		if (not parent_src_widget) return;
+		if (not dest_widget) return;
+		
+		/* Insert into */
+		if (kind == "into")
+		{
+			parent_dest_widget = dest_widget;
+			dest_op_code = null;
+			dest_widget = null;
+		}
+		
+		/* Remove code */
+		parent_src_widget.code.items.items.removeItem(src_op_code);
+		this.registerWidgetItems(parent_src_widget, false);
+		
+		/* Add widget */
+		parent_dest_widget.code.items.items.addItem(src_op_code, dest_op_code, kind);
+		
+		/* Update tree items */
+		this.registerWidgetItems(parent_dest_widget, false);
+	}
+	
+	
+	/**
+	 * Duplicate op_code
+	 */
+	int duplicateOpCode(BaseOpCode dest_op_code)
+	{
+		/* Get widgets */
+		Widget dest_widget = this.hash.get(dest_op_code);
+		Widget parent_widget = this.hash.get(dest_widget.parent_code);
+		if (not dest_widget) return;
+		if (not parent_widget) return;
+		
+		/* Duplicate op_code */
+		OpHtmlTag new_op_code = Serializer::copy(dest_op_code);
+		Widget new_widget = this.registerOpCode(new_op_code, parent_widget.code);
+		
+		/* Add new item */
+		int pos = parent_widget.code.items.items.addItem(new_op_code, dest_op_code, "after");
+		
+		/* Update tree items */
+		this.registerWidgetItems(parent_widget, false);
+		
+		return pos;
+	}
+	
+	
+	/**
+	 * Remove op_code
+	 */
+	void removeOpCode(BaseOpCode dest_op_code)
+	{
+		/* Get widgets */
+		Widget dest_widget = this.hash.get(dest_op_code);
+		Widget parent_widget = this.hash.get(dest_widget.parent_code);
+		if (not dest_widget) return;
+		if (not parent_widget) return;
+		
+		/* Remove op_code */
+		parent_widget.code.items.items.removeItem(dest_op_code);
+		
+		/* Remove tree item */
+		parent_widget.item.items.removeItem(dest_widget.item);
+		
+		/* Remove op_code */
+		this.unregisterOpCode(dest_op_code);
+	}
+}

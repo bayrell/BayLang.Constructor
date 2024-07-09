@@ -126,7 +126,7 @@ class AddItemDialogModel extends ConfirmDialogModel
 			WidgetTreeItem selected_item = this.parent_widget.tree.root.get(
 				this.selected_widget_path
 			);
-			this.selected_widget_info = this.getTagWidgetInfo(selected_item.op_code);
+			this.selected_widget_info = this.getTagWidgetInfo(selected_item.code);
 			this.widget_name_value = this.selected_widget_info.get("widget_name") ~ "_item";
 		}
 		parent();
@@ -141,7 +141,7 @@ class AddItemDialogModel extends ConfirmDialogModel
 		if (this.step != 2) return;
 		
 		/* Create widget */
-		OpHtmlTag op_code = this.parent_widget.code.createWidget(
+		OpHtmlTag op_code = this.parent_widget.component_processor.createWidget(
 			this.widget_name_class, this.widget_name_value
 		);
 		this.parent_widget.addOpCode(op_code, this.selected_widget_path, this.kind);

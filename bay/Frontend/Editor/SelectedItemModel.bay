@@ -77,13 +77,15 @@ class SelectedItemModel extends BaseModel
 	 */
 	void selectItem(Collection<int> path)
 	{
+		/* Change path */
+		this.path = path ? path.slice() : null;
+		
 		/* Get item */
 		WidgetTreeItem item = this.parent_widget.tree.root.get(path);
 		if (item == this.item) return;
 		
 		/* Set item */
 		this.item = item;
-		this.path = path ? path.slice() : null;
 		
 		/* Clear params */
 		this.attrs = [];
@@ -126,16 +128,16 @@ class SelectedItemModel extends BaseModel
 	 */
 	void setupAttrs()
 	{
-		BaseOpCode tree_item_op_code = this.item.op_code;
+		BaseOpCode tree_item_code = this.item.code;
 		if (
-			not (tree_item_op_code instanceof OpHtmlTag) and
-			not (tree_item_op_code instanceof OpHtmlSlot)
+			not (tree_item_code instanceof OpHtmlTag) and
+			not (tree_item_code instanceof OpHtmlSlot)
 		)
 		{
 			return;
 		}
 		
-		Collection<OpHtmlAttribute> attrs = this.item.op_code.attrs;
+		Collection<OpHtmlAttribute> attrs = this.item.code.attrs;
 		if (not attrs) return;
 		
 		/* Setup paremeters values */
@@ -163,9 +165,9 @@ class SelectedItemModel extends BaseModel
 		this.is_raw = false;
 		this.html_content = "";
 		
-		/* Get op_code */
-		OpHtmlTag tree_item_op_code = this.item.op_code;
-		BaseOpCode text_item = tree_item_op_code.items.items.get(0);
+		/* Get code */
+		OpHtmlTag tree_item_code = this.item.code;
+		BaseOpCode text_item = tree_item_code.items.items.get(0);
 		
 		/* Setup text */
 		if (text_item instanceof OpHtmlContent)
@@ -188,11 +190,11 @@ class SelectedItemModel extends BaseModel
 	 */
 	void setupParams()
 	{
-		BaseOpCode item_op_code = this.item.op_code;
-		if (not (item_op_code instanceof OpHtmlTag)) return;
+		BaseOpCode item_code = this.item.code;
+		if (not (item_code instanceof OpHtmlTag)) return;
 		
 		/* Setup widget name */
-		string selected_tag_name = item_op_code.tag_name;
+		string selected_tag_name = item_code.tag_name;
 		if (not CodeModel::isComponent(selected_tag_name))
 		{
 			/* this.setupHtmlParams(); */
@@ -206,7 +208,9 @@ class SelectedItemModel extends BaseModel
 		EditorProvider editor = @.provider(classof EditorProvider);
 		
 		/* Find component settings */
-		string component_class_name = this.parent_widget.code.getModuleClassName(selected_tag_name);
+		string component_class_name = this.parent_widget.component_processor
+			.getModuleClassName(selected_tag_name)
+		;
 		WidgetSettingsInterface component_settings = editor.getWidget(component_class_name);
 		if (not component_settings) return;
 		

@@ -122,7 +122,7 @@
 	<div class="widget_param__row">
 		<div class="widget_param__label">Component</div>
 		<div class="widget_param__content">
-			{{ this.model.selected.item.op_code.tag_name }}
+			{{ this.model.selected.item.code.tag_name }}
 		</div>
 	</div>
 </template>
