@@ -5,24 +5,210 @@
 namespace BayLang.Constructor.Frontend.Editor;
 
 use Runtime.BaseObject;
+use BayLang.Constructor.Frontend.Annotations.WidgetSettingsInterface;
+use BayLang.Constructor.Frontend.Editor.CodeModel;
+use BayLang.Constructor.Frontend.Editor.Parameter;
+use BayLang.Constructor.Frontend.Editor.ParameterClassName;
+use BayLang.Constructor.Frontend.Editor.ParameterWidgetName;
 use BayLang.Constructor.Frontend.Editor.WidgetEditPageModel;
 use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
+use BayLang.Constructor.Frontend.Providers.EditorProvider;
 use BayLang.OpCodes.BaseOpCode;
+use BayLang.OpCodes.OpHtmlAttribute;
+use BayLang.OpCodes.OpHtmlContent;
+use BayLang.OpCodes.OpHtmlSlot;
+use BayLang.OpCodes.OpHtmlTag;
+use BayLang.OpCodes.OpHtmlValue;
+use BayLang.OpCodes.OpString;
 
 
 class Widget extends BaseObject
 {
 	BaseOpCode code = null;
 	BaseOpCode parent_code = null;
+	WidgetEditPageModel page_model = null;
+	WidgetSettingsInterface component_settings = null;
 	WidgetTreeItem item = null;
+	string component_class_name = null;
+	
+	/* Params */
+	Collection<Parameter> params = [];
+	Parameter param_class_name = null;
+	Parameter param_widget_name = null;
+	
+	/* HTML Element */
+	bool is_initialized = false;
+	bool is_component = false;
+	bool is_raw = false;
+	string html_content = "";
 	
 	
 	/**
 	 * Constructor
 	 */
-	public void constructor(BaseOpCode code)
+	public void constructor(WidgetEditPageModel page_model, BaseOpCode code)
 	{
 		parent();
 		this.code = code;
+		this.page_model = page_model;
+		
+		/* Create params */
+		this.param_class_name = new ParameterClassName
+		{
+			"widget": this,
+		};
+		this.param_widget_name = new ParameterWidgetName
+		{
+			"widget": this,
+		};
+		this.param_class_name.param_widget_name = this.param_widget_name;
+		this.param_widget_name.param_class_name = this.param_class_name;
+		this.param_class_name.op_attr = null;
+		this.param_class_name.value = [];
+		this.param_widget_name.op_attr = null;
+		this.param_widget_name.value = "";
+		this.params.add(this.param_widget_name);
+		this.params.add(this.param_class_name);
+		
+		/* Clear HTML params */
+		this.is_component = false;
+		this.is_raw = false;
+		this.html_content = "";
+	}
+	
+	
+	/**
+	 * Returns CSS Content
+	 */
+	string getSelector() => "." ~ this.param_widget_name.value;
+	
+	
+	/**
+	 * Setup
+	 */
+	void setup()
+	{
+		if (this.is_initialized) return;
+		
+		/* Setup params */
+		this.setupParams();
+		
+		/* Setup attributes */
+		this.setupAttrs();
+		
+		/* Create class attribute */
+		if (this.param_class_name.op_attr == null)
+		{
+			OpHtmlAttribute op_attr = new OpHtmlAttribute
+			{
+				"key": "class",
+			};
+			this.param_class_name.op_attr = op_attr;
+			this.param_widget_name.op_attr = op_attr;
+		}
+	}
+	
+	
+	/**
+	 * Setup attributes
+	 */
+	void setupAttrs()
+	{
+		BaseOpCode op_code = this.code;
+		if (
+			not (op_code instanceof OpHtmlTag) and
+			not (op_code instanceof OpHtmlSlot)
+		)
+		{
+			return;
+		}
+		
+		Collection<OpHtmlAttribute> attrs = this.code.attrs;
+		if (not attrs) return;
+		
+		/* Setup paremeters values */
+		for (int i=0; i<attrs.count(); i++)
+		{
+			OpHtmlAttribute op_attr = attrs.get(i);
+			for (int j=0; j<this.params.count(); j++)
+			{
+				Parameter param = this.params.get(j);
+				if (param.isAttribute(op_attr))
+				{
+					param.setHtmlAttribute(op_attr);
+				}
+			}
+		}
+	}
+	
+	
+	/**
+	 * Setup params
+	 */
+	void setupParams()
+	{
+		BaseOpCode op_code = this.code;
+		if (not (op_code instanceof OpHtmlTag)) return;
+		
+		/* Setup widget name */
+		string selected_tag_name = op_code.tag_name;
+		if (not CodeModel::isComponent(selected_tag_name))
+		{
+			/* this.setupHtmlParams(); */
+			return;
+		}
+		
+		/* Set component */
+		this.is_component = true;
+		
+		/* Get EditorProvider */
+		EditorProvider editor = @.provider(classof EditorProvider);
+		
+		/* Find component settings */
+		this.component_class_name = this.page_model.component_processor
+			.getModuleClassName(selected_tag_name)
+		;
+		this.component_settings = editor.getWidget(this.component_class_name);
+		if (not this.component_settings) return;
+		
+		/* Setup params */
+		this.params.appendItems(
+			this.component_settings.getParams().map(
+				Parameter (Parameter param)
+				{
+					param.widget = this;
+					return param;
+				}
+			)
+		);
+	}
+	
+	
+	/**
+	 * Setup HTML Params
+	 */
+	bool setupHtmlParams()
+	{
+		this.is_component = false;
+		this.is_raw = false;
+		this.html_content = "";
+		
+		/* Get code */
+		OpHtmlTag tree_item_code = this.item.code;
+		BaseOpCode text_item = tree_item_code.items.items.get(0);
+		
+		/* Setup text */
+		if (text_item instanceof OpHtmlContent)
+		{
+			this.html_content = text_item.value;
+		}
+		else if (text_item instanceof OpHtmlValue)
+		{
+			this.is_raw = text_item.kind == "raw";
+			if (text_item.value instanceof OpString)
+			{
+				this.html_content = text_item.value.value;
+			}
+		}
 	}
 }

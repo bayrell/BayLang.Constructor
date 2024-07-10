@@ -7,69 +7,19 @@ namespace BayLang.Constructor.Frontend.Editor;
 use Runtime.lib;
 use Runtime.Callback;
 use Runtime.Web.BaseModel;
-use BayLang.Constructor.Frontend.Annotations.WidgetSettingsInterface;
-use BayLang.Constructor.Frontend.Editor.CodeModel;
 use BayLang.Constructor.Frontend.Editor.Parameter;
-use BayLang.Constructor.Frontend.Editor.ParameterClassName;
-use BayLang.Constructor.Frontend.Editor.ParameterWidgetName;
-use BayLang.Constructor.Frontend.Editor.WidgetCSS;
-use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
-use BayLang.Constructor.Frontend.Providers.EditorProvider;
-use BayLang.Exceptions.ParserUnknownError;
-use BayLang.OpCodes.BaseOpCode;
-use BayLang.OpCodes.OpHtmlAttribute;
-use BayLang.OpCodes.OpHtmlContent;
-use BayLang.OpCodes.OpHtmlSlot;
-use BayLang.OpCodes.OpHtmlTag;
-use BayLang.OpCodes.OpHtmlValue;
-use BayLang.OpCodes.OpString;
+use BayLang.Constructor.Frontend.Editor.SelectedItem;
+use BayLang.Constructor.Frontend.Editor.Widget;
 
 
 class SelectedItemModel extends BaseModel
 {
-	string component = classof WidgetCSS;
+	string component = classof SelectedItem;
 	string widget_name = "selected";
-	
-	/* Params */
-	Collection<Parameter> params = [];
-	Parameter param_class_name = null;
-	Parameter param_widget_name = null;
 	
 	/* Selected item */
 	Collection<int> path = null;
-	WidgetTreeItem item = null;
-	
-	/* HTML Element */
-	bool is_component = false;
-	bool is_raw = false;
-	string html_content = "";
-	
-	
-	/**
-	 * Returns CSS Content
-	 */
-	string getCurrentSelector() => "." ~ this.param_widget_name.value;
-	
-	
-	/**
-	 * Init widget
-	 */
-	void init(Dict params)
-	{
-		parent(params);
-		
-		/* Create params */
-		this.param_class_name = new ParameterClassName
-		{
-			"selected": this,
-		};
-		this.param_widget_name = new ParameterWidgetName
-		{
-			"selected": this,
-		};
-		this.param_class_name.param_widget_name = this.param_widget_name;
-		this.param_widget_name.param_class_name = this.param_class_name;
-	}
+	Widget widget = null;
 	
 	
 	/**
@@ -81,153 +31,14 @@ class SelectedItemModel extends BaseModel
 		this.path = path ? path.slice() : null;
 		
 		/* Get item */
-		WidgetTreeItem item = this.parent_widget.tree.root.get(path);
-		if (item == this.item) return;
+		Widget widget = this.parent_widget.component_processor.getWidget(path);
+		if (widget == this.widget) return;
 		
-		/* Set item */
-		this.item = item;
+		/* Set widget */
+		this.widget = widget;
 		
-		/* Clear params */
-		this.attrs = [];
-		this.params = [];
-		this.param_class_name.op_attr = null;
-		this.param_class_name.value = [];
-		this.param_widget_name.op_attr = null;
-		this.param_widget_name.value = "";
-		this.params.add(this.param_widget_name);
-		this.params.add(this.param_class_name);
-		
-		/* Clear HTML params */
-		this.is_component = false;
-		this.is_raw = false;
-		this.html_content = "";
-		
-		if (not this.item) return;
-		
-		/* Setup params */
-		this.setupParams();
-		
-		/* Setup attributes */
-		this.setupAttrs();
-		
-		/* Create class attribute */
-		if (this.param_class_name.op_attr == null)
-		{
-			OpHtmlAttribute op_attr = new OpHtmlAttribute
-			{
-				"key": "class",
-			};
-			this.param_class_name.op_attr = op_attr;
-			this.param_widget_name.op_attr = op_attr;
-		}
-	}
-	
-	
-	/**
-	 * Setup attributes
-	 */
-	void setupAttrs()
-	{
-		BaseOpCode tree_item_code = this.item.code;
-		if (
-			not (tree_item_code instanceof OpHtmlTag) and
-			not (tree_item_code instanceof OpHtmlSlot)
-		)
-		{
-			return;
-		}
-		
-		Collection<OpHtmlAttribute> attrs = this.item.code.attrs;
-		if (not attrs) return;
-		
-		/* Setup paremeters values */
-		for (int i=0; i<attrs.count(); i++)
-		{
-			OpHtmlAttribute op_attr = attrs.get(i);
-			for (int j=0; j<this.params.count(); j++)
-			{
-				Parameter param = this.params.get(j);
-				if (param.isAttribute(op_attr))
-				{
-					param.setHtmlAttribute(op_attr);
-				}
-			}
-		}
-	}
-	
-	
-	/**
-	 * Setup HTML Params
-	 */
-	bool setupHtmlParams()
-	{
-		this.is_component = false;
-		this.is_raw = false;
-		this.html_content = "";
-		
-		/* Get code */
-		OpHtmlTag tree_item_code = this.item.code;
-		BaseOpCode text_item = tree_item_code.items.items.get(0);
-		
-		/* Setup text */
-		if (text_item instanceof OpHtmlContent)
-		{
-			this.html_content = text_item.value;
-		}
-		else if (text_item instanceof OpHtmlValue)
-		{
-			this.is_raw = text_item.kind == "raw";
-			if (text_item.value instanceof OpString)
-			{
-				this.html_content = text_item.value.value;
-			}
-		}
-	}
-	
-	
-	/**
-	 * Setup params
-	 */
-	void setupParams()
-	{
-		BaseOpCode item_code = this.item.code;
-		if (not (item_code instanceof OpHtmlTag)) return;
-		
-		/* Setup widget name */
-		string selected_tag_name = item_code.tag_name;
-		if (not CodeModel::isComponent(selected_tag_name))
-		{
-			/* this.setupHtmlParams(); */
-			return;
-		}
-		
-		/* Set component */
-		this.is_component = true;
-		
-		/* Get EditorProvider */
-		EditorProvider editor = @.provider(classof EditorProvider);
-		
-		/* Find component settings */
-		string component_class_name = this.parent_widget.component_processor
-			.getModuleClassName(selected_tag_name)
-		;
-		WidgetSettingsInterface component_settings = editor.getWidget(component_class_name);
-		if (not component_settings) return;
-		
-		/* Setup settings */
-		this.component_class_name = component_class_name;
-		this.component_settings = component_settings;
-		
-		/* Setup params */
-		this.params.appendItems(
-			component_settings.getParams().map(
-				Parameter (Parameter param)
-				{
-					param.selected = this;
-					return param;
-				}
-			)
-		);
+		/* Setup widget */
+		this.widget.setup();
 	}
 	
 	
@@ -242,7 +53,7 @@ class SelectedItemModel extends BaseModel
 		/* Update label */
 		if (param.name == "widget_name")
 		{
-			this.item.updateLabel();
+			param.widget.item.updateLabel();
 		}
 		
 		/* Update render */

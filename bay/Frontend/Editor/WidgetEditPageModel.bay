@@ -456,7 +456,7 @@ class WidgetEditPageModel extends BasePageModel
 	void onTreeSelectItem(TreeMessage message)
 	{
 		if (not this.isLoaded()) return null;
-		if (message.item == this.selected.item) return;
+		if (this.selected.widget != null and (message.item == this.selected.widget.item)) return;
 		this.selectItem(message.path);
 	}
 	
@@ -536,7 +536,7 @@ class WidgetEditPageModel extends BasePageModel
 	 */
 	void renameSelectedItem()
 	{
-		this.rename_item_dialog.old_value = this.selected.param_widget_name.value;
+		this.rename_item_dialog.old_value = this.selected.widget.param_widget_name.value;
 		this.rename_item_dialog.setTitle("Rename " ~ this.rename_item_dialog.old_value);
 		this.rename_item_dialog.setValue(this.rename_item_dialog.old_value);
 		this.rename_item_dialog.show();
@@ -555,7 +555,7 @@ class WidgetEditPageModel extends BasePageModel
 		if (rs::charAt(new_selector_name, 0) != ".") new_selector_name = "." ~ new_selector_name;
 		
 		/* Rename widget */
-		this.selected.changeParameterValue(this.selected.param_widget_name, new_widget_name);
+		this.selected.changeParameterValue(this.selected.widget.param_widget_name, new_widget_name);
 		
 		/* Create new style */
 		if (not this.styles.items.has(new_selector_name))

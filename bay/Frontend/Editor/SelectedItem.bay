@@ -122,7 +122,7 @@
 	<div class="widget_param__row">
 		<div class="widget_param__label">Component</div>
 		<div class="widget_param__content">
-			{{ this.model.selected.item.code.tag_name }}
+			{{ this.model.selected.widget.code.tag_name }}
 		</div>
 	</div>
 </template>
@@ -146,7 +146,7 @@
 			</div>
 		</div>
 		<div class="widget_param__content">
-			{{ this.model.selected.param_widget_name.value }}
+			{{ this.model.selected.widget.param_widget_name.value }}
 		</div>
 	</div>
 </template>
@@ -156,9 +156,11 @@
 	<div class="widget_param__row">
 		<div class="widget_param__label">Class</div>
 		<div class="widget_param__content">
-			<Tag value={{ this.model.selected.param_class_name.value.slice() }}
+			<Tag value={{ this.model.selected.widget.param_class_name.value.slice() }}
 				@event:valueChange={{ void (var value) {
-					this.model.selected.changeParameterValue(this.model.selected.param_class_name, value);
+					this.model.selected.changeParameterValue(
+						this.model.selected.widget.param_class_name, value
+					);
 				} }}
 			/>
 		</div>
@@ -167,9 +169,9 @@
 
 
 <template name="renderParams">
-	%for (int i=0; i<this.model.selected.params.count(); i++)
+	%for (int i=0; i<this.model.selected.widget.params.count(); i++)
 	{
-		%set Parameter param = this.model.selected.params.get(i);
+		%set Parameter param = this.model.selected.widget.params.get(i);
 		%if (param.display)
 		{
 			%set Dict item_props = param.props;
@@ -201,7 +203,7 @@
 		<div class="widget_param__content">
 			<Select
 				name="is_raw_html"
-				value={{ this.model.selected.is_raw }}
+				value={{ this.model.selected.widget.is_raw }}
 				show_select_value={{ false }}
 				options=[
 					{ "value": "0", "label": "No" },
@@ -219,7 +221,7 @@
 		<div class="widget_param__content">
 			<TextEditable
 				name="content"
-				value={{ this.model.selected.html_content }}
+				value={{ this.model.selected.widget.html_content }}
 				direct_update={{ true }}
 				@event:valueChange={{ void (var value) {
 					this.model.selected.changeHtmlContent(value)
@@ -231,7 +233,7 @@
 
 
 <template name="renderStyles">
-	%set string selector_name = this.model.selected.getCurrentSelector();
+	%set string selector_name = this.model.selected.widget.getSelector();
 	%set StyleItem style_item = this.model.styles.items.get(selector_name);
 	<div class="widget_css__content">
 		<div class="widget_css__label">Common</div>
@@ -266,23 +268,23 @@
 			%render this.renderInput(style_item, "color", "");
 			%render this.renderInput(style_item, "font-size", "");
 			%render this.renderSelect(style_item, "font-weight", "", [
-				{"label": "light", "value": "lighter"},
-				{"label": "normal", "value": "normal"},
-				{"label": "bold", "value": "bold"},
-				{"label": "bolder", "value": "bolder"},
+				{"key": "light", "value": "lighter"},
+				{"key": "normal", "value": "normal"},
+				{"key": "bold", "value": "bold"},
+				{"key": "bolder", "value": "bolder"},
 			]);
 			%render this.renderSelect(style_item, "text-align", "", [
-				{"label": "left", "value": "left"},
-				{"label": "center", "value": "center"},
-				{"label": "right", "value": "right"},
-				{"label": "justify", "value": "justify"},
+				{"key": "left", "value": "left"},
+				{"key": "center", "value": "center"},
+				{"key": "right", "value": "right"},
+				{"key": "justify", "value": "justify"},
 			]);
 			%render this.renderSelect(style_item, "text-transform", "", [
-				{"label": "capitalize", "value": "capitalize"},
-				{"label": "lowercase", "value": "lowercase"},
-				{"label": "uppercase", "value": "uppercase"},
-				{"label": "inherit", "value": "inherit"},
-				{"label": "none", "value": "none"},
+				{"key": "capitalize", "value": "capitalize"},
+				{"key": "lowercase", "value": "lowercase"},
+				{"key": "uppercase", "value": "uppercase"},
+				{"key": "inherit", "value": "inherit"},
+				{"key": "none", "value": "none"},
 			]);
 			%render this.renderInput(style_item, "line-height", "");
 		</div>
@@ -292,16 +294,16 @@
 		<div class="widget_css__items">
 			%render this.renderInput(style_item, "border-color", "");
 			%render this.renderSelect(style_item, "border-style", "", [
-				{"label": "dashed", "value": "dashed"},
-				{"label": "dotted", "value": "dotted"},
-				{"label": "double", "value": "double"},
-				{"label": "hidden", "value": "hidden"},
-				{"label": "inset", "value": "inset"},
-				{"label": "none", "value": "none"},
-				{"label": "outset", "value": "outset"},
-				{"label": "solid", "value": "solid"},
-				{"label": "inherit", "value": "inherit"},
-				{"label": "unset", "value": "unset"},
+				{"key": "dashed", "value": "dashed"},
+				{"key": "dotted", "value": "dotted"},
+				{"key": "double", "value": "double"},
+				{"key": "hidden", "value": "hidden"},
+				{"key": "inset", "value": "inset"},
+				{"key": "none", "value": "none"},
+				{"key": "outset", "value": "outset"},
+				{"key": "solid", "value": "solid"},
+				{"key": "inherit", "value": "inherit"},
+				{"key": "unset", "value": "unset"},
 			]);
 			%render this.renderInput(style_item, "border-width", "");
 			%render this.renderInput(style_item, "border-radius", "");
@@ -314,14 +316,14 @@
 			%render this.renderInput(style_item, "background-image", "Image");
 			%render this.renderInput(style_item, "background-position", "Position");
 			%render this.renderSelect(style_item, "background-repeat", "Repeat", [
-				{"label": "repeat", "value": "repeat"},
-				{"label": "repeat-x", "value": "repeat-x"},
-				{"label": "repeat-y", "value": "repeat-y"},
-				{"label": "no-repeat", "value": "no-repeat"},
+				{"key": "repeat", "value": "repeat"},
+				{"key": "repeat-x", "value": "repeat-x"},
+				{"key": "repeat-y", "value": "repeat-y"},
+				{"key": "no-repeat", "value": "no-repeat"},
 			]);
 			%render this.renderSelect(style_item, "background-size", "Size", [
-				{"label": "contain", "value": "contain"},
-				{"label": "cover", "value": "cover"},
+				{"key": "contain", "value": "contain"},
+				{"key": "cover", "value": "cover"},
 			]);
 		</div>
 	</div>
@@ -335,7 +337,7 @@
 
 
 <template name="renderCSS">
-	%set string selector_name = this.model.selected.getCurrentSelector();
+	%set string selector_name = this.model.selected.widget.getSelector();
 	<TextEditable class="overflow"
 		value={{ this.model.styles.getCSSValue(selector_name) }}
 		@event:valueChange={{ void (var value) use (selector_name) {
@@ -347,7 +349,7 @@
 
 <template>
 	<div class="widget_param">
-		%if (this.model.selected.item and this.model.selected.is_component)
+		%if (this.model.selected.widget and this.model.selected.widget.is_component)
 		{
 			<!-- Render info -->
 			%render this.renderComponentName();
@@ -375,9 +377,9 @@
 props string type = "params";
 string current_tab = "params";
 Collection<string> tabs_items = [
-	{"label": "Params", "value": "params"},
-	{"label": "Styles", "value": "styles"},
-	{"label": "CSS", "value": "css"},
+	{"key": "Params", "value": "params"},
+	{"key": "Styles", "value": "styles"},
+	{"key": "CSS", "value": "css"},
 ];
 
 
@@ -419,7 +421,7 @@ void setCSSValue(StyleItem style_item, string key, string value = "")
 	}
 	else
 	{
-		string selector_name = this.model.selected.getCurrentSelector();
+		string selector_name = this.model.selected.widget.getSelector();
 		this.model.styles.changeCSSValue(selector_name, key ~ ": " ~ value);
 	}
 }

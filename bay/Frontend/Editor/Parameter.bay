@@ -6,8 +6,7 @@ namespace BayLang.Constructor.Frontend.Editor;
 
 use Runtime.BaseObject;
 use BayLang.Constructor.Frontend.Editor.CodeModel;
-use BayLang.Constructor.Frontend.Editor.SelectedItemModel;
-use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
+use BayLang.Constructor.Frontend.Editor.Widget;
 use BayLang.OpCodes.OpHtmlAttribute;
 
 
@@ -22,7 +21,7 @@ class Parameter extends BaseObject
 	var default = null;
 	Dict props = null;
 	OpHtmlAttribute op_attr = null;
-	SelectedItemModel selected = null;
+	Widget widget = null;
 	
 	
 	/**
@@ -63,7 +62,7 @@ class Parameter extends BaseObject
 		{
 			"key": this.name,
 		};
-		this.selected.item.code.attrs.prepend(this.op_attr);
+		this.widget.item.code.attrs.prepend(this.op_attr);
 	}
 	
 	

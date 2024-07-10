@@ -111,11 +111,25 @@ Collection<int> getComponent(var elem)
 Collection<int> getWidgetPath(var elem)
 {
 	elem = this.getComponent(elem);
+	if (elem == null) return null;
 	if (elem.hasAttribute("data-widget-path"))
 	{
 		return elem.getAttribute("data-widget-path");
 	}
-	return elem.__component__.data_widget_path;
+	
+	var component = elem.__component__;
+	
+	#ifcode JAVASCRIPT then
+	while (
+		component != null &&
+		component.data_widget_path == null
+	)
+	{
+		component = component.$parent;
+	}
+	#endif
+	
+	return component ? component.data_widget_path : null;
 }
 
 
