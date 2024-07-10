@@ -6,14 +6,14 @@ namespace BayLang.Constructor.Frontend.Editor;
 
 use Runtime.BaseObject;
 use BayLang.Constructor.Frontend.Editor.CodeModel;
-use BayLang.Constructor.Frontend.Editor.Parameter;
 use BayLang.Constructor.Frontend.Editor.ParameterClassName;
+use BayLang.Constructor.Frontend.Editor.ParameterComponent;
 use BayLang.Constructor.Frontend.Editor.SelectedItemModel;
 use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
 use BayLang.OpCodes.OpHtmlAttribute;
 
 
-class ParameterWidgetName extends Parameter
+class ParameterWidgetName extends ParameterComponent
 {
 	bool display = false;
 	string name = "widget_name";

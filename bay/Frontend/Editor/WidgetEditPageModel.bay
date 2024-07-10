@@ -64,8 +64,8 @@ class WidgetEditPageModel extends BasePageModel
 	
 	/* Models */
 	TreeModel tree = null;
-	ComponentProcessor component_processor = null;
-	ModelProcessor model_processor = null;
+	ComponentProcessor component_processor = new ComponentProcessor(this);
+	ModelProcessor model_processor = new ModelProcessor(this);
 	SelectedItemModel selected = null;
 	StylesModel styles = null;
 	ContextMenuModel context_menu = null;
@@ -131,8 +131,6 @@ class WidgetEditPageModel extends BasePageModel
 		/* Create widgets */
 		this.selected = this.addWidget(classof SelectedItemModel);
 		this.styles = this.addWidget(classof StylesModel);
-		this.component_processor = this.addWidget(classof ComponentProcessor);
-		this.model_processor = this.addWidget(classof ModelProcessor);
 		
 		/* Create Tree */
 		this.tree = this.addWidget(classof TreeModel);
@@ -426,27 +424,6 @@ class WidgetEditPageModel extends BasePageModel
 		
 		/* Build CSS */
 		this.getFramePageModel().buildCSS();
-	}
-	
-	
-	/**
-	 * Load Tree items
-	 */
-	void loadTreeItems()
-	{
-		OpDeclareFunction op_code_render = this.code.getComponentRender("render");
-		if (not op_code_render) return;
-		
-		BaseOpCode op_code_expression = op_code_render.getExpression();
-		if (not op_code_expression) return;
-		if (not (op_code_expression instanceof OpHtmlItems)) return;
-		if (not op_code_expression.items.get(0)) return;
-		
-		BaseOpCode op_code = op_code_expression.items.get(0);
-		if (not (op_code.items instanceof OpHtmlItems)) return;
-		
-		this.tree.root = new WidgetTreeItem(op_code);
-		this.tree.root.addHtmlItems(op_code.items);
 	}
 	
 	

@@ -43,7 +43,6 @@ class ComponentProcessor extends CodeModel
 	HashMap<BaseOpCode, Widget> hash = new HashMap;
 	string component_namespace = "";
 	string component_class_name = "";
-	string widget_name = "component_processor";
 	
 	
 	/**
@@ -54,7 +53,7 @@ class ComponentProcessor extends CodeModel
 		parent(code);
 		
 		/* Process op_code attrs */
-		OpDeclareFunction op_code_render = this.getComponentRender("render");
+		OpDeclareFunction op_code_render = this.findFunction("render");
 		if (not op_code_render) return;
 		
 		/* Process attributes */
@@ -71,7 +70,7 @@ class ComponentProcessor extends CodeModel
 	 */
 	BaseOpCode getOpCode(Collection<int> path)
 	{
-		WidgetTreeItem item = this.parent_widget.tree.root.get(path);
+		WidgetTreeItem item = this.page_model.tree.root.get(path);
 		return item.code;
 	}
 	
@@ -103,7 +102,7 @@ class ComponentProcessor extends CodeModel
 	/**
 	 * Get component render expression
 	 */
-	OpDeclareFunction getComponentRender(string render_name = "render")
+	OpDeclareFunction findFunction(string render_name = "render")
 	{
 		if (not this.code) return null;
 		
@@ -118,9 +117,9 @@ class ComponentProcessor extends CodeModel
 	/**
 	 * Build render function
 	 */
-	string buildComponentRender(string render_name = "render")
+	string buildRenderContent(string render_name = "render")
 	{
-		OpDeclareFunction op_code_render = this.getComponentRender(render_name);
+		OpDeclareFunction op_code_render = this.findFunction(render_name);
 		if (not op_code_render) return "";
 		
 		/* Create translator */
@@ -173,7 +172,7 @@ class ComponentProcessor extends CodeModel
 			);
 			if (op_code_style)
 			{
-				this.parent_widget.styles.setCSSValue("." ~ widget_name, op_code_style.content);
+				this.page_model.styles.setCSSValue("." ~ widget_name, op_code_style.content);
 			}
 		}
 		
@@ -188,10 +187,7 @@ class ComponentProcessor extends CodeModel
 			}
 		}
 		
-		OpDeclareClass op_code_class = default_template.findClass();
-		if (not op_code_class) return null;
-		
-		OpDeclareFunction op_code_render = op_code_class.findFunction("render");
+		OpDeclareFunction op_code_render = this.findFunction("render");
 		if (not op_code_render) return null;
 		if (not op_code_render.expression) return null;
 		if (not (op_code_render.expression instanceof OpHtmlItems)) return null;
@@ -266,7 +262,7 @@ class ComponentProcessor extends CodeModel
 	 */
 	void loadItems()
 	{
-		OpDeclareFunction op_code_render = this.getComponentRender("render");
+		OpDeclareFunction op_code_render = this.findFunction("render");
 		if (not op_code_render) return;
 		
 		BaseOpCode op_code_expression = op_code_render.getExpression();
@@ -281,7 +277,7 @@ class ComponentProcessor extends CodeModel
 		Widget widget = this.registerWidget(op_code);
 		
 		/* Setup tree root item */
-		TreeModel tree = this.parent_widget.tree;
+		TreeModel tree = this.page_model.tree;
 		tree.root = widget.item;
 	}
 	
@@ -294,7 +290,7 @@ class ComponentProcessor extends CodeModel
 		/* Create widget */
 		if (not this.hash.has(op_code))
 		{
-			this.hash.set(op_code, new Widget(this.parent_widget, op_code));
+			this.hash.set(op_code, new Widget(this.page_model, op_code));
 		}
 		
 		/* Setup widget */

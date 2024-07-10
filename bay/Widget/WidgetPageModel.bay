@@ -161,7 +161,7 @@ class WidgetPageModel extends BasePageModel
 		if (not page_model) return;
 		
 		/* Get content */
-		string content = page_model.component_processor.buildComponentRender("render");
+		string content = page_model.component_processor.buildRenderContent("render");
 		
 		/* log(content); */
 		this.widget_component.render = window.eval("fn_new = " + content + ";");

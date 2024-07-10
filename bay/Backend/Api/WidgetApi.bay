@@ -67,16 +67,14 @@ class WidgetApi extends BaseApi
 		}
 		
 		/* Get widget op code */
-		string model_content = await widget.getModelContent();
-		string component_content = await widget.getComponentContent();
-		BaseOpCode component_op_code = await widget.getComponentOpCode();
+		BaseOpCode component = await widget.getComponentOpCode();
+		BaseOpCode model = await widget.getModelOpCode();
 		
 		/* Success */
 		this.success({
 			"data": {
-				"model_content": model_content,
-				"component": component_op_code,
-				"component_content": component_content,
+				"component": component,
+				"model": model,
 			},
 		});
 	}

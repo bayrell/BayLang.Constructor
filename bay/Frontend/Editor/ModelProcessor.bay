@@ -5,9 +5,97 @@
 namespace BayLang.Constructor.Frontend.Editor;
 
 use BayLang.Constructor.Frontend.Editor.CodeModel;
+use BayLang.Constructor.Frontend.Editor.Widget;
+use BayLang.OpCodes.BaseOpCode;
+use BayLang.OpCodes.OpDeclareClass;
+use BayLang.OpCodes.OpDeclareFunction;
+use BayLang.OpCodes.OpHtmlAttribute;
+use BayLang.OpCodes.OpModule;
 
 
 class ModelProcessor extends CodeModel
 {
-    string widget_name = "model_processor";
+	/**
+	 * Setup op code
+	 */
+	void setupOpCode(OpModule code)
+	{
+		parent(code);
+	}
+	
+	
+	/**
+	 * Setup widget
+	 */
+	void setupWidget(Widget widget)
+	{
+		widget.model_codes = [];
+		widget.model_class_name = "";
+		widget.primary_model_code = null;
+		widget.is_model = this.checkIsModel(widget);
+		if (not widget.is_model) return;
+		
+		/* Get widget name */
+		string widget_name = widget.getName();
+		
+		/* Get model codes */
+		widget.model_codes = this.getModelCodes(widget_name);
+	}
+	
+	
+	/**
+	 * Check is model
+	 */
+	bool checkIsModel(Widget widget)
+	{
+		Collection<OpHtmlAttribute> attrs = widget.code.attrs;
+		if (attrs)
+		{
+			for (int i=0; i<attrs.count(); i++)
+			{
+				OpHtmlAttribute attr = attrs.get(i);
+				if (attr.key == "@model") return true;
+			}
+		}
+		return false;
+	}
+	
+	
+	/**
+	 * Returns function
+	 */
+	OpDeclareFunction findFunction(string function_name)
+	{
+		if (not this.code) return null;
+		
+		OpDeclareClass op_code_class = this.code.findClass();
+		if (not op_code_class) return null;
+		
+		OpDeclareFunction op_code = op_code_class.findFunction(function_name);
+		return op_code;
+	}
+	
+	
+	/**
+	 * Returns model codes by widget_name
+	 */
+	Collection<BaseOpCode> getModelCodes(string widget_name)
+	{
+		OpDeclareFunction init_op_code = this.findFunction("init");
+		if (not init_op_code) return [];
+		
+		return init_op_code.items.items.filter(
+			bool (BaseOpCode op_code) use (widget_name) =>
+				this.isModelOpCode(op_code, widget_name)
+		);
+	}
+	
+	
+	/**
+	 * Returns true if model op code
+	 */
+	bool isModelOpCode(BaseOpCode op_code, string widget_name)
+	{
+		return true;
+	}
 }

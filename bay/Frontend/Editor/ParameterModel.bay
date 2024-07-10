@@ -1,0 +1,12 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Editor;
+
+use BayLang.Constructor.Frontend.Editor.Parameter;
+
+
+class ParameterModel extends Parameter
+{
+}

@@ -26,10 +26,14 @@ class Widget extends BaseObject
 {
 	BaseOpCode code = null;
 	BaseOpCode parent_code = null;
+	BaseOpCode primary_model_code = null;
+	Collection<BaseOpCode> model_codes = null;
 	WidgetEditPageModel page_model = null;
 	WidgetSettingsInterface component_settings = null;
+	WidgetSettingsInterface model_settings = null;
 	WidgetTreeItem item = null;
 	string component_class_name = null;
+	string model_class_name = null;
 	
 	/* Params */
 	Collection<Parameter> params = [];
@@ -78,6 +82,12 @@ class Widget extends BaseObject
 	
 	
 	/**
+	 * Returns widget name
+	 */
+	string getName() => this.param_widget_name.value;
+	
+	
+	/**
 	 * Returns CSS Content
 	 */
 	string getSelector() => "." ~ this.param_widget_name.value;
@@ -89,6 +99,9 @@ class Widget extends BaseObject
 	void setup()
 	{
 		if (this.is_initialized) return;
+		
+		/* Setup settings */
+		this.setupSettings();
 		
 		/* Setup params */
 		this.setupParams();
@@ -143,9 +156,9 @@ class Widget extends BaseObject
 	
 	
 	/**
-	 * Setup params
+	 * Setup settings
 	 */
-	void setupParams()
+	void setupSettings()
 	{
 		BaseOpCode op_code = this.code;
 		if (not (op_code instanceof OpHtmlTag)) return;
@@ -169,6 +182,17 @@ class Widget extends BaseObject
 			.getModuleClassName(selected_tag_name)
 		;
 		this.component_settings = editor.getWidget(this.component_class_name);
+		
+		/* Setup model */
+		this.page_model.model_processor.setupWidget(this);
+	}
+	
+	
+	/**
+	 * Setup params
+	 */
+	void setupParams()
+	{
 		if (not this.component_settings) return;
 		
 		/* Setup params */
