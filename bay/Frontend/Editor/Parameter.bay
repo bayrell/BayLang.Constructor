@@ -7,6 +7,7 @@ namespace BayLang.Constructor.Frontend.Editor;
 use Runtime.BaseObject;
 use BayLang.Constructor.Frontend.Editor.CodeModel;
 use BayLang.Constructor.Frontend.Editor.Widget;
+use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpHtmlAttribute;
 
 
@@ -19,6 +20,7 @@ class Parameter extends BaseObject
 	bool display = true;
 	var value = null;
 	var default = null;
+	BaseOpCode op_code = null;
 	Widget widget = null;
 	
 	
@@ -29,6 +31,24 @@ class Parameter extends BaseObject
 	{
 		parent();
 		this._assign_values(params);
+	}
+	
+	
+	/**
+	 * Is op_code
+	 */
+	void isOpCode(BaseOpCode op_code)
+	{
+		return false;
+	}
+	
+	
+	/**
+	 * Set op_code
+	 */
+	void setOpCode(BaseOpCode op_code)
+	{
+		this.op_code = op_code;
 	}
 	
 	

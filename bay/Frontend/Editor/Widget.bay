@@ -9,6 +9,7 @@ use BayLang.Constructor.Frontend.Annotations.WidgetSettingsInterface;
 use BayLang.Constructor.Frontend.Editor.CodeModel;
 use BayLang.Constructor.Frontend.Editor.Parameter;
 use BayLang.Constructor.Frontend.Editor.ParameterClassName;
+use BayLang.Constructor.Frontend.Editor.ParameterComponent;
 use BayLang.Constructor.Frontend.Editor.ParameterWidgetName;
 use BayLang.Constructor.Frontend.Editor.WidgetEditPageModel;
 use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
@@ -71,8 +72,6 @@ class Widget extends BaseObject
 		this.param_class_name.value = [];
 		this.param_widget_name.op_attr = null;
 		this.param_widget_name.value = "";
-		this.params.add(this.param_widget_name);
-		this.params.add(this.param_class_name);
 		
 		/* Clear HTML params */
 		this.is_component = false;
@@ -100,14 +99,19 @@ class Widget extends BaseObject
 	{
 		if (this.is_initialized) return;
 		
+		/* Clear params */
+		this.params = [];
+		this.params.add(this.param_widget_name);
+		this.params.add(this.param_class_name);
+		
 		/* Setup settings */
 		this.setupSettings();
 		
 		/* Setup params */
 		this.setupParams();
 		
-		/* Setup attributes */
-		this.setupAttrs();
+		/* Setup model */
+		this.page_model.model_processor.setupWidget(this);
 		
 		/* Create class attribute */
 		if (this.param_class_name.op_attr == null)
@@ -119,39 +123,9 @@ class Widget extends BaseObject
 			this.param_class_name.op_attr = op_attr;
 			this.param_widget_name.op_attr = op_attr;
 		}
-	}
-	
-	
-	/**
-	 * Setup attributes
-	 */
-	void setupAttrs()
-	{
-		BaseOpCode op_code = this.code;
-		if (
-			not (op_code instanceof OpHtmlTag) and
-			not (op_code instanceof OpHtmlSlot)
-		)
-		{
-			return;
-		}
 		
-		Collection<OpHtmlAttribute> attrs = this.code.attrs;
-		if (not attrs) return;
-		
-		/* Setup paremeters values */
-		for (int i=0; i<attrs.count(); i++)
-		{
-			OpHtmlAttribute op_attr = attrs.get(i);
-			for (int j=0; j<this.params.count(); j++)
-			{
-				Parameter param = this.params.get(j);
-				if (param.isAttribute(op_attr))
-				{
-					param.setHtmlAttribute(op_attr);
-				}
-			}
-		}
+		/* Set flag initialized */
+		this.is_initialized = true;
 	}
 	
 	
@@ -182,9 +156,6 @@ class Widget extends BaseObject
 			.getModuleClassName(selected_tag_name)
 		;
 		this.component_settings = editor.getWidget(this.component_class_name);
-		
-		/* Setup model */
-		this.page_model.model_processor.setupWidget(this);
 	}
 	
 	
@@ -205,6 +176,36 @@ class Widget extends BaseObject
 				}
 			)
 		);
+		
+		/* Check if code is html tag or slot */
+		BaseOpCode op_code = this.code;
+		if (
+			not (op_code instanceof OpHtmlTag) and
+			not (op_code instanceof OpHtmlSlot)
+		)
+		{
+			return;
+		}
+		
+		Collection<OpHtmlAttribute> attrs = this.code.attrs;
+		if (not attrs) return;
+		
+		/* Setup paremeters values */
+		for (int i=0; i<attrs.count(); i++)
+		{
+			OpHtmlAttribute op_attr = attrs.get(i);
+			for (int j=0; j<this.params.count(); j++)
+			{
+				Parameter param = this.params.get(j);
+				if (
+					param instanceof ParameterComponent and
+					param.isOpCode(op_attr)
+				)
+				{
+					param.setOpCode(op_attr);
+				}
+			}
+		}
 	}
 	
 	

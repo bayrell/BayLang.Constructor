@@ -118,27 +118,40 @@ class WidgetApi extends BaseApi
 			);
 		}
 		
-		Serializer serializer = new SerializerBase64();
-		serializer.setFlag(Serializer::ALLOW_OBJECTS);
-		OpModule component = serializer.decode(this.post_data.get("component"));
-		
-		/* Translate widget */
-		TranslatorBay translator = new TranslatorBay();
-		list res = translator::translate(translator, component);
-		string content = res.get(1);
-		
-		/* Save widget content */
-		string file_path = widget.getComponetPath();
-		await fs::saveFile(file_path, content);
-		
-		/* Compile file */
-		string relative_src_file_path = widget.module.getRelativeSourcePath(file_path);
-		widget.module.compile(relative_src_file_path);
+		/* Save file */
+		this.saveFile(widget, widget.getComponetPath(), this.post_data.get("component"));
+		this.saveFile(widget, widget.getModelPath(), this.post_data.get("model"));
 		
 		/* Update assets */
 		widget.module.updateAssets();
 		
 		/* Success */
 		this.success();
+	}
+	
+	
+	/**
+	 * Save file
+	 */
+	void saveFile(Widget widget, string file_path, string content)
+	{
+		/* Get op_code */
+		Serializer serializer = new SerializerBase64();
+		serializer.setFlag(Serializer::ALLOW_OBJECTS);
+		OpModule op_code = serializer.decode(content);
+		
+		/* Translate */
+		TranslatorBay translator = new TranslatorBay();
+		list res = translator::translate(translator, op_code);
+		string content = res.get(1);
+		
+		/* Save content */
+		await fs::saveFile(file_path, content);
+		
+		/* Compile file */
+		string relative_src_file_path = widget.module.getRelativeSourcePath(file_path);
+		widget.module.compile(relative_src_file_path);
+		
+		/* widget.module.translateLanguages(relative_src_file_path, op_code); */
 	}
 }

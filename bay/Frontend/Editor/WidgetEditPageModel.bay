@@ -33,6 +33,7 @@ use BayLang.Constructor.Frontend.Editor.SelectedItemModel;
 use BayLang.Constructor.Frontend.Editor.StylesModel;
 use BayLang.Constructor.Frontend.Editor.WidgetEditPage;
 use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
+use BayLang.Constructor.Frontend.Providers.EditorProvider;
 use BayLang.Constructor.WidgetDebug.WidgetPageModel;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpDeclareClass;
@@ -191,6 +192,10 @@ class WidgetEditPageModel extends BasePageModel
 		});
 		this.context_menu.addListener("click", new Callback(this, "onContextClickItem"));
 		this.tree.setContextMenu(this.context_menu);
+		
+		/* Add components */
+		EditorProvider editor = @.provider(classof EditorProvider);
+		editor.addComponents(this.layout);
 	}
 	
 	
@@ -257,6 +262,11 @@ class WidgetEditPageModel extends BasePageModel
 		serializer.setFlag(Serializer::ALLOW_OBJECTS);
 		string component = serializer.encode(this.component_processor.code);
 		
+		/* Serialize model */
+		Serializer serializer = new SerializerBase64();
+		serializer.setFlag(Serializer::ALLOW_OBJECTS);
+		string model = serializer.encode(this.model_processor.code);
+		
 		/* Save content */
 		this.app_status = static::STATUS_SAVE_PROCESS;
 		ApiResult res = await this.layout.callApi({
@@ -265,6 +275,7 @@ class WidgetEditPageModel extends BasePageModel
 			"data": {
 				"current_widget": this.current_widget,
 				"component": component,
+				"model": model,
 			}
 		});
 		

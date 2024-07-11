@@ -22,18 +22,18 @@ class ParameterClassName extends ParameterComponent
 	
 	
 	/**
-	 * Is attribute
+	 * Is op_code
 	 */
-	void isAttribute(OpHtmlAttribute op_attr)
+	void isOpCode(OpHtmlAttribute op_attr)
 	{
 		return op_attr.key == "class";
 	}
 	
 	
 	/**
-	 * Set attribute
+	 * Set op_code
 	 */
-	void setHtmlAttribute(OpHtmlAttribute op_attr)
+	void setOpCode(OpHtmlAttribute op_attr)
 	{
 		string class_name = CodeModel::getValueFromOpCode(op_attr.value);
 		Collection<string> value = rs::split(" ", class_name);

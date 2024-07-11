@@ -5,12 +5,23 @@
 namespace BayLang.Constructor.Frontend.Editor;
 
 use BayLang.Constructor.Frontend.Editor.CodeModel;
+use BayLang.Constructor.Frontend.Editor.Parameter;
+use BayLang.Constructor.Frontend.Editor.ParameterModel;
 use BayLang.Constructor.Frontend.Editor.Widget;
+use BayLang.Constructor.Frontend.Providers.EditorProvider;
 use BayLang.OpCodes.BaseOpCode;
+use BayLang.OpCodes.OpAssign;
+use BayLang.OpCodes.OpAssignValue;
+use BayLang.OpCodes.OpAttr;
+use BayLang.OpCodes.OpCall;
 use BayLang.OpCodes.OpDeclareClass;
 use BayLang.OpCodes.OpDeclareFunction;
+use BayLang.OpCodes.OpDict;
+use BayLang.OpCodes.OpDictPair;
 use BayLang.OpCodes.OpHtmlAttribute;
+use BayLang.OpCodes.OpIdentifier;
 use BayLang.OpCodes.OpModule;
+use BayLang.OpCodes.OpString;
 
 
 class ModelProcessor extends CodeModel
@@ -35,11 +46,21 @@ class ModelProcessor extends CodeModel
 		widget.is_model = this.checkIsModel(widget);
 		if (not widget.is_model) return;
 		
-		/* Get widget name */
-		string widget_name = widget.getName();
-		
 		/* Get model codes */
-		widget.model_codes = this.getModelCodes(widget_name);
+		this.setupModelCodes(widget);
+		
+		/* Get model name */
+		if (widget.primary_model_code)
+		{
+			BaseOpCode op_code_model_name = widget.primary_model_code.expression.args.get(0);
+			if (op_code_model_name instanceof OpString)
+			{
+				widget.model_class_name = op_code_model_name.value;
+			}
+		}
+		
+		/* Setup model params */
+		this.setupParams(widget);
 	}
 	
 	
@@ -77,25 +98,117 @@ class ModelProcessor extends CodeModel
 	
 	
 	/**
-	 * Returns model codes by widget_name
+	 * Setup to widget model codes
 	 */
-	Collection<BaseOpCode> getModelCodes(string widget_name)
+	void setupModelCodes(Widget widget)
 	{
 		OpDeclareFunction init_op_code = this.findFunction("init");
 		if (not init_op_code) return [];
 		
-		return init_op_code.items.items.filter(
-			bool (BaseOpCode op_code) use (widget_name) =>
-				this.isModelOpCode(op_code, widget_name)
-		);
+		/* Get widget name */
+		string widget_name = widget.getName();
+		for (int i=0; i<init_op_code.items.items.count(); i++)
+		{
+			BaseOpCode op_code = init_op_code.items.items.get(i);
+			list res = static::getOpCodeType(op_code, widget_name);
+			int op_code_type = res.get(0);
+			int op_code_item = res.get(1);
+			if (op_code_type == 0) continue;
+			if (op_code_type == 1) widget.primary_model_code = op_code_item;
+			if (op_code_type == 2) widget.model_codes.push(op_code_item);
+		}
 	}
 	
 	
 	/**
 	 * Returns true if model op code
 	 */
-	bool isModelOpCode(BaseOpCode op_code, string widget_name)
+	pure list getOpCodeType(BaseOpCode op_code, string widget_name)
 	{
+		if (op_code instanceof OpAssign)
+		{
+			OpAssignValue op_code_assign = op_code.values.get(0);
+			if (static::isPrimaryCode(op_code_assign, widget_name))
+			{
+				return [1, op_code_assign];
+			}
+		}
+		else if (op_code instanceof OpCall)
+		{
+		}
+		return [0, null];
+	}
+	
+	
+	/**
+	 * Returns true if primary code
+	 */
+	pure bool isPrimaryCode(OpAssignValue op_code, string widget_name)
+	{
+		if (not (op_code instanceof OpAssignValue)) return false;
+		if (not (op_code.expression instanceof OpCall)) return false;
+		if (not (op_code.op_code instanceof OpAttr)) return false;
+		if (not (op_code.op_code.obj instanceof OpIdentifier)) return false;
+		if (not (op_code.op_code.value instanceof OpIdentifier)) return false;
+		if (not (op_code.expression.obj instanceof OpAttr)) return false;
+		if (not (op_code.expression.obj.obj instanceof OpIdentifier)) return false;
+		if (not (op_code.expression.obj.value instanceof OpIdentifier)) return false;
+		if (op_code.op_code.obj.value != "this") return false;
+		if (op_code.op_code.value.value != widget_name) return false;
+		if (op_code.expression.obj.obj.value != "this") return false;
+		if (op_code.expression.obj.value.value != "addWidget") return false;
+		if (op_code.expression.args.count() != 2) return false;
+		if (not (op_code.expression.args.get(0) instanceof OpString)) return false;
+		if (not (op_code.expression.args.get(1) instanceof OpDict)) return false;
 		return true;
+	}
+	
+	
+	/**
+	 * Setup model params
+	 */
+	void setupParams(Widget widget)
+	{
+		if (widget.model_class_name == "") return;
+		if (not widget.primary_model_code) return;
+		
+		/* Get model settings */
+		EditorProvider editor = @.provider(classof EditorProvider);
+		widget.model_settings = editor.getWidget(widget.model_class_name);
+		if (not widget.model_settings) return;
+		
+		/* Add params */
+		widget.params.appendItems(
+			widget.model_settings.getParams().map(
+				Parameter (Parameter param) use (widget)
+				{
+					param.widget = widget;
+					return param;
+				}
+			)
+		);
+		
+		/* Get values */
+		OpDict op_dict = widget.primary_model_code.expression.args.get(1);
+		if (not op_dict) return;
+		if (not (op_dict instanceof OpDict)) return;
+		
+		/* Add params values */
+		Collection<OpDictPair> values = op_dict.values;
+		for (int i=0; i<values.count(); i++)
+		{
+			OpDictPair op_dict_pair = values.get(i);
+			for (int j=0; j<widget.params.count(); j++)
+			{
+				Parameter param = widget.params.get(j);
+				if (
+					param instanceof ParameterModel and
+					param.isOpCode(op_dict_pair)
+				)
+				{
+					param.setOpCode(op_dict_pair);
+				}
+			}
+		}
 	}
 }

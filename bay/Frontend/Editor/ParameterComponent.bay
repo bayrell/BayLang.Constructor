@@ -13,25 +13,25 @@ use BayLang.OpCodes.OpHtmlAttribute;
 class ParameterComponent extends Parameter
 {
 	Dict props = null;
-	OpHtmlAttribute op_attr = null;
+	OpHtmlAttribute op_code = null;
 	
     
 	/**
-	 * Is attribute
+	 * Is op_code
 	 */
-	void isAttribute(OpHtmlAttribute op_attr)
+	void isOpCode(OpHtmlAttribute op_code)
 	{
-		return this.name == op_attr.key;
+		return op_code instanceof OpHtmlAttribute and this.name == op_code.key;
 	}
 	
 	
 	/**
-	 * Set attribute
+	 * Set op_code
 	 */
-	void setHtmlAttribute(OpHtmlAttribute op_attr)
+	void setOpCode(OpHtmlAttribute op_code)
 	{
-		this.op_attr = op_attr;
-		this.value = CodeModel::getValueFromOpCode(op_attr.value);
+		this.op_code = op_code;
+		this.value = CodeModel::getValueFromOpCode(op_code.value);
 	}
 	
 	
@@ -40,11 +40,11 @@ class ParameterComponent extends Parameter
 	 */
 	void createHtmlAttribute()
 	{
-		this.op_attr = new OpHtmlAttribute
+		this.op_code = new OpHtmlAttribute
 		{
 			"key": this.name,
 		};
-		this.widget.item.code.attrs.prepend(this.op_attr);
+		this.widget.item.code.attrs.prepend(this.op_code);
 	}
 	
 	
@@ -54,13 +54,13 @@ class ParameterComponent extends Parameter
 	void setValue(var value)
 	{
 		/* Create html attribute */
-		if (this.op_attr == null)
+		if (this.op_code == null)
 		{
 			this.createHtmlAttribute();
 		}
 		
 		/* Set value */
 		this.value = value;
-		this.op_attr.value = CodeModel::getOpCodeByValue(value);
+		this.op_code.value = CodeModel::getOpCodeByValue(value);
 	}
 }

@@ -7,14 +7,13 @@
 <use name="Runtime.Callback" />
 <use name="Runtime.Widget.Input" component="true" />
 <use name="Runtime.Widget.Select" component="true" />
-<use name="Runtime.Widget.SortableList" component="true" />
 <use name="Runtime.Widget.Tag" component="true" />
 <use name="Runtime.Widget.TextArea" component="true" />
 <use name="Runtime.Widget.TextEditable" component="true" />
-<use name="Runtime.Widget.Blocks.FormFields" component="true" />
 <use name="BayLang.Constructor.Frontend.Editor.Parameter" />
 <use name="BayLang.Constructor.Frontend.Editor.StyleItem" />
 <use name="BayLang.Constructor.Frontend.Editor.WidgetStyle" component="true" />
+<use name="BayLang.Constructor.Frontend.Providers.EditorProvider" />
 
 
 <style>
@@ -388,14 +387,8 @@ Collection<string> tabs_items = [
  */
 bool isAllowClassName(string class_name)
 {
-	if (class_name == "Runtime.Widget.Input") return true;
-	if (class_name == "Runtime.Widget.Select") return true;
-	if (class_name == "Runtime.Widget.SortableList") return true;
-	if (class_name == "Runtime.Widget.Tag") return true;
-	if (class_name == "Runtime.Widget.TextArea") return true;
-	if (class_name == "Runtime.Widget.TextEditable") return true;
-	if (class_name == "Runtime.Widget.Blocks.FormFields") return true;
-	return false;
+	EditorProvider editor = @.provider(classof EditorProvider);
+	return editor.allowParamClassName(class_name);
 }
 
 

@@ -226,13 +226,13 @@ class CodeModel extends BaseObject
 				OpDictPair op_dict_item = op_attr.values.get(i);
 				string key = op_dict_item.key;
 				BaseOpCode item = op_dict_item.value;
-				result.set(key, static::getOpCodeFromValue(item));
+				result.set(key, static::getValueFromOpCode(item));
 			}
 			return result;
 		}
 		else if (op_attr instanceof OpCollection)
 		{
-			return op_attr.values.map(var (BaseOpCode value) => static::getOpCodeFromValue(value));
+			return op_attr.values.map(var (BaseOpCode value) => static::getValueFromOpCode(value));
 		}
 		return null;
 	}
