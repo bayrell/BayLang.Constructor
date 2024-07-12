@@ -56,6 +56,13 @@ class SelectedItemModel extends BaseModel
 			param.widget.item.updateLabel();
 		}
 		
+		/* Change model value */
+		if (param.widget.is_model)
+		{
+			string widget_name = param.widget.getName();
+			this.parent_widget.changeModelValue(widget_name, param.name, value);
+		}
+		
 		/* Update render */
 		this.parent_widget.updateFrameRender();
 	}

@@ -15,7 +15,7 @@ class RoutePageModel extends CrudPageModel
 	/**
 	 * Init widget settings
 	 */
-	void init(Dict params)
+	void initWidget(Dict params)
 	{
 		parent(params);
 		

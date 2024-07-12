@@ -32,7 +32,7 @@ class ProjectTableModel extends TableDialogModel
 	/**
 	 * Init widget settings
 	 */
-	void init(Dict params)
+	void initWidget(Dict params)
 	{
 		parent(params);
 		

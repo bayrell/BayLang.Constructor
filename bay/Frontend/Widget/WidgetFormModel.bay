@@ -28,7 +28,7 @@ class WidgetFormModel extends FormModel
 	/**
 	 * Init widget settings
 	 */
-	void init(Dict params)
+	void initWidget(Dict params)
 	{
 		parent(params);
 		

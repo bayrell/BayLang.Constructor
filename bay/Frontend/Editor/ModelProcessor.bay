@@ -102,7 +102,7 @@ class ModelProcessor extends CodeModel
 	 */
 	void setupModelCodes(Widget widget)
 	{
-		OpDeclareFunction init_op_code = this.findFunction("init");
+		OpDeclareFunction init_op_code = this.findFunction("initWidget");
 		if (not init_op_code) return [];
 		
 		/* Get widget name */

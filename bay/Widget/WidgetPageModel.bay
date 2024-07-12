@@ -38,7 +38,7 @@ class WidgetPageModel extends BasePageModel
 	/**
 	 * Init widget settings
 	 */
-	void init(Dict params)
+	void initWidget(Dict params)
 	{
 		parent(params);
 		
@@ -149,6 +149,21 @@ class WidgetPageModel extends BasePageModel
 		string component = this.widget_model.component;
 		string css = BaseLayoutModel::_getRequiredComponents(res, cache, [component]);
 		return css;
+	}
+	
+	
+	/**
+	 * Change model value
+	 */
+	void changeModelValue(string widget_name, string key, var value)
+	{
+		BaseModel widget = this.widget_model.getWidget(widget_name);
+		if (not widget) return;
+		
+		/* Set params */
+		Dict params = {};
+		params.set(key, value);
+		widget.initParams(params);
 	}
 	
 	
