@@ -153,6 +153,21 @@ class WidgetPageModel extends BasePageModel
 	
 	
 	/**
+	 * Add model widget
+	 */
+	void addModelWidget(string widget_name, string content)
+	{
+		content = rs::substr(content, 5);
+		content = "fn_new = function (){ return this.widget_model." + content + "; };";
+		#ifcode JAVASCRIPT then
+		var fn_new = window.eval(content);
+		fn_new = fn_new.bind(this);
+		this.widget_model[widget_name] = fn_new();
+		#endif
+	}
+	
+	
+	/**
 	 * Change model value
 	 */
 	void changeModelValue(string widget_name, string key, var value)

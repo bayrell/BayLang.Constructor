@@ -586,7 +586,16 @@ class WidgetEditPageModel extends BasePageModel
 		{
 			widget.setupSettings();
 			widget.setupParams();
+			
+			/* Create model op_code */
 			this.model_processor.createModel(widget);
+			
+			/* Add model widget */
+			string content = this.model_processor.buildPrimaryContent(widget);
+			if (content)
+			{
+				this.getFramePageModel().addModelWidget(widget.getName(), content);
+			}
 		}
 		
 		/* Select new item */

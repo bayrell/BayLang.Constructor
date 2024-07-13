@@ -5,12 +5,14 @@
 namespace BayLang.Constructor.Frontend.Editor;
 
 use Runtime.Callback;
+use BayLang.SaveOpCode;
 use BayLang.Constructor.Frontend.Editor.CodeModel;
 use BayLang.Constructor.Frontend.Editor.Parameter;
 use BayLang.Constructor.Frontend.Editor.ParameterModel;
 use BayLang.Constructor.Frontend.Editor.Widget;
 use BayLang.Constructor.Frontend.Providers.EditorProvider;
 use BayLang.LangBay.ParserBay;
+use BayLang.LangES6.TranslatorES6;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpAssign;
 use BayLang.OpCodes.OpAssignValue;
@@ -256,6 +258,39 @@ class ModelProcessor extends CodeModel
 	
 	
 	/**
+	 * Build primary content
+	 */
+	string buildPrimaryContent(Widget widget)
+	{
+		if (not widget.primary_model_code) return "";
+		
+		string content = "";
+		try
+		{
+			/* Create translator */
+			TranslatorES6 t = this.createTranslator();
+			Collection<SaveOpCode> save_op_codes = t.save_op_codes;
+			
+			/* Translate expression */
+			list res = t.expression::Expression(t, widget.primary_model_code.expression);
+			t = res.get(0);
+			
+			/* Output save op code */
+			string save = t::outputSaveOpCode(t, save_op_codes.count());
+			if (save != "") content ~= save;
+			content ~= res.get(1);
+			content = t.program::removeContext(content);
+			content = rs::trim(content);
+		}
+		catch (var e)
+		{
+		}
+		
+		return content;
+	}
+	
+	
+	/**
 	 * Create primary code
 	 */
 	OpAssign createPrimaryCode(Widget widget)
@@ -281,7 +316,6 @@ class ModelProcessor extends CodeModel
 		}
 		catch (var e)
 		{
-			throw e;
 		}
 		
 		return primary_model_code;
