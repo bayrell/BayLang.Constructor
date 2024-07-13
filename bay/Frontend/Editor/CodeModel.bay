@@ -7,6 +7,7 @@ namespace BayLang.Constructor.Frontend.Editor;
 use Runtime.BaseObject;
 use BayLang.Constructor.Frontend.Editor.WidgetEditPageModel;
 use BayLang.LangBay.ParserBay;
+use BayLang.LangBay.TranslatorBay;
 use BayLang.LangES6.TranslatorES6;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpCollection;
@@ -105,7 +106,6 @@ class CodeModel extends BaseObject
 		if (not this.code.hasModule(alias_name))
 		{
 			this.code.addModule(widget_name, alias_name, is_component);
-			this.page_model.updateFrameGlobalCSS();
 		}
 		else if (this.code.uses.get(alias_name) != widget_name)
 		{
@@ -121,7 +121,8 @@ class CodeModel extends BaseObject
 	ParserBay createParser()
 	{
 		/* Setup parser params */
-		Dict params = {
+		Dict params =
+		{
 			"current_namespace_name": this.class_namespace,
 			"current_class_name": this.class_name,
 			"uses": this.code.uses
@@ -161,6 +162,17 @@ class CodeModel extends BaseObject
 		
 		/* Return */
 		return t;
+	}
+	
+	
+	/**
+	 * Build code
+	 */
+	string buildContent()
+	{
+		TranslatorBay t = new TranslatorBay();
+		list res = t::translate(t, this.code, false);
+		return res.get(1);
 	}
 	
 	

@@ -99,11 +99,6 @@ class Widget extends BaseObject
 	{
 		if (this.is_initialized) return;
 		
-		/* Clear params */
-		this.params = [];
-		this.params.add(this.param_widget_name);
-		this.params.add(this.param_class_name);
-		
 		/* Setup settings */
 		this.setupSettings();
 		
@@ -164,6 +159,12 @@ class Widget extends BaseObject
 	 */
 	void setupParams()
 	{
+		/* Clear params */
+		this.params = [];
+		this.params.add(this.param_widget_name);
+		this.params.add(this.param_class_name);
+		
+		/* if component settings is exists */
 		if (not this.component_settings) return;
 		
 		/* Setup params */

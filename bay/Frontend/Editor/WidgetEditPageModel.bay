@@ -580,6 +580,15 @@ class WidgetEditPageModel extends BasePageModel
 		;
 		new_src_path.push(pos);
 		
+		/* Add model */
+		Widget widget = this.component_processor.getWidget(new_src_path);
+		if (widget)
+		{
+			widget.setupSettings();
+			widget.setupParams();
+			this.model_processor.createModel(widget);
+		}
+		
 		/* Select new item */
 		this.selectItem(new_src_path);
 		

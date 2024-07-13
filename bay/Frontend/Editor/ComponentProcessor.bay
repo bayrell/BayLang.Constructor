@@ -71,7 +71,7 @@ class ComponentProcessor extends CodeModel
 	BaseOpCode getOpCode(Collection<int> path)
 	{
 		WidgetTreeItem item = this.page_model.tree.root.get(path);
-		return item.code;
+		return item ? item.code : null;
 	}
 	
 	
@@ -235,11 +235,11 @@ class ComponentProcessor extends CodeModel
 		
 		/* Default template */
 		EditorProvider editor = @.provider(classof EditorProvider);
-		WidgetSettingsInterface widget = editor.getWidget(class_name);
-		if (not widget) return op_code;
+		WidgetSettingsInterface widget_settings = editor.getWidget(class_name);
+		if (not widget_settings) return op_code;
 		
 		/* Get default template */
-		Dict template_info = widget.getDefaultTemplate();
+		Dict template_info = widget_settings.getDefaultTemplate();
 		fn template_factory = template_info.get("default");
 		if (not template_factory) return op_code;
 		
@@ -320,9 +320,12 @@ class ComponentProcessor extends CodeModel
 		this.hash.remove(op_code);
 		
 		/* Remove op_code items */
-		for (int i=0; i<op_code.items.items.count(); i++)
+		if (op_code.items)
 		{
-			this.unregisterOpCode(op_code.items.items.get(i));
+			for (int i=0; i<op_code.items.items.count(); i++)
+			{
+				this.unregisterOpCode(op_code.items.items.get(i));
+			}
 		}
 	}
 	
@@ -399,6 +402,7 @@ class ComponentProcessor extends CodeModel
 		int pos = parent_widget.code.items.items.addItem(new_op_code, dest_op_code, kind);
 		
 		/* Update tree items */
+		this.registerWidget(new_op_code, parent_widget);
 		this.registerWidgetItems(parent_widget, false);
 		
 		return pos;

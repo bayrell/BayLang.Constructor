@@ -36,6 +36,7 @@ class SelectedItemModel extends BaseModel
 		
 		/* Set widget */
 		this.widget = widget;
+		if (not this.widget) return;
 		
 		/* Setup widget */
 		this.widget.setup();
