@@ -1,0 +1,73 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Editor.Dialog;
+
+use Runtime.Widget.ButtonModel;
+use Runtime.Widget.Messages.ValueChangeMessage;
+use Runtime.Widget.Dialog.ConfirmDialogModel;
+use BayLang.Constructor.Frontend.Editor.Dialog.RemoveItemDialog;
+
+
+class RemoveItemDialogModel extends ConfirmDialogModel
+{
+	string component = classof RemoveItemDialog;
+	string widget_name = "remove_item_dialog";
+	string remove_value = "model_and_component";
+	
+	
+	/**
+	 * Init widget settings
+	 */
+	void initWidget(Dict params)
+	{
+		parent(params);
+		
+		/* Remove button */
+		ButtonModel confirm_button = this.buttons.getWidget("confirm_button");
+		confirm_button.content = "Remove";
+		confirm_button.styles.add("danger");
+		confirm_button.styles.removeItem("primary");
+	}
+	
+	
+	/**
+	 * Show dialog
+	 */
+	void show()
+	{
+		parent();
+		this.remove_value = "model_and_component";
+	}
+	
+	
+	/**
+	 * On value change
+	 */
+	void onValueChange(ValueChangeMessage message)
+	{
+		this.remove_value = message.value;
+	}
+	
+	
+	/**
+	 * Confirm button click
+	 */
+	void onConfirmButtonClick()
+	{
+		Collection path = this.parent_widget.selected.path.slice();
+		if (path)
+		{
+			if (this.remove_value == "only_component")
+			{
+				this.parent_widget.removeWidget(path, false);
+			}
+			else
+			{
+				this.parent_widget.removeWidget(path, true);
+			}
+		}
+		this.hide();
+	}
+}

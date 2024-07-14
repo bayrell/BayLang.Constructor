@@ -2,7 +2,7 @@
  *  BayLang Constructor
 -->
 
-<class name="BayLang.Constructor.Frontend.Editor.AddItemDialog"
+<class name="BayLang.Constructor.Frontend.Editor.Dialog.AddItemDialog"
 	extends="Runtime.Widget.Dialog.Dialog"
 >
 
@@ -94,7 +94,9 @@
 							{"key": "first", "value": "Insert fisrt"},
 							{"key": "last", "value": "Insert last"},
 						]
-						@event:valueChange={{ void (string value){ this.model.kind = value; } }}
+						@event:valueChange={{ void (var message){
+							this.model.kind = message.value;
+						} }}
 					/>
 				</div>
 				%if (this.model.selected_widget_info)
@@ -109,9 +111,9 @@
 				<div class="row_item row_content">
 					<Input
 						value={{ this.model.widget_name_value }}
-						@event:valueChange={{ void (string value)
+						@event:valueChange={{ void (var message)
 						{
-							this.model.widget_name_value = value;
+							this.model.widget_name_value = message.value;
 						} }}
 					/>
 				</div>

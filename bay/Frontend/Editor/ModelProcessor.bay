@@ -451,4 +451,67 @@ class ModelProcessor extends CodeModel
 		/* Set widget name */
 		this.setWidgetName(widget, widget.getName());
 	}
+	
+	
+	/**
+	 * Remove primary code
+	 */
+	void removePrimaryCode(Widget widget)
+	{
+		if (not widget.primary_model_code) return;
+		
+		OpDeclareFunction init_op_code = this.findFunction("initWidget");
+		if (not init_op_code) return;
+		
+		/* Remove item */
+		string widget_name = widget.getName();
+		for (int i=init_op_code.items.items.count() - 1; i>=0; i--)
+		{
+			BaseOpCode op_code = init_op_code.items.items.get(i);
+			if (op_code instanceof OpAssign and op_code.values.count() > 0)
+			{
+				OpAssignValue op_code_assign = op_code.values.get(0);
+				if (static::isPrimaryCode(op_code_assign, widget_name))
+				{
+					init_op_code.items.items.remove(i);
+				}
+			}
+		}
+	}
+	
+	
+	/**
+	 * Add class model
+	 */
+	void removeClassModel(Widget widget)
+	{
+		OpDeclareClass model_class_op_code = this.code.findClass();
+		if (not model_class_op_code) return null;
+		
+		/* Remove item */
+		string widget_name = widget.getName();
+		for (int i=model_class_op_code.items.count() - 1; i>=0; i--)
+		{
+			BaseOpCode op_code = model_class_op_code.items.get(i);
+			if (op_code instanceof OpAssign and op_code.values.count() > 0)
+			{
+				OpAssignValue op_code_assign = op_code.values.get(0);
+				if (op_code_assign.var_name == widget_name)
+				{
+					model_class_op_code.items.remove(i);
+				}
+			}
+		}
+	}
+	
+	
+	/**
+	 * Remove model
+	 */
+	void removeModel(Widget widget)
+	{
+		if (not widget.model_settings) return;
+		this.removeClassModel(widget);
+		this.removePrimaryCode(widget);
+	}
 }

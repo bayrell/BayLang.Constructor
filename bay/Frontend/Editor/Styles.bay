@@ -75,8 +75,8 @@
 				class="widget_style__editable overflow"
 				name={{ selector_name }}
 				value={{ this.model.getCSSValue(selector_name) }}
-				@event:valueChange={{ void (var value) use (selector_name) {
-					this.model.changeCSSValue(selector_name, value);
+				@event:valueChange={{ void (var message) use (selector_name) {
+					this.model.changeCSSValue(selector_name, message.value);
 				} }}
 			/>
 		</div>

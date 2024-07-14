@@ -26,7 +26,8 @@ use Runtime.Widget.Tree.TreeItem;
 use Runtime.Widget.Tree.TreeMessage;
 use Runtime.Widget.Tree.TreeModel;
 use BayLang.LangBay.TranslatorBay;
-use BayLang.Constructor.Frontend.Editor.AddItemDialogModel;
+use BayLang.Constructor.Frontend.Editor.Dialog.AddItemDialogModel;
+use BayLang.Constructor.Frontend.Editor.Dialog.RemoveItemDialogModel;
 use BayLang.Constructor.Frontend.Editor.ComponentProcessor;
 use BayLang.Constructor.Frontend.Editor.ModelProcessor;
 use BayLang.Constructor.Frontend.Editor.SelectedItemModel;
@@ -71,7 +72,7 @@ class WidgetEditPageModel extends BasePageModel
 	StylesModel styles = null;
 	ContextMenuModel context_menu = null;
 	AddItemDialogModel add_item_dialog = null;
-	AddItemDialogModel remove_item_dialog = null;
+	RemoveItemDialogModel remove_item_dialog = null;
 	PromptDialogModel rename_item_dialog = null;
 	
 	
@@ -146,7 +147,7 @@ class WidgetEditPageModel extends BasePageModel
 		});
 		
 		/* Remove item dialog model */
-		this.remove_item_dialog = this.addWidget(classof ConfirmDialogModel, {
+		this.remove_item_dialog = this.addWidget(classof RemoveItemDialogModel, {
 			"widget_name": "remove_item_dialog",
 		});
 		
@@ -159,14 +160,6 @@ class WidgetEditPageModel extends BasePageModel
 				"confirm": new Callback(this, "onRename")
 			},
 		});
-		
-		/* Remove button */
-		ButtonModel confirm_button = this.remove_item_dialog.buttons.getWidget("confirm_button");
-		confirm_button.content = "Remove";
-		confirm_button.clearListener("click");
-		confirm_button.addListener("click", new Callback(this, "onRemoveItemConfirm"));
-		confirm_button.styles.add("danger");
-		confirm_button.styles.removeItem("primary");
 		
 		/* Create ContextMenu */
 		this.context_menu = this.addWidget(classof ContextMenuModel);
@@ -359,16 +352,6 @@ class WidgetEditPageModel extends BasePageModel
 			this.remove_item_dialog.content = "Do you want to remove this item?";
 			this.remove_item_dialog.show();
 		}
-	}
-	
-	
-	/**
-	 * On remove item
-	 */
-	void onRemoveItemConfirm()
-	{
-		this.removeWidget(this.selected.path);
-		this.remove_item_dialog.hide();
 	}
 	
 	
@@ -631,13 +614,20 @@ class WidgetEditPageModel extends BasePageModel
 	/**
 	 * Remove widget
 	 */
-	void removeWidget(Collection<int> path)
+	void removeWidget(Collection<int> path, bool model = true)
 	{
 		if (path == null) return;
 		
 		/* Get op_code */
 		BaseOpCode dest_op_code = this.component_processor.getOpCode(this.selected.path);
 		if (not dest_op_code) return;
+		
+		/* Remove model */
+		if (model)
+		{
+			Widget widget = this.component_processor.hash.get(dest_op_code);
+			if (widget) this.model_processor.removeModel(widget);
+		}
 		
 		/* Remove */
 		this.component_processor.removeOpCode(dest_op_code);

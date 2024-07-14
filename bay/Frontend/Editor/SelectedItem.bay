@@ -83,9 +83,9 @@
 		<div class="widget_css__value">
 			<Input value={{ value }}
 				@event:valueChange={{
-					void (string value) use (style_item, key)
+					void (var message) use (style_item, key)
 					{
-						this.setCSSValue(style_item, key, value);
+						this.setCSSValue(style_item, key, message.value);
 					}
 				}}
 			/>
@@ -106,9 +106,9 @@
 				value={{ value }}
 				options={{ options }}
 				@event:valueChange={{
-					void (string value) use (style_item, key)
+					void (var message) use (style_item, key)
 					{
-						this.setCSSValue(style_item, key, value);
+						this.setCSSValue(style_item, key, message.value);
 					}
 				}}
 			/>
@@ -156,9 +156,9 @@
 		<div class="widget_param__label">Class</div>
 		<div class="widget_param__content">
 			<Tag value={{ this.model.selected.widget.param_class_name.value.slice() }}
-				@event:valueChange={{ void (var value) {
+				@event:valueChange={{ void (var message) {
 					this.model.selected.changeParameterValue(
-						this.model.selected.widget.param_class_name, value
+						this.model.selected.widget.param_class_name, message.value
 					);
 				} }}
 			/>
@@ -182,8 +182,8 @@
 					{
 						<{class_name}
 							value={{ param.value }}
-							@event:valueChange={{ void (var value) use (param) {
-								this.model.selected.changeParameterValue(param, value);
+							@event:valueChange={{ void (var message) use (param) {
+								this.model.selected.changeParameterValue(param, message.value);
 							} }}
 							...item_props
 						/>
@@ -208,8 +208,8 @@
 					{ "value": "0", "label": "No" },
 					{ "value": "1", "label": "Yes" },
 				]
-				@event:valueChange={{ void (var value) {
-					this.model.selected.changeHtmlRaw(value)
+				@event:valueChange={{ void (var message) {
+					this.model.selected.changeHtmlRaw(message.value)
 				} }}
 			/>
 		</div>
@@ -222,8 +222,8 @@
 				name="content"
 				value={{ this.model.selected.widget.html_content }}
 				direct_update={{ true }}
-				@event:valueChange={{ void (var value) {
-					this.model.selected.changeHtmlContent(value)
+				@event:valueChange={{ void (var message) {
+					this.model.selected.changeHtmlContent(message.value)
 				} }}
 			/>
 		</div>
@@ -339,8 +339,8 @@
 	%set string selector_name = this.model.selected.widget.getSelector();
 	<TextEditable class="overflow"
 		value={{ this.model.styles.getCSSValue(selector_name) }}
-		@event:valueChange={{ void (var value) use (selector_name) {
-			this.model.styles.changeCSSValue(selector_name, value)
+		@event:valueChange={{ void (var message) use (selector_name) {
+			this.model.styles.changeCSSValue(selector_name, message.value)
 		} }}
 	/>
 </template>

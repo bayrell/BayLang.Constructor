@@ -2,14 +2,14 @@
  *  BayLang Constructor
  */
 
-namespace BayLang.Constructor.Frontend.Editor;
+namespace BayLang.Constructor.Frontend.Editor.Dialog;
 
 use Runtime.lib;
 use Runtime.Callback;
 use Runtime.Widget.ButtonModel;
 use Runtime.Widget.Dialog.ConfirmDialogModel;
 use BayLang.Constructor.Frontend.Annotations.WidgetSettingsInterface;
-use BayLang.Constructor.Frontend.Editor.AddItemDialog;
+use BayLang.Constructor.Frontend.Editor.Dialog.AddItemDialog;
 use BayLang.Constructor.Frontend.Editor.CodeModel;
 use BayLang.Constructor.Frontend.Editor.Widget;
 use BayLang.Constructor.Frontend.Providers.EditorProvider;
@@ -134,7 +134,7 @@ class AddItemDialogModel extends ConfirmDialogModel
 	
 	
 	/**
-	 * Add confirm button click
+	 * Confirm button click
 	 */
 	void onConfirmButtonClick()
 	{

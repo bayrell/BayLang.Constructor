@@ -1,0 +1,33 @@
+<!--
+ *  BayLang Constructor
+-->
+
+<class name="BayLang.Constructor.Frontend.Editor.Dialog.RemoveItemDialog"
+	extends="Runtime.Widget.Dialog.Dialog"
+>
+
+<use name="Runtime.Widget.Select" component="true" />
+<use name="Runtime.Widget.Form.FormRow" component="true" />
+
+
+<template name="renderContent">
+	<div class="widget_dialog__content">
+		<FormRow>
+			<slot name="label">Remove</slot>
+			<slot name="content">
+				<Select
+					value={{ this.model.remove_value }}
+					options={{ [
+						{"key": "model_and_component", "value": "model_and_component"},
+						{"key": "only_component", "value": "only_component"},
+					] }}
+					show_select_value="false"
+					@event:valueChange={{ void (var message){ this.model.onValueChange(message); } }}
+				/>
+			</slot>
+		</FormRow>
+	</div>
+</template>
+
+
+</class>
