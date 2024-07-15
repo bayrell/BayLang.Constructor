@@ -13,13 +13,13 @@ class Routes extends BaseRoute
 	/**
 	 * Returns layout name
 	 */
-	static string getLayoutName() => "default";
+	static string getLayoutName() => "clear";
 	
 	
 	/**
 	 * Returns routes
 	 */
-	pure Collection<RouteInfo> getRoutes()
+	static Collection<RouteInfo> getRoutes()
 	{
 		return
 		[

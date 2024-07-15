@@ -1,0 +1,73 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Project;
+
+use Runtime.Entity.Factory;
+use Runtime.Web.BasePageModel;
+use Runtime.Web.ModelFactory;
+use Runtime.Web.RenderContainer;
+use Runtime.Widget.Table.TableModel;
+use Runtime.Widget.Label;
+use BayLang.Constructor.Frontend.Project.ProjectListPage;
+
+
+class ProjectListPageModel extends BasePageModel
+{
+	string component = classof ProjectListPage;
+	
+	
+	/**
+	 * Init widget settings
+	 */
+	void initWidget(Dict params)
+	{
+		parent(params);
+		
+		/* Add table */
+		this.table = this.addWidget(
+			classof TableModel,
+			{
+				"widget_name": "table",
+				"styles": ["border"],
+				"storage": new Factory
+				(
+					"Runtime.Widget.Table.TableStorage",
+					{
+						"api_name": "baylang.constructor.project",
+					}
+				),
+				"fields":
+				[
+					{
+						"name": "row_number",
+					},
+					{
+						"name": "id",
+						"label": "ID",
+						"component": "Runtime.Widget.Label",
+					},
+					{
+						"name": "name",
+						"label": "Name",
+						"component": "Runtime.Widget.Label",
+					},
+					/*{
+						"name": "row_buttons",
+						"model": new ModelFactory("Runtime.Widget.Table.TableRowButtonsModel"),
+					},*/
+				],
+			}
+		);
+	}
+	
+	
+	/**
+	 * Build title
+	 */
+	void buildTitle(RenderContainer container)
+	{
+		this.layout.setPageTitle("Projects");
+	}
+}

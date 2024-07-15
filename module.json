@@ -30,6 +30,8 @@
 		"Frontend/Editor/WidgetMenu.bay",
 		"Frontend/Editor/WidgetTreeItem.bay",
 		"Frontend/Layout/DefaultLayout.bay",
+		"Frontend/Project/ProjectListPage.bay",
+		"Frontend/Project/ProjectListPageModel.bay",
 		"Frontend/Providers/EditorProvider.bay",
 		"Frontend/Widget/WidgetFormModel.bay",
 		"Frontend/Widget/WidgetPageModel.bay",

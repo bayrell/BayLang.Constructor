@@ -1,0 +1,14 @@
+<!--
+ *  BayLang Constructor
+-->
+
+<class name="BayLang.Constructor.Frontend.Project.ProjectListPage">
+
+<use name="Runtime.Widget.Table.Table" component="true" />
+
+<template>
+	<h1>Project page</h1>
+	<Table @model={{ this.model.table }} />
+</template>
+
+</class>

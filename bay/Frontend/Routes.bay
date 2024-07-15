@@ -1,0 +1,48 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend;
+
+use Runtime.Web.BaseRoute;
+use Runtime.Web.RenderContainer;
+use Runtime.Web.RouteInfo;
+
+
+class Routes extends BaseRoute
+{
+	/**
+	 * Returns layout name
+	 */
+	static string getLayoutName() => "admin";
+	
+	
+	/**
+	 * Returns routes
+	 */
+	static Collection<RouteInfo> getRoutes()
+	{
+		return
+		[
+			new RouteInfo
+			{
+				"uri": "/",
+				"name": "baylang:project:list",
+				"model": "BayLang.Constructor.Frontend.Project.ProjectListPageModel",
+			},
+			new RouteInfo
+			{
+				"uri": "/project/{project_id}",
+				"name": "baylang:project:info",
+				"model": "BayLang.Constructor.Frontend.Project.ProjectPageModel",
+			},
+			new RouteInfo
+			{
+				"uri": "/widgets/{widget_name}/",
+				"name": "baylang:project:widget",
+				"model": "BayLang.Constructor.Frontend.Editor.WidgetEditPageModel",
+				"layout": "clear",
+			},
+		];
+	}
+}

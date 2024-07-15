@@ -207,7 +207,7 @@ class WidgetEditPageModel extends BasePageModel
 	async void loadWidget()
 	{
 		ApiResult res = await this.layout.callApi({
-			"api_name": "admin.constructor.widget",
+			"api_name": "baylang.constructor.widget",
 			"method_name": "getOpCode",
 			"data": {
 				"current_widget": this.current_widget,
@@ -263,7 +263,7 @@ class WidgetEditPageModel extends BasePageModel
 		/* Save content */
 		this.app_status = static::STATUS_SAVE_PROCESS;
 		ApiResult res = await this.layout.callApi({
-			"api_name": "admin.constructor.widget",
+			"api_name": "baylang.constructor.widget",
 			"method_name": "save",
 			"data": {
 				"current_widget": this.current_widget,

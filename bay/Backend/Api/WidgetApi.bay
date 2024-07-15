@@ -20,19 +20,19 @@ use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpModule;
 
 
-class WidgetApi extends BaseApi
+class WidgetApi
 {
 	/**
 	 * Returns api name
 	 */
-	pure string getApiName() => "admin.constructor.widget";
+	static string getApiName() => "baylang.constructor.widget";
 	
 	
 	/**
 	 * Load widget
 	 */
 	@ApiMethod
-	async void getOpCode()
+	async static void getOpCode(BaseApi api)
 	{
 		string project_path = @.env("project_path");
 		string current_widget = this.post_data.get("current_widget");
@@ -71,7 +71,7 @@ class WidgetApi extends BaseApi
 		BaseOpCode model = await widget.getModelOpCode();
 		
 		/* Success */
-		this.success({
+		api.success({
 			"data": {
 				"component": component,
 				"model": model,
@@ -84,7 +84,7 @@ class WidgetApi extends BaseApi
 	 * Save widget
 	 */
 	@ApiMethod
-	async void save()
+	async static void save(BaseApi api)
 	{
 		string project_path = @.env("project_path");
 		string current_widget = this.post_data.get("current_widget");
@@ -119,21 +119,21 @@ class WidgetApi extends BaseApi
 		}
 		
 		/* Save file */
-		this.saveFile(widget, widget.getComponetPath(), this.post_data.get("component"));
-		this.saveFile(widget, widget.getModelPath(), this.post_data.get("model"));
+		static::saveFile(widget, widget.getComponetPath(), this.post_data.get("component"));
+		static::saveFile(widget, widget.getModelPath(), this.post_data.get("model"));
 		
 		/* Update assets */
 		widget.module.updateAssets();
 		
 		/* Success */
-		this.success();
+		api.success();
 	}
 	
 	
 	/**
 	 * Save file
 	 */
-	void saveFile(Widget widget, string file_path, string content)
+	static void saveFile(Widget widget, string file_path, string content)
 	{
 		/* Get op_code */
 		Serializer serializer = new SerializerBase64();
