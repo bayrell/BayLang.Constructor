@@ -4,12 +4,18 @@
 
 namespace BayLang.Constructor.Frontend.Project;
 
+use Runtime.Callback;
 use Runtime.Entity.Factory;
 use Runtime.Web.BasePageModel;
 use Runtime.Web.ModelFactory;
 use Runtime.Web.RenderContainer;
-use Runtime.Widget.Table.TableModel;
+use Runtime.Web.Messages.ClickMessage;
+use Runtime.Widget.Form.FormDeleteStorage;
+use Runtime.Widget.Form.FormModel;
+use Runtime.Widget.Form.FormSubmitStorage;
+use Runtime.Widget.Table.TableDialogModel;
 use Runtime.Widget.Label;
+use Runtime.Widget.RowButtonsModel;
 use BayLang.Constructor.Frontend.Project.ProjectListPage;
 
 
@@ -25,12 +31,54 @@ class ProjectListPageModel extends BasePageModel
 	{
 		parent(params);
 		
+		/* Add top buttons */
+		this.top_buttons = this.addWidget(
+			classof RowButtonsModel,
+			{
+				"widget_name": "top_buttons",
+				"buttons":
+				[
+					{
+						"content": "Add",
+						"widget_name": "add_button",
+						"styles": [
+							"success",
+						]
+					},
+				],
+				"events":
+				{
+					"click": new Callback(this, "onTopButtonsClick"),
+				},
+			}
+		);
+		
 		/* Add table */
 		this.table = this.addWidget(
-			classof TableModel,
+			classof TableDialogModel,
 			{
 				"widget_name": "table",
+				"get_title": void (Dict params)
+				{
+					string action = params.get("action");
+					Dict item = params.get("item");
+					if (action == "add")
+					{
+						return "Add item";
+					}
+					if (action == "edit")
+					{
+						return "Edit item " ~ item.get("id");
+					}
+					if (action == "delete")
+					{
+						return "Delete item " ~ item.get("id");
+					}
+					return "";
+				},
 				"styles": ["border"],
+				
+				/* Table storage */
 				"storage": new Factory
 				(
 					"Runtime.Widget.Table.TableStorage",
@@ -38,6 +86,101 @@ class ProjectListPageModel extends BasePageModel
 						"api_name": "baylang.constructor.project",
 					}
 				),
+				
+				/* Add form */
+				"add_form": new ModelFactory(
+					classof FormModel,
+					{
+						"widget_name": "add_form",
+						"primary_key": ["id"],
+						"storage": new Factory(
+							classof FormSubmitStorage,
+							{
+								"api_name": "baylang.constructor.project"
+							}
+						),
+						"fields":
+						[
+							{
+								"name": "id",
+								"label": "ID",
+								"component": "Runtime.Widget.Input",
+							},
+							{
+								"name": "name",
+								"label": "Name",
+								"component": "Runtime.Widget.Input",
+							},
+							{
+								"name": "template",
+								"label": "Template",
+								"component": "Runtime.Widget.Select",
+								"props":
+								{
+									"options":
+									[
+										{"key": "web", "value": "Web project"},
+									],
+								},
+							},
+							{
+								"name": "description",
+								"label": "Description",
+								"component": "Runtime.Widget.TextArea",
+							},
+						],
+					}
+				),
+				
+				/* Edit form */
+				"edit_form": new ModelFactory(
+					classof FormModel,
+					{
+						"widget_name": "edit_form",
+						"primary_key": ["id"],
+						"storage": new Factory(
+							classof FormSubmitStorage,
+							{
+								"api_name": "baylang.constructor.project"
+							}
+						),
+						"fields":
+						[
+							{
+								"name": "id",
+								"label": "ID",
+								"component": "Runtime.Widget.Input",
+							},
+							{
+								"name": "name",
+								"label": "Name",
+								"component": "Runtime.Widget.Input",
+							},
+							{
+								"name": "description",
+								"label": "Description",
+								"component": "Runtime.Widget.TextArea",
+							},
+						],
+					}
+				),
+				
+				/* Delete form */
+				"delete_form": new ModelFactory(
+					classof FormModel,
+					{
+						"widget_name": "delete_form",
+						"primary_key": ["id"],
+						"storage": new Factory(
+							classof FormDeleteStorage,
+							{
+								"api_name": "baylang.constructor.project"
+							}
+						),
+					}
+				),
+				
+				/* Table fields */
 				"fields":
 				[
 					{
@@ -53,10 +196,10 @@ class ProjectListPageModel extends BasePageModel
 						"label": "Name",
 						"component": "Runtime.Widget.Label",
 					},
-					/*{
+					{
 						"name": "row_buttons",
 						"model": new ModelFactory("Runtime.Widget.Table.TableRowButtonsModel"),
-					},*/
+					},
 				],
 			}
 		);
@@ -69,5 +212,17 @@ class ProjectListPageModel extends BasePageModel
 	void buildTitle(RenderContainer container)
 	{
 		this.layout.setPageTitle("Projects");
+	}
+	
+	
+	/**
+	 * Top buttons click
+	 */
+	void onTopButtonsClick(ClickMessage message)
+	{
+		if (message.widget.widget_name == "add_button")
+		{
+			this.table.save_dialog.showAdd();
+		}
 	}
 }

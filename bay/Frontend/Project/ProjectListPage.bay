@@ -4,11 +4,19 @@
 
 <class name="BayLang.Constructor.Frontend.Project.ProjectListPage">
 
+<use name="Runtime.Widget.RowButtons" component="true" />
 <use name="Runtime.Widget.Table.Table" component="true" />
+
+<style>
+.top_buttons{
+	margin-bottom: 10px;
+}
+</style>
 
 <template>
 	<h1>Project page</h1>
-	<Table @model={{ this.model.table }} />
+	<RowButtons class="top_buttons" @model={{ this.model.top_buttons }} />
+	<Table class="projects_table" @model={{ this.model.table }} />
 </template>
 
 </class>
