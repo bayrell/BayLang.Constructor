@@ -1,0 +1,51 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Backend.Api;
+
+use Runtime.fs;
+use Runtime.Web.Annotations.ApiMethod;
+use Runtime.Web.BaseApi;
+use Runtime.Widget.Crud.SearchApi;
+use BayLang.Helper.Project;
+
+
+class ProjectSearchApi extends SearchApi
+{
+	/**
+	 * Returns api name
+	 */
+	static string getApiName() => "baylang.constructor.project::search";
+	
+	
+	/**
+	 * Action search
+	 */
+	@ApiMethod
+	async static void actionSearch(SearchApi api)
+	{
+		/* Get projects */
+		Collection items = await Project::readProjects(
+			fs::join([@.env("constructor_path"), "projects"])
+		);
+		
+		/* Filter items */
+		items = items.map(
+			Dict (Project project) => {
+				"id": project.getID(),
+				"name": project.getName(),
+				"description": project.getDescription(),
+			}
+		);
+		
+		/* Set result */
+		api.success({
+			"data": {
+				"items": items,
+				"page": 1,
+				"pages": 1,
+			}
+		})
+	}
+}

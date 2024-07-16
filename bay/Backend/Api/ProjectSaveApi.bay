@@ -1,0 +1,116 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Backend.Api;
+
+use Runtime.fs;
+use Runtime.Web.Annotations.ApiMethod;
+use Runtime.Web.BaseApi;
+use Runtime.Widget.Crud.SaveApi;
+use Runtime.Widget.Crud.Rules.CrudRule;
+use Runtime.Widget.Crud.Rules.Required;
+use BayLang.Helper.Project;
+
+
+class ProjectSaveApi extends SaveApi
+{
+	/**
+	 * Returns api name
+	 */
+	static string getApiName() => "baylang.constructor.project::save";
+	
+	
+	/**
+	 * Returns rules
+	 */
+	Vector<CrudRule> getRules() =>
+	[
+		new Required{"name": "id"},
+		new Required{"name": "name"},
+		new Required{"name": "template", "check_update": false},
+	];
+	
+	
+	/**
+	 * New item
+	 */
+	async void newItem()
+	{
+		this.item = new Project(null);
+	}
+	
+	
+	/**
+	 * Find item
+	 */
+	async void findItem(Dict pk)
+	{
+		string project_id = pk.get("id");
+		this.item = await Project::readProject(
+			fs::join([@.env("constructor_path"), "projects", project_id])
+		);
+	}
+	
+	
+	/**
+	 * Create project
+	 */
+	async void createProject()
+	{
+		string project_template = this.data.get("template");
+		this.fail({
+			"message": "Method are not allowed",
+		});
+	}
+	
+	
+	/**
+	 * Action save
+	 */
+	@ApiMethod
+	async void actionSave()
+	{
+		/* Load data */
+		await this.loadItem();
+		await this.loadData();
+		
+		/* Create project */
+		if (this.pk == null)
+		{
+			await this.createProject();
+			return;
+		}
+		
+		/* Set project info */
+		if (this.data.has("name"))
+		{
+			this.item.setName(this.data.get("name"));
+		}
+		if (this.data.has("description"))
+		{
+			this.item.setDescription(this.data.get("description"));
+		}
+		
+		/* Save project */
+		await this.item.saveInfo();
+		
+		/* Success */
+		this.success();
+	}
+	
+	
+	/**
+	 * Action delete
+	 */
+	@ApiMethod
+	async void actionDelete()
+	{
+		/* Load data */
+		await this.loadItem();
+		
+		this.fail({
+			"message": "Method are not allowed",
+		});
+	}
+}

@@ -83,7 +83,7 @@ class ProjectListPageModel extends BasePageModel
 				(
 					"Runtime.Widget.Table.TableStorage",
 					{
-						"api_name": "baylang.constructor.project",
+						"api_name": "baylang.constructor.project::search",
 					}
 				),
 				
@@ -96,7 +96,7 @@ class ProjectListPageModel extends BasePageModel
 						"storage": new Factory(
 							classof FormSubmitStorage,
 							{
-								"api_name": "baylang.constructor.project"
+								"api_name": "baylang.constructor.project::save"
 							}
 						),
 						"fields":
@@ -141,7 +141,7 @@ class ProjectListPageModel extends BasePageModel
 						"storage": new Factory(
 							classof FormSubmitStorage,
 							{
-								"api_name": "baylang.constructor.project"
+								"api_name": "baylang.constructor.project::save"
 							}
 						),
 						"fields":
@@ -174,7 +174,7 @@ class ProjectListPageModel extends BasePageModel
 						"storage": new Factory(
 							classof FormDeleteStorage,
 							{
-								"api_name": "baylang.constructor.project"
+								"api_name": "baylang.constructor.project::save"
 							}
 						),
 					}
