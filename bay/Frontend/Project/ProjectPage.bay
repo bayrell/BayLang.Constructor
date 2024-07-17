@@ -1,0 +1,12 @@
+<!--
+ *  BayLang Constructor
+-->
+
+<class name="BayLang.Constructor.Frontend.Project.ProjectPage">
+
+<template>
+    <div class="project">
+    </div>
+</template>
+
+</class>

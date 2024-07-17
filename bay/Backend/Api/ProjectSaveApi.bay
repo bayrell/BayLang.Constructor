@@ -69,7 +69,7 @@ class ProjectSaveApi extends SaveApi
 			string project_dest = fs::join([projects_path, project_id])
 			
 			/* Add nginx */
-			content.push("# Project clear");
+			content.push("# Project " ~ project_id);
 			content.push("location /project/" ~ project_id ~ "/iframe/assets/ {");
 			content.push("\talias " ~ project_dest ~ "/src/public/assets/;");
 			content.push("\tbreak;");
@@ -77,13 +77,13 @@ class ProjectSaveApi extends SaveApi
 			content.push("location /project/" ~ project_id ~ "/iframe/ {");
 			content.push("\tinclude fastcgi_params;");
 			content.push("\troot " ~ project_dest ~ "/src/public;");
-			content.push("\tfastcgi_param SCRIPT_FILENAME $document_root/;");
+			content.push("\tfastcgi_param SCRIPT_FILENAME $document_root/index.php;");
 			content.push("\tfastcgi_param HTTP_X_FORWARDED_PREFIX " ~
 				"$http_x_forwarded_prefix/project/" ~ project_id ~ "/iframe;");
 			content.push("\tbreak;");
 			content.push("}");
 			
-			if (i == files.count() - 1)
+			if (i != files.count() - 1)
 			{
 				content.push("");
 			}

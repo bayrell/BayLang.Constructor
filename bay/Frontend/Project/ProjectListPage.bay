@@ -14,9 +14,11 @@
 </style>
 
 <template>
-	<h1>Project page</h1>
-	<RowButtons class="top_buttons" @model={{ this.model.top_buttons }} />
-	<Table class="projects_table" @model={{ this.model.table }} />
+	<div class="project_list">
+		<h1>Projects</h1>
+		<RowButtons class="top_buttons" @model={{ this.model.top_buttons }} />
+		<Table class="projects_table" @model={{ this.model.table }} />
+	</div>
 </template>
 
 </class>

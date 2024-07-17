@@ -1,0 +1,25 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Layout;
+
+use Runtime.Web.BaseLayoutModel;
+use BayLang.Constructor.Frontend.Layout.ProjectLayout;
+
+
+class ProjectLayoutModel extends BaseLayoutModel
+{
+	string component = classof ProjectLayout;
+    string project_id = "";
+    
+    
+    /**
+	 * Init widget settings
+	 */
+	void initWidget(Dict params)
+	{
+		parent(params);
+		this.project_id = this.layout.route.matches.get("project_id");
+	}
+}

@@ -1,0 +1,126 @@
+<!--
+ *  BayLang Constructor
+-->
+
+<class name="BayLang.Constructor.Frontend.Layout.ProjectLayout"
+	extends="Runtime.Web.DefaultLayout"
+>
+
+<style>
+.layout{
+	position: relative;
+	display: flex;
+	align-items: stretch;
+	min-height: 100%;
+}
+.layout__menu_wrap{
+	position: relative;
+	width: 200px;
+	padding-top: 10px;
+	padding-right: 10px;
+}
+.layout__content_wrap{
+	position: relative;
+	width: calc(100% - 200px);
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+.layout__title{
+	font-size: 16px;
+	font-weight: normal;
+	padding-bottom: 10px;
+	margin: 0;
+}
+.layout__menu_wrap .layout__title{
+	padding-left: 10px;
+}
+.menu__item a{
+	display: block;
+    padding: 10px;
+    border-bottom: 1px solid var(--widget-color-border);
+}
+.menu__item a:hover{
+	background-color: var(--widget-color-hover);
+}
+.menu__item--active a, .menu__item--active a.nolink, .menu__item--active a.nolink:visited{
+	background-color: var(--widget-color-selected);
+    border-color: var(--widget-color-selected);
+    color: var(--widget-color-selected-text);
+}
+.menu__item:last-child a{
+	border-bottom-width: 0px;
+}
+</style>
+
+
+<template name="renderMenu">
+	<div class="menu">
+		<div class="menu__item">
+			<a href={{ this.layout.url("baylang:index") }} class="nolink">Projects</a>
+		</div>
+		%if (this.layout.project_id != "")
+		{
+			<div class="menu__item" class={{ this.menuActive("baylang:project:modules") }}>
+				<a href={{
+					this.layout.url(
+						"baylang:project:modules",
+						{"project_id": this.layout.project_id}
+					)
+				}} class="nolink">Modules</a>
+			</div>
+			<div class="menu__item" class={{ this.menuActive("baylang:project:routes") }}>
+				<a href={{
+					this.layout.url(
+						"baylang:project:routes",
+						{"project_id": this.layout.project_id}
+					)
+				}} class="nolink">Routes</a>
+			</div>
+			<div class="menu__item" class={{ this.menuActive("baylang:project:widgets") }}>
+				<a href={{
+					this.layout.url(
+						"baylang:project:widgets",
+						{"project_id": this.layout.project_id}
+					)
+				}} class="nolink">Widgets</a>
+			</div>
+		}
+	</div>
+</template>
+
+
+<template>
+	<div class="layout" class={{ "layout--" ~ this.layout.layout_name }}>
+		<div class="layout__menu_wrap">
+			<div class="layout__title">Menu</div>
+			%render this.renderMenu();
+		</div>
+		<div class="layout__content_wrap">
+			<h1 class="layout__title">{{ this.layout.title }}</h1>
+			%render this.renderCurrentPage();
+		</div>
+	</div>
+</template>
+
+
+<script>
+
+/**
+ * Returns true if menu is active
+ */
+bool menuActive(string route_name)
+{
+	if (this.layout.route == null)
+	{
+		return "";
+	}
+	if (this.layout.route.name == route_name)
+	{
+		return "menu__item--active";
+	}
+	return "";
+}
+
+</script>
+
+</class>

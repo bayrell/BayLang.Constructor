@@ -35,6 +35,7 @@ class Routes extends BaseRoute
 				"uri": "/project/{project_id}",
 				"name": "baylang:project:info",
 				"model": "BayLang.Constructor.Frontend.Project.ProjectPageModel",
+				"layout": "project",
 			},
 			new RouteInfo
 			{
