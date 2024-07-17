@@ -8,7 +8,6 @@ use Runtime.fs;
 use Runtime.Exceptions.ApiError;
 use Runtime.Exceptions.RuntimeException;
 use Runtime.Web.Annotations.ApiMethod;
-use Runtime.Web.BaseApi;
 use Runtime.Widget.Crud.SaveApi;
 use Runtime.Widget.Crud.Rules.CrudRule;
 use Runtime.Widget.Crud.Rules.Required;

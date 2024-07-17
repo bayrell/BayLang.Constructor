@@ -20,7 +20,7 @@ use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpModule;
 
 
-class WidgetApi
+class WidgetApi extends BaseApi
 {
 	/**
 	 * Returns api name
@@ -34,10 +34,11 @@ class WidgetApi
 	@ApiMethod
 	async static void getOpCode(BaseApi api)
 	{
-		string project_path = @.env("project_path");
-		string current_widget = this.post_data.get("current_widget");
+		string project_id = api.post_data.get("project_id");
+		string current_widget = api.post_data.get("current_widget");
 		
 		/* Find project */
+		string project_path = fs::join([@.env("constructor_path"), "projects", project_id]);
 		Project project = await Project::readProject(project_path);
 		if (not project)
 		{
@@ -57,18 +58,17 @@ class WidgetApi
 		/* Load widget */
 		await widget.load();
 		
+		/* Get widget op code */
+		BaseOpCode component = await widget.getComponentOpCode();
+		BaseOpCode model = await widget.getModelOpCode();
+		
 		/* Get component path */
-		string component_path = widget.getComponetPath();
-		if (not component_path)
+		if (not component)
 		{
 			throw new ApiError(
 				new RuntimeException("Failed to load widget '" ~ current_widget ~ "'")
 			);
 		}
-		
-		/* Get widget op code */
-		BaseOpCode component = await widget.getComponentOpCode();
-		BaseOpCode model = await widget.getModelOpCode();
 		
 		/* Success */
 		api.success({
@@ -86,10 +86,11 @@ class WidgetApi
 	@ApiMethod
 	async static void save(BaseApi api)
 	{
-		string project_path = @.env("project_path");
-		string current_widget = this.post_data.get("current_widget");
+		string project_id = api.post_data.get("project_id");
+		string current_widget = api.post_data.get("current_widget");
 		
 		/* Find project */
+		string project_path = fs::join([@.env("constructor_path"), "projects", project_id]);
 		Project project = await Project::readProject(project_path);
 		if (not project)
 		{
@@ -110,7 +111,7 @@ class WidgetApi
 		await widget.load();
 		
 		/* Get component path */
-		string component_path = widget.getComponetPath();
+		string component_path = widget.getComponentPath();
 		if (not component_path)
 		{
 			throw new ApiError(
@@ -119,8 +120,8 @@ class WidgetApi
 		}
 		
 		/* Save file */
-		static::saveFile(widget, widget.getComponetPath(), this.post_data.get("component"));
-		static::saveFile(widget, widget.getModelPath(), this.post_data.get("model"));
+		static::saveFile(widget, widget.getComponentPath(), api.post_data.get("component"));
+		static::saveFile(widget, widget.getModelPath(), api.post_data.get("model"));
 		
 		/* Update assets */
 		widget.module.updateAssets();

@@ -1,0 +1,73 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Backend.Api;
+
+use Runtime.fs;
+use Runtime.Exceptions.ApiError;
+use Runtime.Exceptions.ItemNotFound;
+use Runtime.Web.Annotations.ApiMethod;
+use Runtime.Widget.Crud.SearchApi;
+use BayLang.Helper.Module;
+use BayLang.Helper.Project;
+
+
+class ModuleSearchApi extends SearchApi
+{
+	Project project = null;
+	
+	
+	/**
+	 * Returns api name
+	 */
+	static string getApiName() => "baylang.constructor.module::search";
+	
+	
+	/**
+	 * Action search
+	 */
+	@ApiMethod
+	async void actionSearch()
+	{
+		/* Get project */
+		string project_id = this.post_data["foreign_key", "project_id"];
+		this.project = await Project::readProject(
+			fs::join([@.env("constructor_path"), "projects", project_id])
+		);
+		if (not this.project)
+		{
+			throw new ApiError(new ItemNotFound(project_id, "Project"));
+		}
+		
+		/* Load modules */
+		await this.project.readModules();
+		
+		/* Get modules */
+		Collection items = this.project.modules.transition( Module (Module item) => item );
+		
+		/* Sort modules */
+		items = items.sort(
+			int (Module a, Module b)
+			{
+				return rs::compare(a.getName(), b.getName());
+			}
+		);
+		
+		/* Filter items */
+		items = items.map(
+			Dict (Module module) => {
+				"id": module.getName(),
+			}
+		);
+		
+		/* Set result */
+		this.success({
+			"data": {
+				"items": items,
+				"page": 1,
+				"pages": 1,
+			}
+		})
+	}
+}

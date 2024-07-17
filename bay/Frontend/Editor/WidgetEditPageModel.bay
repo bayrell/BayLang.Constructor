@@ -56,6 +56,8 @@ class WidgetEditPageModel extends BasePageModel
 	
 	/* Variables */
 	string component = classof WidgetEditPage;
+	string project_id = "";
+	string module_id = "";
 	string current_widget = "";
 	string component_class_name = "";
 	string menu_selected = "params";
@@ -116,7 +118,7 @@ class WidgetEditPageModel extends BasePageModel
 	 * Returns widget frame page
 	 */
 	string getFramePageUrl() =>
-		"/iframe/open/widget?widget_name=" ~ this.current_widget
+		"/project/" ~ this.project_id ~ "/iframe/open/widget?widget_name=" ~ this.current_widget
 	;
 	
 	
@@ -128,6 +130,8 @@ class WidgetEditPageModel extends BasePageModel
 		parent(params);
 		
 		this.layout.setLayoutName("default");
+		this.project_id = this.layout.route.matches.get("project_id");
+		this.module_id = this.layout.request_query.get("module_id");
 		this.current_widget = this.layout.route.matches.get("widget_name");
 		
 		/* Create widgets */
@@ -210,6 +214,7 @@ class WidgetEditPageModel extends BasePageModel
 			"api_name": "baylang.constructor.widget",
 			"method_name": "getOpCode",
 			"data": {
+				"project_id": this.project_id,
 				"current_widget": this.current_widget,
 			}
 		});
@@ -266,6 +271,7 @@ class WidgetEditPageModel extends BasePageModel
 			"api_name": "baylang.constructor.widget",
 			"method_name": "save",
 			"data": {
+				"project_id": this.project_id,
 				"current_widget": this.current_widget,
 				"component": component,
 				"model": model,

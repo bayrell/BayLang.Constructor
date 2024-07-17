@@ -17,12 +17,12 @@ use Runtime.Widget.Table.TableDialogModel;
 use Runtime.Widget.Table.TableRowButtonsModel;
 use Runtime.Widget.Label;
 use Runtime.Widget.RowButtonsModel;
-use BayLang.Constructor.Frontend.Project.ProjectListPage;
+use BayLang.Constructor.Frontend.Project.ProjectList;
 
 
-class ProjectListPageModel extends BasePageModel
+class ProjectListModel extends BasePageModel
 {
-	string component = classof ProjectListPage;
+	string component = classof ProjectList;
 	
 	
 	/**
@@ -214,9 +214,10 @@ class ProjectListPageModel extends BasePageModel
 				"href": void (Dict data)
 				{
 					Dict item = data.get("item");
-					return this.layout.url("baylang:project:info", {"project_id": item.get("id")});
+					return this.layout.url("baylang:project:modules", {"project_id": item.get("id")});
 				},
 				"content": "Open",
+				"widget_name": "open",
 				"styles":
 				[
 					"default",

@@ -1,0 +1,22 @@
+<!--
+ *  BayLang Constructor
+-->
+
+<class name="BayLang.Constructor.Frontend.Module.ModuleList">
+
+<use name="Runtime.Widget.RowButtons" component="true" />
+<use name="Runtime.Widget.Table.Table" component="true" />
+
+<style>
+.top_buttons{
+	margin-bottom: 10px;
+}
+</style>
+
+<template>
+	<div class="modules_list">
+		<Table class="modules_table" @model={{ this.model.table }} />
+	</div>
+</template>
+
+</class>

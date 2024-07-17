@@ -2,7 +2,7 @@
  *  BayLang Constructor
 -->
 
-<class name="BayLang.Constructor.Frontend.Project.ProjectListPage">
+<class name="BayLang.Constructor.Frontend.Project.ProjectList">
 
 <use name="Runtime.Widget.RowButtons" component="true" />
 <use name="Runtime.Widget.Table.Table" component="true" />
