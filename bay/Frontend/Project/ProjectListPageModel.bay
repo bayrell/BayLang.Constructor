@@ -14,6 +14,7 @@ use Runtime.Widget.Form.FormDeleteStorage;
 use Runtime.Widget.Form.FormModel;
 use Runtime.Widget.Form.FormSubmitStorage;
 use Runtime.Widget.Table.TableDialogModel;
+use Runtime.Widget.Table.TableRowButtonsModel;
 use Runtime.Widget.Label;
 use Runtime.Widget.RowButtonsModel;
 use BayLang.Constructor.Frontend.Project.ProjectListPage;
@@ -202,6 +203,28 @@ class ProjectListPageModel extends BasePageModel
 					},
 				],
 			}
+		);
+		
+		/* Get row buttons */
+		TableRowButtonsModel row_buttons = this.table.getWidget("row_buttons");
+		
+		/* Add open button */
+		row_buttons.addButton(
+			{
+				"href": void (Dict data)
+				{
+					Dict item = data.get("item");
+					return this.layout.url("baylang:project:info", {"project_id": item.get("id")});
+				},
+				"content": "Open",
+				"styles":
+				[
+					"default",
+					"small"
+				],
+			},
+			"edit_button",
+			"before"
 		);
 	}
 	

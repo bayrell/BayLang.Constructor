@@ -5,6 +5,8 @@
 namespace BayLang.Constructor.Backend.Api;
 
 use Runtime.fs;
+use Runtime.Exceptions.ApiError;
+use Runtime.Exceptions.RuntimeException;
 use Runtime.Web.Annotations.ApiMethod;
 use Runtime.Web.BaseApi;
 use Runtime.Widget.Crud.SaveApi;
@@ -54,14 +56,87 @@ class ProjectSaveApi extends SaveApi
 	
 	
 	/**
+	 * Reload nginx
+	 */
+	void reloadNginx()
+	{
+		string content = [];
+		string projects_path = fs::join([@.env("constructor_path"), "projects"]);
+		Collection<string> files = fs::listDir(projects_path);
+		for (int i=0; i<files.count(); i++)
+		{
+			string project_id = files.get(i);
+			string project_dest = fs::join([projects_path, project_id])
+			
+			/* Add nginx */
+			content.push("# Project clear");
+			content.push("location /project/" ~ project_id ~ "/iframe/assets/ {");
+			content.push("\talias " ~ project_dest ~ "/src/public/assets/;");
+			content.push("\tbreak;");
+			content.push("}");
+			content.push("location /project/" ~ project_id ~ "/iframe/ {");
+			content.push("\tinclude fastcgi_params;");
+			content.push("\troot " ~ project_dest ~ "/src/public;");
+			content.push("\tfastcgi_param SCRIPT_FILENAME $document_root/;");
+			content.push("\tfastcgi_param HTTP_X_FORWARDED_PREFIX " ~
+				"$http_x_forwarded_prefix/project/" ~ project_id ~ "/iframe;");
+			content.push("\tbreak;");
+			content.push("}");
+			
+			if (i == files.count() - 1)
+			{
+				content.push("");
+			}
+		}
+		
+		/* Save nginx */
+		string nginx_path = fs::join([@.env("constructor_path"), "nginx.conf"]);
+		string nginx_content = rs::join("\n", content);
+		await fs::saveFile(nginx_path, nginx_content);
+		
+		/* Reload nginx */
+		#ifcode PHP then
+		shell_exec("sudo /usr/sbin/nginx -s reload");
+		#endif
+	}
+	
+	
+	/**
 	 * Create project
 	 */
 	async void createProject()
 	{
+		string project_id = this.data.get("id");
 		string project_template = this.data.get("template");
-		this.fail({
-			"message": "Method are not allowed",
-		});
+		
+		/* Check project */
+		Project project = await Project::readProject(
+			fs::join([@.env("constructor_path"), "projects", project_id])
+		);
+		if (project)
+		{
+			throw new ApiError(new RuntimeException("Project already exists"));
+		}
+		
+		/* Get project path */
+		string project_archive = fs::join([@.base_path, "examples", "clear.zip"]);
+		string project_dest = fs::join([@.env("constructor_path"), "projects", project_id])
+		
+		/* Create project folder */
+		if (not await fs::exists(project_dest))
+		{
+			await fs::mkdir(project_dest);
+		}
+		
+		/* Copy project */
+		#ifcode PHP then
+		shell_exec("unzip $project_archive -d $project_dest");
+		#endif
+		
+		/* Reload nginx */
+		await this.reloadNginx();
+		
+		this.success();
 	}
 	
 	
@@ -109,8 +184,18 @@ class ProjectSaveApi extends SaveApi
 		/* Load data */
 		await this.loadItem();
 		
-		this.fail({
-			"message": "Method are not allowed",
-		});
+		/* Project path */
+		string project_dest = this.item.getPath()
+		
+		/* Remove project */
+		#ifcode PHP then
+		shell_exec("rm -rf $project_dest");
+		#endif
+		
+		/* Reload nginx */
+		await this.reloadNginx();
+		
+		/* Success */
+		this.success();
 	}
 }
