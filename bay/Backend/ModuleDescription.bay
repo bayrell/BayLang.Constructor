@@ -42,6 +42,7 @@ static class ModuleDescription
 		new Api("BayLang.Constructor.Backend.Api.ProjectSaveApi"),
 		new Api("BayLang.Constructor.Backend.Api.ProjectSearchApi"),
 		new Api("BayLang.Constructor.Backend.Api.WidgetApi"),
+		new Api("BayLang.Constructor.Backend.Api.WidgetSaveApi"),
 		new Api("BayLang.Constructor.Backend.Api.WidgetSearchApi"),
 	];
 }

@@ -10,7 +10,9 @@ use Runtime.Web.BasePageModel;
 use Runtime.Web.ModelFactory;
 use Runtime.Web.RenderContainer;
 use Runtime.Web.Messages.ClickMessage;
-use Runtime.Widget.Table.TableModel;
+use Runtime.Widget.Form.FormModel;
+use Runtime.Widget.Form.FormSubmitStorage;
+use Runtime.Widget.Table.TableDialogModel;
 use Runtime.Widget.Label;
 use Runtime.Widget.RowButtonsModel;
 use BayLang.Constructor.Frontend.Widget.WidgetList;
@@ -58,7 +60,7 @@ class WidgetListModel extends BasePageModel
 		
 		/* Add table */
 		this.table = this.addWidget(
-			classof TableModel,
+			classof TableDialogModel,
 			{
 				"widget_name": "table",
 				"get_title": void (Dict params)
@@ -67,15 +69,15 @@ class WidgetListModel extends BasePageModel
 					Dict item = params.get("item");
 					if (action == "add")
 					{
-						return "Add module";
+						return "Add widget";
 					}
 					if (action == "edit")
 					{
-						return "Edit module " ~ item.get("id");
+						return "Edit widget " ~ item.get("id");
 					}
 					if (action == "delete")
 					{
-						return "Delete module " ~ item.get("id");
+						return "Delete widget " ~ item.get("id");
 					}
 					return "";
 				},
@@ -87,6 +89,35 @@ class WidgetListModel extends BasePageModel
 					"Runtime.Widget.Table.TableStorage",
 					{
 						"api_name": "baylang.constructor.widget::search",
+					}
+				),
+				
+				/* Add form */
+				"add_form": new ModelFactory(
+					classof FormModel,
+					{
+						"widget_name": "add_form",
+						"primary_key": ["id"],
+						"foreign_key":
+						{
+							"project_id": this.project_id,
+							"module_id": this.module_id,
+						},
+						"storage": new Factory(
+							classof FormSubmitStorage,
+							{
+								"api_name": "baylang.constructor.widget::save"
+							}
+						),
+						"fields":
+						[
+							{
+								"name": "id",
+								"label": "Name",
+								"component": "Runtime.Widget.Input",
+								"default": this.module_id ~ ".WidgetModel",
+							}
+						],
 					}
 				),
 				
@@ -104,7 +135,7 @@ class WidgetListModel extends BasePageModel
 					},
 					{
 						"name": "id",
-						"label": "ID",
+						"label": "Widget name",
 						"component": "Runtime.Widget.Label",
 					},
 					{
@@ -161,7 +192,7 @@ class WidgetListModel extends BasePageModel
 	{
 		if (message.widget.widget_name == "add_button")
 		{
-			/* this.table.save_dialog.showAdd(); */
+			this.table.save_dialog.showAdd();
 		}
 	}
 }
