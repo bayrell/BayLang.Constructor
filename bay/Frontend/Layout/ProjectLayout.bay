@@ -118,6 +118,15 @@ Collection<string> getMenu()
 		});
 	}
 	
+	arr.push({
+		"label": "Code",
+		"name": "baylang:project:code",
+		"href": this.layout.url(
+			"baylang:project:code",
+			{"project_id": this.layout.project_id}
+		)
+	});
+	
 	return arr;
 }
 

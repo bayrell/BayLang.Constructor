@@ -1,0 +1,162 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Code;
+
+use Runtime.Callback;
+use Runtime.Serializer;
+use Runtime.Web.ApiResult;
+use Runtime.Web.BasePageModel;
+use Runtime.Web.RenderContainer;
+use Runtime.Widget.Tree.TreeMessage;
+use Runtime.Widget.Tree.TreeModel;
+use BayLang.Constructor.Frontend.Code.CodeEditor;
+use BayLang.Constructor.Frontend.Code.TreeItem;
+
+
+class CodeEditorModel extends BasePageModel
+{
+	string component = classof CodeEditor;
+	string project_id = "";
+	TreeModel tree = null;
+	TreeItem selected_item = null;
+	Collection<string> selected_path = null;
+	
+	
+	/**
+	 * Init widget settings
+	 */
+	void initWidget(Dict params)
+	{
+		parent(params);
+		
+		/* Setup settings */
+		this.project_id = this.layout.route.matches.get("project_id");
+		
+		/* Create Tree */
+		this.tree = this.addWidget(classof TreeModel, {
+			"dnd": false,
+			"icons": true,
+			"events":
+			{
+				"selectItem": new Callback(this, "onTreeSelectItem")
+			},
+		});
+		this.tree.root = new TreeItem{};
+	}
+	
+	
+	/**
+	 * Build title
+	 */
+	void buildTitle(RenderContainer container)
+	{
+		this.layout.setPageTitle("Code editor");
+	}
+	
+	
+	/**
+	 * Load data
+	 */
+	async void loadData(RenderContainer container)
+	{
+		await parent(container);
+		
+		ApiResult res = await this.layout.callApi({
+			"api_name": "baylang.constructor.code",
+			"method_name": "getModules",
+			"data": {
+				"project_id": this.project_id,
+			}
+		});
+		
+		if (res.isSuccess())
+		{
+			Collection items = res.data.get("items")
+			for (int i=0; i<items.count(); i++)
+			{
+				Dict module = items.get(i);
+				this.tree.root.items.push(new TreeItem{
+					"kind": "module",
+					"label": module.get("id"),
+					"module_id": module.get("id"),
+					"project_id": this.project_id,
+				});
+			}
+		}
+	}
+	
+	
+	/**
+	 * Select item
+	 */
+	async void onTreeSelectItem(TreeMessage message)
+	{
+		this.selected_item = message.item;
+		this.selected_path = message.path ? message.path.slice() : null;
+		if (not this.selected_item) return;
+		if (this.selected_item.kind == "dir" or this.selected_item.kind == "module")
+		{
+			await this.loadItems(this.selected_item);
+		}
+	}
+	
+	
+	/**
+	 * Load items
+	 */
+	async void loadItems(TreeItem item)
+	{
+		if (item.isLoaded()) return;
+		
+		item.is_loaded = true;
+		
+		ApiResult res = await this.layout.callApi({
+			"api_name": "baylang.constructor.code",
+			"method_name": "getFiles",
+			"data": {
+				"project_id": item.project_id,
+				"module_id": item.module_id,
+				"file_path": item.file_path,
+			}
+		});
+		
+		if (not res.isSuccess()) return;
+		
+		Collection items = res.data.get("items");
+		
+		/* Add dir */
+		for (int i=0; i<items.count(); i++)
+		{
+			Dict file = items.get(i);
+			if (file.get("kind") == "dir")
+			{
+				item.items.push(new TreeItem{
+					"kind": "dir",
+					"label": file.get("file_name"),
+					"file_path": file.get("file_path"),
+					"module_id": item.module_id,
+					"project_id": item.project_id,
+				});
+			}
+		}
+		
+		/* Add files */
+		for (int i=0; i<items.count(); i++)
+		{
+			Dict file = items.get(i);
+			if (file.get("kind") == "file")
+			{
+				item.items.push(new TreeItem{
+					"kind": "file",
+					"label": file.get("file_name"),
+					"file_path": file.get("file_path"),
+					"module_id": item.module_id,
+					"project_id": item.project_id,
+				});
+			}
+		}
+		
+	}
+}

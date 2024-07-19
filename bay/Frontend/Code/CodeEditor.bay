@@ -1,0 +1,34 @@
+<!--
+ *  BayLang Constructor
+-->
+
+<class name="BayLang.Constructor.Frontend.Code.CodeEditor">
+
+<style>
+.code_editor{
+	display: flex;
+	height: 100vh;
+}
+.code_editor__file_manager{
+	position: relative;
+	border-right: 1px var(--widget-color-border) solid;
+	overflow-x: auto;
+	width: 300px;
+}
+.code_editor__content{
+	position: relative;
+	flex: 1;
+}
+</style>
+
+<template>
+	<div class="code_editor">
+		<div class="code_editor__file_manager">
+			%render this.renderWidget(this.model.tree);
+		</div>
+		<div class="code_editor__content">
+		</div>
+	</div>
+</template>
+
+</class>

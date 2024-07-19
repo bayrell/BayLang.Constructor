@@ -1,0 +1,136 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Backend.Api;
+
+use Runtime.fs;
+use Runtime.Exceptions.ApiError;
+use Runtime.Exceptions.ItemNotFound;
+use Runtime.Exceptions.RuntimeException;
+use Runtime.Web.BaseApi;
+use Runtime.Web.Annotations.ApiMethod;
+use BayLang.Helper.Module;
+use BayLang.Helper.Project;
+
+
+class CodeApi extends BaseApi
+{
+	Project project;
+	Module module;
+	
+	
+	/**
+	 * Returns api name
+	 */
+	static string getApiName() => "baylang.constructor.code";
+	
+	
+	/**
+	 * Action before
+	 */
+	async void onActionBefore()
+	{
+		/* Get project */
+		string project_id = this.post_data.get("project_id");
+		this.project = await Project::readProject(
+			fs::join([@.env("constructor_path"), "projects", project_id])
+		);
+		if (not this.project)
+		{
+			throw new ApiError(new ItemNotFound(project_id, "Project"));
+		}
+		
+		/* Load project */
+		await this.project.load();
+		
+		/* Get module */
+		if (this.post_data.has("module_id"))
+		{
+			string module_id = this.post_data.get("module_id");
+			this.module = this.project.getModule(module_id);
+			if (not this.module)
+			{
+				throw new ApiError(new ItemNotFound(module_id, "Module"));
+			}
+		}
+	}
+	
+	
+	/**
+	 * Returns modules
+	 */
+	@ApiMethod
+	async void getModules()
+	{
+		/* Get modules */
+		Collection items = this.project.modules.transition( Module (Module item) => item );
+		
+		/* Sort modules */
+		items = items.sort(
+			int (Module a, Module b)
+			{
+				return rs::compare(a.getName(), b.getName());
+			}
+		);
+		
+		/* Filter items */
+		items = items.map(
+			Dict (Module module) => {
+				"id": module.getName(),
+			}
+		);
+		
+		/* Result */
+		this.success({
+			"data":
+			{
+				"items": items,
+			}
+		});
+	}
+	
+	
+	/**
+	 * Returns files
+	 */
+	@ApiMethod
+	async void getFiles()
+	{
+		if (not this.module)
+		{
+			throw new ApiError(new RuntimeException("Module not found"));
+		}
+		
+		Collection items = [];
+		string file_path = this.post_data.get("file_path");
+		string module_path = this.module.getPath();
+		string folder_path = fs::join([module_path, file_path]);
+		
+		/* Get items */
+		Collection<string> files = await fs::listDir(folder_path);
+		for (int i=0; i<files.count(); i++)
+		{
+			string item_name = files.get(i);
+			string item_path = fs::join([folder_path, item_name]);
+			string item_kind = "";
+			
+			if (await fs::isFile(item_path)) item_kind = "file";
+			else if (await fs::isDir(item_path)) item_kind = "dir";
+			
+			items.push({
+				"kind": item_kind,
+				"file_name": item_name,
+				"file_path": fs::join([file_path, item_name]),
+			});
+		}
+		
+		/* Result */
+		this.success({
+			"data":
+			{
+				"items": items,
+			}
+		});
+	}
+}

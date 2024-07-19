@@ -139,7 +139,10 @@ class WidgetEditPageModel extends BasePageModel
 		this.styles = this.addWidget(classof StylesModel);
 		
 		/* Create Tree */
-		this.tree = this.addWidget(classof TreeModel);
+		this.tree = this.addWidget(classof TreeModel, {
+			"dnd": true,
+			"icons": false,
+		});
 		this.tree.addListener("canDrag", new Callback(this, "onCanTreeDrop"));
 		this.tree.addListener("dragElement", new Callback(this, "onTreeDragElement"));
 		this.tree.addListener("selectItem", new Callback(this, "onTreeSelectItem"));

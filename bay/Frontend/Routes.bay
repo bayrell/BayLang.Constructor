@@ -51,6 +51,13 @@ class Routes extends BaseRoute
 				"model": "BayLang.Constructor.Frontend.Editor.WidgetEditPageModel",
 				"layout": "clear",
 			},
+			new RouteInfo
+			{
+				"uri": "/project/{project_id}/code",
+				"name": "baylang:project:code",
+				"model": "BayLang.Constructor.Frontend.Code.CodeEditorModel",
+				"layout": "clear",
+			},
 		];
 	}
 }
