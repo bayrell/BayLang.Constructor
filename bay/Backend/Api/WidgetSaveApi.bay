@@ -151,27 +151,6 @@ class WidgetSaveApi extends SaveApi
 	
 	
 	/**
-	 * Action save
-	 */
-	@ApiMethod
-	async void actionSave()
-	{
-		/* Load data */
-		await this.loadItem();
-		await this.loadData();
-		
-		/* Create widget */
-		if (this.pk == null)
-		{
-			await this.createWidget();
-			return;
-		}
-		
-		throw new ApiError(new RuntimeException("Method are not allowed"));
-	}
-	
-	
-	/**
 	 * Create model
 	 */
 	async void createModel(string file_path, string model_name, string component_name)
@@ -239,5 +218,58 @@ class WidgetSaveApi extends SaveApi
 		/* Save file */
 		string file_content = rs::join("\n", content);
 		await fs::saveFile(file_path, file_content);
+	}
+	
+	
+	/**
+	 * Action save
+	 */
+	@ApiMethod
+	async void actionSave()
+	{
+		/* Load data */
+		await this.loadItem();
+		await this.loadData();
+		
+		/* Create widget */
+		if (this.pk == null)
+		{
+			await this.createWidget();
+			return;
+		}
+		
+		throw new ApiError(new RuntimeException("Method are not allowed"));
+	}
+	
+	
+	/**
+	 * Action delete
+	 */
+	@ApiMethod
+	async void actionDelete()
+	{
+		/* Load data */
+		await this.loadItem();
+		
+		/* Load widget */
+		await this.item.load(true);
+		
+		/* Remove files */
+		string model_path = this.item.getModelPath();
+		string component_path = this.item.getComponentPath();
+		if (await fs::isFile(model_path)) await fs::unlink(model_path);
+		if (await fs::isFile(component_path)) await fs::unlink(component_path);
+		
+		/* Remove widget */
+		await this.module.removeWidget(this.item);
+		
+		/* Update assets */
+		this.module.updateAssets();
+		
+		/* Save cache */
+		await this.project.saveCache();
+		
+		/* Result */
+		this.success();
 	}
 }

@@ -10,6 +10,7 @@ use Runtime.Web.BasePageModel;
 use Runtime.Web.ModelFactory;
 use Runtime.Web.RenderContainer;
 use Runtime.Web.Messages.ClickMessage;
+use Runtime.Widget.Form.FormDeleteStorage;
 use Runtime.Widget.Form.FormModel;
 use Runtime.Widget.Form.FormSubmitStorage;
 use Runtime.Widget.Table.TableDialogModel;
@@ -121,6 +122,26 @@ class WidgetListModel extends BasePageModel
 					}
 				),
 				
+				/* Delete form */
+				"delete_form": new ModelFactory(
+					classof FormModel,
+					{
+						"widget_name": "delete_form",
+						"primary_key": ["id"],
+						"foreign_key":
+						{
+							"project_id": this.project_id,
+							"module_id": this.module_id,
+						},
+						"storage": new Factory(
+							classof FormDeleteStorage,
+							{
+								"api_name": "baylang.constructor.widget::save"
+							}
+						),
+					}
+				),
+				
 				/* Foreign key */
 				"foreign_key": {
 					"project_id": this.project_id,
@@ -165,6 +186,19 @@ class WidgetListModel extends BasePageModel
 											"default",
 											"small"
 										],
+									},
+									{
+										"widget_name": "delete",
+										"content": "Delete",
+										"events":
+										{
+											"click": new Callback(this, "onDeleteClick"),
+										},
+										"styles":
+										[
+											"danger",
+											"small"
+										],
 									}
 								],
 							}
@@ -182,6 +216,15 @@ class WidgetListModel extends BasePageModel
 	void buildTitle(RenderContainer container)
 	{
 		this.layout.setPageTitle("Widgets");
+	}
+	
+	
+	/**
+	 * Delete click
+	 */
+	void onDeleteClick(ClickMessage message)
+	{
+		this.table.delete_dialog.showDelete(message.data.get("item"));
 	}
 	
 	
