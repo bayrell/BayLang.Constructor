@@ -17,7 +17,6 @@ use BayLang.Helper.Project;
 class CodeApi extends BaseApi
 {
 	Project project;
-	Module module;
 	
 	
 	/**
@@ -43,51 +42,6 @@ class CodeApi extends BaseApi
 		
 		/* Load project */
 		await this.project.load();
-		
-		/* Get module */
-		if (this.post_data.has("module_id"))
-		{
-			string module_id = this.post_data.get("module_id");
-			this.module = this.project.getModule(module_id);
-			if (not this.module)
-			{
-				throw new ApiError(new ItemNotFound(module_id, "Module"));
-			}
-		}
-	}
-	
-	
-	/**
-	 * Returns modules
-	 */
-	@ApiMethod
-	async void getModules()
-	{
-		/* Get modules */
-		Collection items = this.project.modules.transition( Module (Module item) => item );
-		
-		/* Sort modules */
-		items = items.sort(
-			int (Module a, Module b)
-			{
-				return rs::compare(a.getName(), b.getName());
-			}
-		);
-		
-		/* Filter items */
-		items = items.map(
-			Dict (Module module) => {
-				"id": module.getName(),
-			}
-		);
-		
-		/* Result */
-		this.success({
-			"data":
-			{
-				"items": items,
-			}
-		});
 	}
 	
 	
@@ -97,15 +51,16 @@ class CodeApi extends BaseApi
 	@ApiMethod
 	async void getFiles()
 	{
-		if (not this.module)
-		{
-			throw new ApiError(new RuntimeException("Module not found"));
-		}
-		
 		Collection items = [];
 		string file_path = this.post_data.get("file_path");
-		string module_path = this.module.getPath();
-		string folder_path = fs::join([module_path, file_path]);
+		string project_path = this.project.getPath();
+		string folder_path = fs::join([project_path, file_path]);
+		
+		/* File not exists */
+		if (not await fs::isFolder(folder_path))
+		{
+			throw new ApiError(new ItemNotFound(file_path, "Folder"));
+		}
 		
 		/* Get items */
 		Collection<string> files = await fs::listDir(folder_path);
@@ -130,6 +85,36 @@ class CodeApi extends BaseApi
 			"data":
 			{
 				"items": items,
+			}
+		});
+	}
+	
+	
+	/**
+	 * Returns file content
+	 */
+	@ApiMethod
+	async void getContent()
+	{
+		string file_path = this.post_data.get("file_path");
+		string project_path = this.project.getPath();
+		string file_full_path = fs::join([project_path, file_path]);
+		
+		/* File not exists */
+		if (not await fs::isFile(file_full_path))
+		{
+			throw new ApiError(new ItemNotFound(file_path, "File"));
+		}
+		
+		/* Read file */
+		string content = await fs::readFile(file_full_path);
+		
+		/* Result */
+		this.success({
+			"data":
+			{
+				"file_path": file_path,
+				"content": content,
 			}
 		});
 	}

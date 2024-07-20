@@ -8,6 +8,7 @@
 		"Frontend/Code/CodeEditor.bay",
 		"Frontend/Code/CodeEditorModel.bay",
 		"Frontend/Code/TreeItem.bay",
+		"Frontend/Code/TreeWidget.bay",
 		"Frontend/Editor/Dialog/AddItemDialog.bay",
 		"Frontend/Editor/Dialog/AddItemDialogModel.bay",
 		"Frontend/Editor/Dialog/RemoveItemDialog.bay",

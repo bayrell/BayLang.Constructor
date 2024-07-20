@@ -1,0 +1,35 @@
+<!--
+ *  BayLang Constructor
+-->
+
+<class name="BayLang.Constructor.Frontend.Code.TreeWidget"
+	extends="Runtime.Widget.Tree.TreeWidget"
+>
+
+<style>
+.tree_widget__item_icon{
+	display: inline-block;
+	font-family: monospace;
+	text-align: center;
+	cursor: pointer;
+	width: 24px;
+}
+</style>
+
+<template name="renderItemLabel" args="TreeItem item, Collection<int> path">
+	<span class="tree_widget__item_icon">
+		%if (item.kind == "dir")
+		{
+			%if (not item.is_loaded) <span>@raw{{ "&#128448;" }}</span>
+			%else if (item.open) <span>@raw{{ "&#128449;" }}</span>
+			%else <span>@raw{{ "&#128448;" }}</span>
+		}
+		%else
+		{
+			<span>@raw{{ "&#128462;" }}</span>
+		}
+	</span>
+	<span class="tree_widget__item_label">{{ item.label }}</span>
+</template>
+
+</class>

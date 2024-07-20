@@ -13,6 +13,7 @@ use Runtime.Widget.Tree.TreeMessage;
 use Runtime.Widget.Tree.TreeModel;
 use BayLang.Constructor.Frontend.Code.CodeEditor;
 use BayLang.Constructor.Frontend.Code.TreeItem;
+use BayLang.Constructor.Frontend.Code.TreeWidget;
 
 
 class CodeEditorModel extends BasePageModel
@@ -21,7 +22,9 @@ class CodeEditorModel extends BasePageModel
 	string project_id = "";
 	TreeModel tree = null;
 	TreeItem selected_item = null;
+	TreeItem selected_tab = null;
 	Collection<string> selected_path = null;
+	Collection<TreeItem> tabs = [];
 	
 	
 	/**
@@ -36,6 +39,7 @@ class CodeEditorModel extends BasePageModel
 		
 		/* Create Tree */
 		this.tree = this.addWidget(classof TreeModel, {
+			"component": classof TreeWidget,
 			"dnd": false,
 			"icons": true,
 			"events":
@@ -43,7 +47,11 @@ class CodeEditorModel extends BasePageModel
 				"selectItem": new Callback(this, "onTreeSelectItem")
 			},
 		});
-		this.tree.root = new TreeItem{};
+		this.tree.root = new TreeItem
+		{
+			"project_id": this.project_id,
+			"open": true,
+		};
 	}
 	
 	
@@ -63,28 +71,35 @@ class CodeEditorModel extends BasePageModel
 	{
 		await parent(container);
 		
-		ApiResult res = await this.layout.callApi({
-			"api_name": "baylang.constructor.code",
-			"method_name": "getModules",
-			"data": {
-				"project_id": this.project_id,
-			}
-		});
-		
-		if (res.isSuccess())
-		{
-			Collection items = res.data.get("items")
-			for (int i=0; i<items.count(); i++)
-			{
-				Dict module = items.get(i);
-				this.tree.root.items.push(new TreeItem{
-					"kind": "module",
-					"label": module.get("id"),
-					"module_id": module.get("id"),
-					"project_id": this.project_id,
-				});
-			}
-		}
+		/* Load root */
+		await this.loadItems(this.tree.root);
+	}
+	
+	
+	/**
+	 * Remove tab
+	 */
+	void selectTab(TreeItem item)
+	{
+		this.selected_tab = item;
+	}
+	
+	
+	/**
+	 * Add tab
+	 */
+	void addTab(TreeItem item)
+	{
+		this.tabs.push(this.selected_item);
+	}
+	
+	
+	/**
+	 * Remove tab
+	 */
+	void removeTab(TreeItem item)
+	{
+		this.tabs.removeItem(item);
 	}
 	
 	
@@ -96,10 +111,42 @@ class CodeEditorModel extends BasePageModel
 		this.selected_item = message.item;
 		this.selected_path = message.path ? message.path.slice() : null;
 		if (not this.selected_item) return;
-		if (this.selected_item.kind == "dir" or this.selected_item.kind == "module")
+		if (this.selected_item.kind == "dir")
 		{
 			await this.loadItems(this.selected_item);
 		}
+		else if (this.selected_item.kind == "file")
+		{
+			if (this.tabs.indexOf(this.selected_item) == -1)
+			{
+				this.addTab(this.selected_item);
+				this.selectTab(this.selected_item);
+				await this.loadFileContent(this.selected_item);
+			}
+		}
+	}
+	
+	
+	/**
+	 * Load file content
+	 */
+	async void loadFileContent(TreeItem item)
+	{
+		ApiResult res = await this.layout.callApi({
+			"api_name": "baylang.constructor.code",
+			"method_name": "getContent",
+			"data": {
+				"project_id": item.project_id,
+				"module_id": item.module_id,
+				"file_path": item.file_path,
+			}
+		});
+		
+		item.is_loaded = true;
+		if (not res.isSuccess()) return;
+		
+		/* Set file content */
+		item.content = res.data.get("content");
 	}
 	
 	
@@ -109,8 +156,6 @@ class CodeEditorModel extends BasePageModel
 	async void loadItems(TreeItem item)
 	{
 		if (item.isLoaded()) return;
-		
-		item.is_loaded = true;
 		
 		ApiResult res = await this.layout.callApi({
 			"api_name": "baylang.constructor.code",
@@ -122,6 +167,7 @@ class CodeEditorModel extends BasePageModel
 			}
 		});
 		
+		item.is_loaded = true;
 		if (not res.isSuccess()) return;
 		
 		Collection items = res.data.get("items");
@@ -157,6 +203,5 @@ class CodeEditorModel extends BasePageModel
 				});
 			}
 		}
-		
 	}
 }
