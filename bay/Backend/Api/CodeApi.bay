@@ -10,6 +10,7 @@ use Runtime.Exceptions.ItemNotFound;
 use Runtime.Exceptions.RuntimeException;
 use Runtime.Web.BaseApi;
 use Runtime.Web.Annotations.ApiMethod;
+use BayLang.Exceptions.ParserUnknownError;
 use BayLang.Helper.Module;
 use BayLang.Helper.Project;
 
@@ -115,6 +116,64 @@ class CodeApi extends BaseApi
 			{
 				"file_path": file_path,
 				"content": content,
+			}
+		});
+	}
+	
+	
+	/**
+	 * Save file
+	 */
+	@ApiMethod
+	async void saveContent()
+	{
+		string file_path = this.post_data.get("file_path");
+		string project_path = this.project.getPath();
+		string file_full_path = fs::join([project_path, file_path]);
+		
+		/* Read file */
+		string content = this.post_data.get("content");
+		await fs::saveFile(file_full_path, content);
+		
+		/* Compile file */
+		Module module = this.project.findModuleByFileName(file_full_path);
+		if (module)
+		{
+			/* Init module */
+			await module.init();
+			
+			/* Compile file */
+			string relative_src_file_path = module.getRelativeSourcePath(file_full_path);
+			if (relative_src_file_path)
+			{
+				bool is_allow = module.checkAllow(relative_src_file_path);
+				bool is_exclude = module.checkExclude(relative_src_file_path);
+				if (is_allow and not is_exclude)
+				{
+					try
+					{
+						await module.compile(relative_src_file_path);
+					}
+					catch (ParserUnknownError e)
+					{
+						string error_str = e.getErrorMessage();
+						string line = e.getErrorLine();
+						string pos = e.getErrorPos();
+						if (line != -1)
+						{
+							error_str ~= " at Ln:" ~ line ~ ( (pos != "") ? ", Pos:" ~ pos : "" );
+						}
+						throw new ApiError(new RuntimeException(error_str));
+					}
+				}
+			}
+		}
+		
+		/* Result */
+		this.success({
+			"data":
+			{
+				"file_path": file_path,
 			}
 		});
 	}

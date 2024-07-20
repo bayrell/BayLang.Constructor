@@ -4,7 +4,7 @@
 
 <class name="BayLang.Constructor.Frontend.Code.CodeEditor">
 
-<use name="Runtime.Widget.CodeMirror.CodeMirror" component="true" />
+<use name="Runtime.Widget.TextEditable" component="true" />
 <use name="BayLang.Constructor.Frontend.Code.TreeItem" />
 
 
@@ -89,6 +89,10 @@
 .code_editor__file{
 	overflow-y: auto;
 	height: 100%;
+	%(TextEditable)widget_text_editable{
+		border-width: 0px;
+		padding: 5px;
+	}
 }
 .code_editor__file.hide{
 	display: none;
@@ -114,7 +118,9 @@
 				}
 			) }}
 		>Back</a>
-		<div class="code_editor__menu_item">Save</div>
+		<div class="code_editor__menu_item"
+			@event:click={{ void (){ this.model.save(); } }}
+		>Save</div>
 	</div>
 </template>
 
@@ -153,6 +159,7 @@
 
 <template name="renderStatusBar">
 	<div class="code_editor__status_bar">
+		{{ this.model.save_result.message }}
 	</div>
 </template>
 
@@ -165,7 +172,7 @@
 			<div class="code_editor__file" @key={{ item.file_path }}
 				class={{ item == this.model.selected_tab ? "" : "hide" }}
 			>
-				<CodeMirror value={{ item.content }}
+				<TextEditable value={{ item.content }}
 					@event:valueChange={{
 						void (var e) use (item)
 						{
@@ -194,5 +201,31 @@
 		</div>
 	</div>
 </template>
+
+
+<script>
+
+/**
+ * Mounted
+ */
+void onMounted()
+{
+	document.addEventListener("keydown", this.onKeyDown);
+}
+
+
+/**
+ * Key down
+ */
+void onKeyDown(var e)
+{
+	if (e.key == "s" and e.ctrlKey)
+	{
+		this.model.save();
+		e.preventDefault();
+	}
+}
+
+</script>
 
 </class>

@@ -9,6 +9,7 @@ use Runtime.Serializer;
 use Runtime.Web.ApiResult;
 use Runtime.Web.BasePageModel;
 use Runtime.Web.RenderContainer;
+use Runtime.Widget.WidgetResultModel;
 use Runtime.Widget.Tree.TreeMessage;
 use Runtime.Widget.Tree.TreeModel;
 use BayLang.Constructor.Frontend.Code.CodeEditor;
@@ -25,6 +26,7 @@ class CodeEditorModel extends BasePageModel
 	TreeItem selected_tab = null;
 	Collection<string> selected_path = null;
 	Collection<TreeItem> tabs = [];
+	WidgetResultModel save_result = null;
 	
 	
 	/**
@@ -36,6 +38,14 @@ class CodeEditorModel extends BasePageModel
 		
 		/* Setup settings */
 		this.project_id = this.layout.route.matches.get("project_id");
+		
+		/* Save result */
+		this.save_result = this.addWidget(
+			classof WidgetResultModel,
+			{
+				"widget_name": "save_result"
+			}
+		);
 		
 		/* Create Tree */
 		this.tree = this.addWidget(classof TreeModel, {
@@ -100,6 +110,8 @@ class CodeEditorModel extends BasePageModel
 	void removeTab(TreeItem item)
 	{
 		this.tabs.removeItem(item);
+		this.save_result.clear();
+		this.selected_tab = null;
 	}
 	
 	
@@ -124,6 +136,29 @@ class CodeEditorModel extends BasePageModel
 				await this.loadFileContent(this.selected_item);
 			}
 		}
+	}
+	
+	
+	/**
+	 * Save file
+	 */
+	async void save()
+	{
+		if (not this.selected_tab) return;
+		
+		this.save_result.setWaitMessage();
+		
+		ApiResult res = await this.layout.callApi({
+			"api_name": "baylang.constructor.code",
+			"method_name": "saveContent",
+			"data": {
+				"project_id": this.project_id,
+				"file_path": this.selected_tab.file_path,
+				"content": this.selected_tab.content,
+			}
+		});
+		
+		this.save_result.setApiResult(res);
 	}
 	
 	

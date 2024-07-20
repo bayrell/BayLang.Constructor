@@ -36,10 +36,7 @@ class ProjectSaveApi extends SaveApi
 	/**
 	 * New item
 	 */
-	async void newItem()
-	{
-		this.item = new Project(null);
-	}
+	async void newItem() => new Project(null);
 	
 	
 	/**
@@ -48,7 +45,7 @@ class ProjectSaveApi extends SaveApi
 	async void findItem(Dict pk)
 	{
 		string project_id = pk.get("id");
-		this.item = await Project::readProject(
+		return await Project::readProject(
 			fs::join([@.env("constructor_path"), "projects", project_id])
 		);
 	}
