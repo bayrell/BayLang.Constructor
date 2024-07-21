@@ -146,7 +146,6 @@ class WidgetEditPageModel extends BasePageModel
 		this.tree.addListener("canDrag", new Callback(this, "onCanTreeDrop"));
 		this.tree.addListener("dragElement", new Callback(this, "onTreeDragElement"));
 		this.tree.addListener("selectItem", new Callback(this, "onTreeSelectItem"));
-		this.tree.addListener("contextMenuClick", new Callback(this, "onTreeContextMenuClick"));
 		
 		/* Add item dialog model */
 		this.add_item_dialog = this.addWidget(classof AddItemDialogModel, {
@@ -190,7 +189,7 @@ class WidgetEditPageModel extends BasePageModel
 			"label": "Remove item",
 			"key": "remove"
 		});
-		this.context_menu.addListener("click", new Callback(this, "onContextClickItem"));
+		this.context_menu.addListener("clickItem", new Callback(this, "onContextClickItem"));
 		this.tree.setContextMenu(this.context_menu);
 		
 		/* Add components */
@@ -493,17 +492,6 @@ class WidgetEditPageModel extends BasePageModel
 		var rect = this.iframe.getBoundingClientRect();
 		int x = e.clientX + rect.x;
 		int y = e.clientY + rect.y;
-		this.context_menu.show(x, y);
-	}
-	
-	
-	/**
-	 * Context menu click
-	 */
-	void onTreeContextMenuClick(var e)
-	{
-		int x = e.clientX;
-		int y = e.clientY;
 		this.context_menu.show(x, y);
 	}
 	

@@ -10,6 +10,8 @@ use Runtime.Web.ApiResult;
 use Runtime.Web.BasePageModel;
 use Runtime.Web.RenderContainer;
 use Runtime.Widget.WidgetResultModel;
+use Runtime.Widget.ContextMenu.ContextMenuMessage;
+use Runtime.Widget.ContextMenu.ContextMenuModel;
 use Runtime.Widget.Tree.TreeMessage;
 use Runtime.Widget.Tree.TreeModel;
 use BayLang.Constructor.Frontend.Code.CodeEditor;
@@ -27,6 +29,7 @@ class CodeEditorModel extends BasePageModel
 	Collection<string> selected_path = null;
 	Collection<TreeItem> tabs = [];
 	WidgetResultModel save_result = null;
+	ContextMenuModel context_menu = null;
 	
 	
 	/**
@@ -54,7 +57,45 @@ class CodeEditorModel extends BasePageModel
 			"icons": true,
 			"events":
 			{
-				"selectItem": new Callback(this, "onTreeSelectItem")
+				"selectItem": new Callback(this, "onTreeSelectItem"),
+			},
+			"context_menu":
+			{
+				"items":
+				[
+					{
+						"label": "Create file",
+						"key": "create_file",
+					},
+					{
+						"label": "Create folder",
+						"key": "create_folder",
+					},
+					{
+						"label": "Rename",
+						"key": "rename",
+					},
+					{
+						"label": "Copy",
+						"key": "copy",
+					},
+					{
+						"label": "Cut",
+						"key": "cut",
+					},
+					{
+						"label": "Paste",
+						"key": "paste",
+					},
+					{
+						"label": "Delete",
+						"key": "delete",
+					},
+				],
+				"events":
+				{
+					"clickItem": new Callback(this, "onContextMenuItemClick"),
+				}
 			},
 		});
 		this.tree.root = new TreeItem
@@ -116,6 +157,15 @@ class CodeEditorModel extends BasePageModel
 	
 	
 	/**
+	 * Context menu item click
+	 */
+	void onContextMenuItemClick(ContextMenuMessage message)
+	{
+		message.widget.hide();
+	}
+	
+	
+	/**
 	 * Select item
 	 */
 	async void onTreeSelectItem(TreeMessage message)
@@ -123,6 +173,7 @@ class CodeEditorModel extends BasePageModel
 		this.selected_item = message.item;
 		this.selected_path = message.path ? message.path.slice() : null;
 		if (not this.selected_item) return;
+		if (message.kind != "click") return;
 		if (this.selected_item.kind == "dir")
 		{
 			await this.loadItems(this.selected_item);

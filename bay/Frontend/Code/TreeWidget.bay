@@ -16,7 +16,7 @@
 }
 </style>
 
-<template name="renderItemLabel" args="TreeItem item, Collection<int> path">
+<template name="renderItemContent" args="TreeItem item, Collection<int> path">
 	<span class="tree_widget__item_icon">
 		%if (item.kind == "dir")
 		{
@@ -29,7 +29,7 @@
 			<span>@raw{{ "&#128462;" }}</span>
 		}
 	</span>
-	<span class="tree_widget__item_label">{{ item.label }}</span>
+	%render this.renderItemLabel(item, path);
 </template>
 
 </class>

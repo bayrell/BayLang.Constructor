@@ -7,6 +7,7 @@ namespace BayLang.Constructor.Frontend.Code;
 use Runtime.Serializer;
 use Runtime.Web.ApiResult;
 use Runtime.Widget.Tree.TreeItem as BaseTreeItem;
+use Runtime.Widget.Tree.TreeModel;
 
 
 class TreeItem extends BaseTreeItem
@@ -42,7 +43,7 @@ class TreeItem extends BaseTreeItem
 	/**
 	 * Click
 	 */
-	void onClick()
+	void onClick(TreeModel model)
 	{
 		if (this.kind != "dir") return;
 		if (this.is_loaded)
