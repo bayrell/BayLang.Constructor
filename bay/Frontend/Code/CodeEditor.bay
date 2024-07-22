@@ -199,6 +199,8 @@
 				%render this.renderStatusBar();
 			</div>
 		</div>
+		%render this.renderWidget(this.model.confirm_dialog);
+		%render this.renderWidget(this.model.prompt_dialog);
 	</div>
 </template>
 

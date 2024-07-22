@@ -122,6 +122,125 @@ class CodeApi extends BaseApi
 	
 	
 	/**
+	 * Create
+	 */
+	@ApiMethod
+	async void create()
+	{
+		string project_path = this.project.getPath();
+		string parent_dir = this.post_data.get("file_path");
+		string file_name = this.post_data.get("file_name");
+		string file_full_path = fs::join([project_path, parent_dir, file_name]);
+		string kind = this.post_data.get("kind");
+		
+		/* Create folder */
+		if (kind == "dir" or kind == "folder")
+		{
+			await fs::mkDir(file_full_path);
+		}
+		
+		/* Create file */
+		else
+		{
+			await fs::saveFile(file_full_path, "");
+		}
+		
+		this.success();
+	}
+	
+	
+	/**
+	 * Rename
+	 */
+	@ApiMethod
+	async void rename()
+	{
+		string project_path = this.project.getPath();
+		string file_path = this.post_data.get("file_path");
+		string file_new_name = this.post_data.get("file_new_name");
+		string parent_dir = rs::dirname(file_path);
+		string file_full_path = fs::join([project_path, file_path]);
+		string file_new_path = fs::join([project_path, parent_dir, file_new_name]);
+		await fs::rename(file_full_path, file_new_path);
+		this.success();
+	}
+	
+	
+	/**
+	 * Remove file
+	 */
+	@ApiMethod
+	async void remove()
+	{
+		string project_path = this.project.getPath();
+		string file_path = this.post_data.get("file_path");
+		string file_full_path = fs::join([project_path, file_path]);
+		
+		/* Remove file */
+		if (await fs::isFile(file_full_path))
+		{
+			await fs::unlink(file_full_path);
+		}
+		
+		/* Remove folder */
+		else if (await fs::isFolder(file_full_path))
+		{
+			#ifcode PHP then
+			shell_exec("rm -rf $file_full_path");
+			#endif
+		}
+		
+		this.success();
+	}
+	
+	
+	/**
+	 * Move file
+	 */
+	@ApiMethod
+	async void move()
+	{
+		string project_path = this.project.getPath();
+		string file_path = this.post_data.get("file_path");
+		string dest_path = this.post_data.get("dest_path");
+		string kind = this.post_data.get("kind");
+		
+		/* Get file name */
+		string file_name = rs::basename(file_path);
+		
+		/* Full path */
+		file_path = fs::join([project_path, file_path]);
+		dest_path = fs::join([project_path, dest_path]);
+		
+		/* Copy */
+		if (kind == "copy")
+		{
+			if (await fs::isFile(file_path))
+			{
+				#ifcode PHP then
+				shell_exec("cp $file_path $dest_path");
+				#endif
+			}
+			else
+			{
+				#ifcode PHP then
+				shell_exec("cp -r $file_path $dest_path");
+				#endif
+			}
+		}
+		
+		/* Move file */
+		else
+		{
+			dest_path = fs::join([dest_path, file_name]);
+			await fs::rename(file_path, dest_path);
+		}
+		
+		this.success();
+	}
+	
+	
+	/**
 	 * Save file
 	 */
 	@ApiMethod
