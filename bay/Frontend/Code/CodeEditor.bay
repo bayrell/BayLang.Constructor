@@ -24,6 +24,13 @@
     user-select: none;
     padding: 10px;
 }
+.code_editor_menu_item_file_name{
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	/*padding-right: 100px;*/
+	flex: 1;
+}
 .code_editor__main{
 	display: flex;
 	height: calc(100% - 37px);
@@ -47,7 +54,8 @@
 	display: flex;
 	height: 32px;
 	border-bottom: 1px var(--widget-color-border) solid;
-	overflow-x: hidden;
+	overflow-x: auto;
+	scrollbar-width: none;
 }
 .code_editor__tab{
 	display: flex;
@@ -107,6 +115,11 @@
 }
 </style>
 
+<style global="true">
+.code_editor__tabs.h-fd5f::-webkit-scrollbar{
+	width: 0;
+}
+</style>
 
 <template name="renderMenu">
 	<div class="code_editor__menu">
@@ -121,20 +134,45 @@
 		<div class="code_editor__menu_item"
 			@event:click={{ void (){ this.model.save(); } }}
 		>Save</div>
+		<div class="code_editor_menu_item code_editor_menu_item_file_name">
+			%if (this.model.selected_tab)
+			{
+				{{ this.model.selected_tab.file_path }}
+			}
+		</div>
 	</div>
 </template>
 
 
 <template name="renderTabs">
-	<div class="code_editor__tabs">
+	<div class="code_editor__tabs" @ref="tabs"
+		@event:mousewheel={{
+			var (var e)
+			{
+				var tabs = this.getRef("tabs");
+				tabs.scrollLeft = tabs.scrollLeft + e.deltaY;
+				e.preventDefault();
+				e.stopPropagation();
+			}
+		}}
+	>
 		%for (int i=0; i<this.model.tabs.count(); i++)
 		{
 			%set TreeItem item = this.model.tabs.get(i);
 			<div class="code_editor__tab"
 				class={{ item == this.model.selected_tab ? "selected" : "" }}
 				@key={{ item.file_path }}
+				@event:mousedown={{
+					void (var e) use (item)
+					{
+						if (e.button == 1)
+						{
+							this.model.removeTab(item);
+						}
+					}
+				}}
 				@event:click={{
-					void () use (item)
+					void (var e) use (item)
 					{
 						this.model.selectTab(item);
 					}

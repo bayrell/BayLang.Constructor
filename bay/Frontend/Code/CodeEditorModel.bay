@@ -186,7 +186,7 @@ class CodeEditorModel extends BasePageModel
 	{
 		this.tabs.removeItem(item);
 		this.save_result.clear();
-		this.selected_tab = null;
+		if (this.selected_tab == item) this.selected_tab = null;
 	}
 	
 	
