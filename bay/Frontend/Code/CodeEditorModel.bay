@@ -459,13 +459,14 @@ class CodeEditorModel extends BasePageModel
 		
 		this.save_result.setWaitMessage();
 		
+		string content = this.selected_tab.code_editor.value().getValue();
 		ApiResult res = await this.layout.callApi({
 			"api_name": "baylang.constructor.code",
 			"method_name": "saveContent",
 			"data": {
 				"project_id": this.project_id,
 				"file_path": this.selected_tab.file_path,
-				"content": this.selected_tab.content,
+				"content": content,
 			}
 		});
 		

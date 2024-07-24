@@ -5,6 +5,7 @@
 <class name="BayLang.Constructor.Frontend.Code.CodeEditor">
 
 <use name="Runtime.Widget.TextEditable" component="true" />
+<use name="Runtime.Widget.CodeMirror.CodeMirror" component="true" />
 <use name="BayLang.Constructor.Frontend.Code.TreeItem" />
 
 
@@ -210,7 +211,10 @@
 			<div class="code_editor__file" @key={{ item.file_path }}
 				class={{ item == this.model.selected_tab ? "" : "hide" }}
 			>
-				<TextEditable value={{ item.content }}
+				<CodeMirror
+					class="wrap"
+					value={{ item.content }}
+					reference={{ item.code_editor }}
 					@event:valueChange={{
 						void (var e) use (item)
 						{

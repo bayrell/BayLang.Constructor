@@ -4,6 +4,7 @@
 
 namespace BayLang.Constructor.Frontend.Code;
 
+use Runtime.Reference;
 use Runtime.Serializer;
 use Runtime.Web.ApiResult;
 use Runtime.Widget.Tree.TreeItem as BaseTreeItem;
@@ -17,6 +18,7 @@ class TreeItem extends BaseTreeItem
 	string module_id = "";
 	string project_id = "";
 	string content = "";
+	Reference code_editor = new Reference();
 	bool is_loaded = false;
 	
 	
