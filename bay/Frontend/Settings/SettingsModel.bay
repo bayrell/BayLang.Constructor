@@ -1,0 +1,106 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Settings;
+
+use Runtime.Entity.Factory;
+use Runtime.Web.BasePageModel;
+use Runtime.Web.RenderContainer;
+use Runtime.Widget.Form.FormModel;
+use Runtime.Widget.Form.FormSaveStorage;
+use Runtime.Widget.Form.FormSubmitModel;
+use BayLang.Constructor.Frontend.Settings.Settings;
+
+
+class SettingsModel extends BasePageModel
+{
+	string component = classof Settings;
+	string project_id = "";
+	FormModel edit_form = null;
+	
+	
+	/**
+	 * Init widget settings
+	 */
+	void initWidget(Dict params)
+	{
+		parent(params);
+		
+		/* Project id */
+		this.project_id = this.layout.route.matches.get("project_id");
+		
+		/* Edit form */
+		this.edit_form = this.addWidget(
+			classof FormSubmitModel,
+			{
+				"widget_name": "edit_form",
+				"primary_key": ["id"],
+				"pk": {
+					"id": this.project_id,
+				},
+				"submit_button": {
+					"text": "Save",
+					"styles": ["success", "large"],
+				},
+				"storage": new Factory(
+					classof FormSaveStorage,
+					{
+						"api_name": "baylang.constructor.project::save"
+					}
+				),
+				"fields":
+				[
+					{
+						"name": "name",
+						"label": "Name",
+						"component": "Runtime.Widget.Input",
+					},
+					{
+						"name": "description",
+						"label": "Description",
+						"component": "Runtime.Widget.TextArea",
+						"props":
+						{
+							"height": "150px",
+						},
+					},
+					{
+						"name": "domains",
+						"label": "Domains",
+						"component": "Runtime.Widget.SortableList",
+						"buttons":
+						[
+							{
+								"event": "onAddItemClick",
+								"props":
+								{
+									"content": "Add",
+									"styles": ["small"],
+								},
+							}
+						],
+						"props":
+						{
+							"show_buttons": false,
+						},
+					},
+					{
+						"name": "reload_cache",
+						"label": "Reload cache",
+						"component": "BayLang.Constructor.Frontend.Settings.ReloadCache",
+					},
+				],
+			}
+		);
+	}
+	
+	
+	/**
+	 * Build title
+	 */
+	void buildTitle(RenderContainer container)
+	{
+		this.layout.setPageTitle("Settings");
+	}
+}

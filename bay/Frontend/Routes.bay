@@ -32,6 +32,13 @@ class Routes extends BaseRoute
 			},
 			new RouteInfo
 			{
+				"uri": "/project/{project_id}/settings",
+				"name": "baylang:project:settings",
+				"model": "BayLang.Constructor.Frontend.Settings.SettingsModel",
+				"layout": "project",
+			},
+			new RouteInfo
+			{
 				"uri": "/project/{project_id}/modules",
 				"name": "baylang:project:modules",
 				"model": "BayLang.Constructor.Frontend.Module.ModuleListModel",

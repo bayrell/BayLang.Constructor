@@ -1,0 +1,16 @@
+<!--
+ *  BayLang Constructor
+-->
+
+<class name="BayLang.Constructor.Frontend.Settings.Settings">
+
+<style>
+</style>
+
+<template>
+	<div class="settings">
+		%render this.renderWidget(this.model.edit_form);
+	</div>
+</template>
+
+</class>

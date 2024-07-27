@@ -5,6 +5,7 @@
 namespace BayLang.Constructor.Backend.Api;
 
 use Runtime.fs;
+use Runtime.lib;
 use Runtime.Exceptions.ApiError;
 use Runtime.Exceptions.RuntimeException;
 use Runtime.Web.Annotations.ApiMethod;
@@ -56,9 +57,9 @@ class ProjectSaveApi extends SaveApi
 	 */
 	void reloadNginx()
 	{
-		string content = [];
 		string projects_path = fs::join([@.env("constructor_path"), "projects"]);
 		Collection<string> files = fs::listDir(projects_path);
+		Collection<string> content = [];
 		for (int i=0; i<files.count(); i++)
 		{
 			string project_id = files.get(i);
@@ -86,7 +87,7 @@ class ProjectSaveApi extends SaveApi
 		}
 		
 		/* Save nginx */
-		string nginx_path = fs::join([@.env("constructor_path"), "nginx.conf"]);
+		string nginx_path = fs::join([@.env("constructor_path"), "nginx/nginx.conf"]);
 		string nginx_content = rs::join("\n", content);
 		await fs::saveFile(nginx_path, nginx_content);
 		
@@ -94,6 +95,64 @@ class ProjectSaveApi extends SaveApi
 		#ifcode PHP then
 		shell_exec("sudo /usr/sbin/nginx -s reload");
 		#endif
+	}
+	
+	
+	/**
+	 * Create nginx project file
+	 */
+	async void createNginxProjectFile(Project project)
+	{
+		/* Get domains */
+		Collection<string> domains = [];
+		if (project.info.has("domains"))
+		{
+			domains = project.info.get("domains");
+		}
+		
+		/* Filter domains */
+		domains = domains.filter(lib::equalNot(""));
+		domains = domains.removeDuplicates();
+		
+		/* Get file name */
+		string projects_path = fs::join([@.env("constructor_path"), "projects"]);
+		string nginx_file_name = fs::join([
+			@.env("constructor_path"), "nginx/domains",
+			project.getID() ~ ".conf"
+		]);
+		
+		/* Create file */
+		Collection<string> content = [];
+		if (domains.count() > 0)
+		{
+			string project_id = project.getID();
+			string project_dest = fs::join([projects_path, project_id])
+			string server_name = rs::join(" ", domains);
+			
+			/* Add nginx */
+			content.push("server {");
+			content.push("\tlisten 80;");
+			content.push("\tserver_name " ~ server_name ~ ";");
+			content.push("\troot " ~ project_dest ~ "/src/public;");
+			content.push("\tindex index.php index.html;");
+			content.push("\tautoindex off;");
+			content.push("\tlocation /index.php {");
+			content.push("\t\tinclude fastcgi_params;");
+			content.push("\t\tbreak;");
+			content.push("\t}");
+			content.push("}");
+			
+			/* Save nginx */
+			string nginx_content = rs::join("\n", content);
+			await fs::saveFile(nginx_file_name, nginx_content);
+		}
+		else
+		{
+			if (await fs::exists(nginx_file_name))
+			{
+				await fs::unlink(nginx_file_name);
+			}
+		}
 	}
 	
 	
@@ -137,6 +196,64 @@ class ProjectSaveApi extends SaveApi
 	
 	
 	/**
+	 * Reload cache
+	 */
+	@ApiMethod
+	async void reloadCache()
+	{
+		/* Load data */
+		await this.loadItem(false);
+		
+		/* Project path */
+		string project_path = this.item.getPath();
+		string cache_path = fs::join([project_path, ".cache"]);
+		
+		/* Remove cache */
+		#ifcode PHP then
+		shell_exec("rm -rf $cache_path");
+		#endif
+		
+		/* Load project */
+		await this.item.load();
+		
+		/* Success */
+		this.success();
+	}
+	
+	
+	/**
+	 * Action item
+	 */
+	@ApiMethod
+	async void actionItem()
+	{
+		/* Load data */
+		await this.loadItem(false);
+		
+		/* Get domains */
+		Collection<string> domains = [];
+		if (this.item.info.has("domains"))
+		{
+			domains = this.item.info.get("domains");
+		}
+		
+		/* Success */
+		this.success({
+			"data":
+			{
+				"item":
+				{
+					"id": this.item.getID(),
+					"name": this.item.getName(),
+					"description": this.item.getDescription(),
+					"domains": domains,
+				},
+			},
+		});
+	}
+	
+	
+	/**
 	 * Action save
 	 */
 	@ApiMethod
@@ -162,9 +279,19 @@ class ProjectSaveApi extends SaveApi
 		{
 			this.item.setDescription(this.data.get("description"));
 		}
+		if (this.data.has("domains"))
+		{
+			this.item.info.set("domains", this.data.get("domains"));
+		}
 		
 		/* Save project */
 		await this.item.saveInfo();
+		
+		/* Create nginx file */
+		await this.createNginxProjectFile(this.item);
+		
+		/* Reload nginx */
+		await this.reloadNginx();
 		
 		/* Success */
 		this.success();
@@ -180,8 +307,18 @@ class ProjectSaveApi extends SaveApi
 		/* Load data */
 		await this.loadItem();
 		
+		/* Remove nginx file */
+		string nginx_file_name = fs::join([
+			@.env("constructor_path"), "nginx/domains",
+			this.item.getName() ~ ".conf"
+		]);
+		if (await fs::exists(nginx_file_name))
+		{
+			await fs::unlink(nginx_file_name);
+		}
+		
 		/* Project path */
-		string project_dest = this.item.getPath()
+		string project_dest = this.item.getPath();
 		
 		/* Remove project */
 		#ifcode PHP then

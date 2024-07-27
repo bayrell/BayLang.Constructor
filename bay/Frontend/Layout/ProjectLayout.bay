@@ -97,6 +97,14 @@ Collection<string> getMenu()
 			"href": this.layout.url("baylang:project:list")
 		},
 		{
+			"label": "Settings",
+			"name": "baylang:project:settings",
+			"href": this.layout.url(
+				"baylang:project:settings",
+				{"project_id": this.layout.project_id}
+			)
+		},
+		{
 			"label": "Modules",
 			"name": "baylang:project:modules",
 			"href": this.layout.url(

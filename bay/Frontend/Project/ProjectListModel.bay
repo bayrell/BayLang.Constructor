@@ -214,7 +214,7 @@ class ProjectListModel extends BasePageModel
 				"href": void (Dict data)
 				{
 					Dict item = data.get("item");
-					return this.layout.url("baylang:project:modules", {"project_id": item.get("id")});
+					return this.layout.url("baylang:project:settings", {"project_id": item.get("id")});
 				},
 				"content": "Open",
 				"widget_name": "open",
