@@ -195,10 +195,10 @@ class ProjectSaveApi extends SaveApi
 		shell_exec("unzip $project_archive -d $project_dest");
 		#endif
 		
-		/* Reload nginx */
-		await this.reloadNginx();
-		
-		this.success();
+		/* Read new project */
+		this.item = await Project::readProject(
+			fs::join([@.env("constructor_path"), "projects", project_id])
+		);
 	}
 	
 	
@@ -274,7 +274,6 @@ class ProjectSaveApi extends SaveApi
 		if (this.pk == null)
 		{
 			await this.createProject();
-			return;
 		}
 		
 		/* Set project info */

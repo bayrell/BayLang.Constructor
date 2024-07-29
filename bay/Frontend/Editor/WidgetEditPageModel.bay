@@ -578,6 +578,9 @@ class WidgetEditPageModel extends BasePageModel
 		/* Update CSS */
 		this.updateFrameCSS();
 		
+		/* Update Global CSS */
+		this.updateFrameGlobalCSS();
+		
 		return new_src_path;
 	}
 	
