@@ -74,6 +74,7 @@ class ProjectSaveApi extends SaveApi
 			content.push("location /project/" ~ project_id ~ "/iframe/ {");
 			content.push("\tinclude fastcgi_params;");
 			content.push("\troot " ~ project_dest ~ "/src/public;");
+			content.push("\tfastcgi_param CONSTRUCTOR true;");
 			content.push("\tfastcgi_param SCRIPT_FILENAME $document_root/index.php;");
 			content.push("\tfastcgi_param HTTP_X_FORWARDED_PREFIX " ~
 				"$http_x_forwarded_prefix/project/" ~ project_id ~ "/iframe;");
@@ -136,6 +137,12 @@ class ProjectSaveApi extends SaveApi
 			content.push("\troot " ~ project_dest ~ "/src/public;");
 			content.push("\tindex index.php index.html;");
 			content.push("\tautoindex off;");
+			content.push("\tlocation / {");
+			content.push("\t\tif (-f $request_filename) {");
+			content.push("\t\t\tbreak;");
+			content.push("\t\t}");
+			content.push("\t\trewrite ^/. /index.php last;");
+			content.push("\t}");
 			content.push("\tlocation /index.php {");
 			content.push("\t\tinclude fastcgi_params;");
 			content.push("\t\tbreak;");

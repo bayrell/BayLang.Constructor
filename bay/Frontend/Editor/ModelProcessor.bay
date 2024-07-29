@@ -20,11 +20,14 @@ use BayLang.OpCodes.OpAttr;
 use BayLang.OpCodes.OpCall;
 use BayLang.OpCodes.OpDeclareClass;
 use BayLang.OpCodes.OpDeclareFunction;
+use BayLang.OpCodes.OpDeclareFunctionArg;
 use BayLang.OpCodes.OpDict;
 use BayLang.OpCodes.OpDictPair;
 use BayLang.OpCodes.OpEntityName;
+use BayLang.OpCodes.OpFlags;
 use BayLang.OpCodes.OpHtmlAttribute;
 use BayLang.OpCodes.OpIdentifier;
+use BayLang.OpCodes.OpItems;
 use BayLang.OpCodes.OpModule;
 use BayLang.OpCodes.OpString;
 use BayLang.OpCodes.OpTypeIdentifier;
@@ -100,6 +103,75 @@ class ModelProcessor extends CodeModel
 		
 		OpDeclareFunction op_code = op_code_class.findFunction(function_name);
 		return op_code;
+	}
+	
+	
+	/**
+	 * Create init widget function
+	 */
+	void createInitWidget()
+	{
+		OpDeclareFunction init_op_code = this.findFunction("initWidget");
+		if (init_op_code) return init_op_code;
+		
+		OpDeclareClass op_code_class = this.code.findClass();
+		if (not op_code_class) return null;
+		
+		/* Create initWidget */
+		OpDeclareFunction init_op_code = new OpDeclareFunction
+		{
+			"name": "initWidget",
+			"args":
+			[
+				new OpDeclareFunctionArg
+				{
+					"name": "params",
+					"pattern": new OpTypeIdentifier
+					{
+						"entity_name": new OpEntityName
+						{
+							"names": ["Dict"],
+						},
+					}
+				},
+			],
+			"flags": new OpFlags,
+			"result_type": new OpTypeIdentifier
+			{
+				"entity_name": new OpEntityName
+				{
+					"names": ["void"],
+				},
+			},
+			"items": new OpItems
+			{
+				"items":
+				[
+					new OpCall
+					{
+						"args":
+						[
+							new OpIdentifier
+							{
+								"kind": "var",
+								"value": "params",
+							},
+						],
+						"obj": new OpIdentifier
+						{
+							"kind": "classref",
+							"value": "parent",
+						},
+					},
+				],
+			}
+		};
+		
+		/* Add initWidget */
+		op_code_class.functions.push(init_op_code);
+		op_code_class.items.push(init_op_code);
+		
+		return init_op_code;
 	}
 	
 	
@@ -224,6 +296,8 @@ class ModelProcessor extends CodeModel
 	 */
 	void setWidgetName(Widget widget, string widget_name)
 	{
+		if (not widget.primary_model_code) return;
+		
 		/* Set name */
 		widget.primary_model_code.op_code.value.value = widget_name;
 		
@@ -304,6 +378,17 @@ class ModelProcessor extends CodeModel
 		Dict template_info = template_factory();
 		string primary_model_content = template_info.get("model");
 		
+		/* Add modules */
+		if (template_info.has("modules"))
+		{
+			Collection<string> modules = template_info.get("modules");
+			for (int i=0; i<modules.count(); i++)
+			{
+				string module_name = modules.get(i);
+				this.addModule(module_name);
+			}
+		}
+		
 		/* Parse default template */
 		OpAssign primary_model_code = null;
 		ParserBay parser = this.createParser();
@@ -316,6 +401,7 @@ class ModelProcessor extends CodeModel
 		}
 		catch (var e)
 		{
+			throw e;
 		}
 		
 		return primary_model_code;
@@ -330,7 +416,10 @@ class ModelProcessor extends CodeModel
 		if (widget.primary_model_code) return;
 		
 		OpDeclareFunction init_op_code = this.findFunction("initWidget");
-		if (not init_op_code) return;
+		if (not init_op_code)
+		{
+			init_op_code = this.createInitWidget();
+		}
 		
 		OpAssign primary_model_code = this.createPrimaryCode(widget);
 		if (not primary_model_code) return;
@@ -342,9 +431,9 @@ class ModelProcessor extends CodeModel
 	
 	
 	/**
-	 * Add class model
+	 * Add assign model code
 	 */
-	void addClassModel(Widget widget)
+	void addAssignCode(Widget widget)
 	{
 		OpDeclareClass model_class_op_code = this.code.findClass();
 		if (not model_class_op_code) return null;
@@ -439,8 +528,8 @@ class ModelProcessor extends CodeModel
 		widget.model_settings = editor.getWidget(widget.model_class_name);
 		if (not widget.model_settings) return;
 		
-		/* Add class model */
-		this.addClassModel(widget);
+		/* Add assign model code */
+		this.addAssignCode(widget);
 		
 		/* Add primary model code */
 		this.addPrimaryCode(widget);

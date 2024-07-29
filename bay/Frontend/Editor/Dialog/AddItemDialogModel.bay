@@ -105,7 +105,16 @@ class AddItemDialogModel extends ConfirmDialogModel
 	Collection<WidgetSettingsInterface> getFrameWidgets()
 	{
 		EditorProvider editor = @.provider(classof EditorProvider);
-		return editor.getWidgets();
+		Collection<WidgetSettingsInterface> widgets = editor.getWidgets();
+		widgets = widgets.filter(
+			bool (WidgetSettingsInterface widget)
+			{
+				string name = widget.getName();
+				if (rs::substr(name, -5) == "Model") return false;
+				return true;
+			}
+		);
+		return widgets;
 	}
 	
 	

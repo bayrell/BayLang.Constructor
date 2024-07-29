@@ -4,6 +4,7 @@
 
 namespace BayLang.Constructor.Frontend.Editor;
 
+use Runtime.Web.BaseModel;
 use BayLang.Constructor.Frontend.Editor.CodeModel;
 use BayLang.Constructor.Frontend.Editor.Parameter;
 use BayLang.OpCodes.OpDictPair;
@@ -12,6 +13,7 @@ use BayLang.OpCodes.OpDictPair;
 class ParameterModel extends Parameter
 {
 	OpDictPair op_code = null;
+	fn onChange = null;
 	
 	
 	/**
@@ -40,5 +42,46 @@ class ParameterModel extends Parameter
 	{
 		this.value = value;
 		this.op_code.value = CodeModel::getOpCodeByValue(value);
+	}
+	
+	
+	/**
+	 * Change model value
+	 */
+	void changeModelValue(var iframeWindow)
+	{
+		var page_model = iframeWindow.app_layout.getPageModel();
+		
+		/* Get page widget */
+		string widget_name = this.widget.getName();
+		BaseModel widget = page_model.widget_model.getWidget(widget_name);
+		if (not widget) return;
+		
+		/* Update model value */
+		if (this.onChange)
+		{
+			this.onChange(iframeWindow, widget, this);
+			return;
+		}
+		else
+		{
+			this.updateModelValue(iframeWindow, widget);
+		}
+	}
+	
+	
+	/**
+	 * Update model value
+	 */
+	void updateModelValue(var iframeWindow, BaseModel widget)
+	{
+		/* Get key value */
+		string key = this.name;
+		var value = this.value;
+		
+		/* Set params */
+		Dict params = {};
+		params.set(key, value);
+		widget.initParams(params);
 	}
 }

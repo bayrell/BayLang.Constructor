@@ -187,10 +187,15 @@ class ComponentProcessor extends CodeModel
 			}
 		}
 		
-		OpDeclareFunction op_code_render = this.findFunction("render");
-		if (not op_code_render) return null;
-		if (not op_code_render.expression) return null;
-		if (not (op_code_render.expression instanceof OpHtmlItems)) return null;
+		/* Find class from default_template */
+		OpDeclareClass op_code_class = default_template.findClass();
+		if (not op_code_class) return;
+		
+		/* Find render */
+		OpDeclareFunction op_code_render = op_code_class.findFunction("render");
+		if (not op_code_render) return;
+		if (not op_code_render.expression) return;
+		if (not (op_code_render.expression instanceof OpHtmlItems)) return;
 		
 		/* Add items */
 		op_code.items = op_code_render.expression;
@@ -203,7 +208,7 @@ class ComponentProcessor extends CodeModel
 	OpHtmlTag createWidget(string class_name, string widget_name)
 	{
 		/* Add module */
-		string alias_name = this.addModule(class_name);
+		string alias_name = this.addModule(class_name, "", true);
 		
 		/* Create op_code */
 		string css_name = "widget_" ~ this.widget_inc;
@@ -346,7 +351,8 @@ class ComponentProcessor extends CodeModel
 		for (int i=0; i<op_code_items.items.count(); i++)
 		{
 			BaseOpCode op_code = op_code_items.items.get(i);
-			this.registerWidget(op_code, parent_widget, recursive);
+			Widget new_widget = this.registerWidget(op_code, parent_widget, recursive);
+			parent_widget.item.items.push(new_widget.item);
 		}
 	}
 	
@@ -364,7 +370,6 @@ class ComponentProcessor extends CodeModel
 			Widget new_widget = this.registerOpCode(
 				op_code, parent_widget ? parent_widget.code : null
 			);
-			if (parent_widget) parent_widget.item.items.push(new_widget.item);
 			if (recursive) this.registerWidgetItems(new_widget);
 			return new_widget;
 		}

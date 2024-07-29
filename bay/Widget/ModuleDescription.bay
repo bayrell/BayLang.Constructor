@@ -43,6 +43,9 @@ static class ModuleDescription
 		new Hook("BayLang.Constructor.WidgetDebug.AppHook"),
 		
 		#ifdef BACKEND then
+		new Hook("Runtime.Web.Hooks.Environments", {
+			"frontend": ["CONSTRUCTOR"],
+		}),
 		new Route("BayLang.Constructor.WidgetDebug.Routes"),
 		#endif
 	];

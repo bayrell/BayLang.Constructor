@@ -446,6 +446,10 @@ class CodeEditorModel extends BasePageModel
 				this.selectTab(this.selected_item);
 				await this.loadFileContent(this.selected_item);
 			}
+			else
+			{
+				this.selectTab(this.selected_item);
+			}
 		}
 	}
 	

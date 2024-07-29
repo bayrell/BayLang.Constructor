@@ -168,21 +168,6 @@ class WidgetPageModel extends BasePageModel
 	
 	
 	/**
-	 * Change model value
-	 */
-	void changeModelValue(string widget_name, string key, var value)
-	{
-		BaseModel widget = this.widget_model.getWidget(widget_name);
-		if (not widget) return;
-		
-		/* Set params */
-		Dict params = {};
-		params.set(key, value);
-		widget.initParams(params);
-	}
-	
-	
-	/**
 	 * Build render function
 	 */
 	void buildRender(string render_name = "render")

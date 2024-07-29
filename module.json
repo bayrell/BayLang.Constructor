@@ -22,6 +22,8 @@
 		"Frontend/Editor/ParameterComponent.bay",
 		"Frontend/Editor/ParameterClassName.bay",
 		"Frontend/Editor/ParameterModel.bay",
+		"Frontend/Editor/ParameterDictModel.bay",
+		"Frontend/Editor/ParameterFactoryModel.bay",
 		"Frontend/Editor/ParameterWidgetName.bay",
 		"Frontend/Editor/SelectedItem.bay",
 		"Frontend/Editor/SelectedItemModel.bay",

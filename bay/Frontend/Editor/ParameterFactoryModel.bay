@@ -1,0 +1,80 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Editor;
+
+use Runtime.lib;
+use Runtime.Web.BaseModel;
+use BayLang.Constructor.Frontend.Editor.CodeModel;
+use BayLang.Constructor.Frontend.Editor.ParameterModel;
+use BayLang.OpCodes.OpDict;
+use BayLang.OpCodes.OpDictPair;
+use BayLang.OpCodes.OpNew;
+
+
+class ParameterFactoryModel extends ParameterModel
+{
+	string path = "";
+	
+	
+	/**
+	 * Find OpDictPair by path
+	 */
+	OpDictPair getCode()
+	{
+		OpNew op_code = this.op_code.value;
+		if (not (op_code instanceof OpNew)) return;
+		if (op_code.args.count() != 2) return;
+		
+		OpDict op_code_params = op_code.args.get(1);
+		if (not (op_code_params instanceof OpDict)) return;
+		
+		OpDictPair op_code_api_name = op_code_params.values.findItem(lib::equalAttr("api_name"));
+		if (not op_code_api_name) return;
+		
+		return op_code_api_name;
+	}
+	
+	
+	/**
+	 * Set op_code
+	 */
+	void setOpCode(OpDictPair op_dict_pair)
+	{
+		this.op_code = op_dict_pair;
+		OpDictPair code = this.getCode();
+		if (code)
+		{
+			this.value = CodeModel::getValueFromOpCode(code.value);
+		}
+	}
+	
+	
+	/**
+	 * Set value
+	 */
+	void setValue(var value)
+	{
+		this.value = value;
+		OpDictPair code = this.getCode();
+		if (code)
+		{
+			code.value = CodeModel::getOpCodeByValue(value);
+		}
+	}
+	
+	
+	/**
+	 * Update model value
+	 */
+	void updateModelValue(var iframeWindow, BaseModel widget)
+	{
+		var name = this.name;
+		var path = this.path;
+		var value = this.value;
+		#ifcode JAVASCRIPT then
+		widget[name][path] = value;
+		#endif
+	}
+}

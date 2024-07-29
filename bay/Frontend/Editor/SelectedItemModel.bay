@@ -60,8 +60,8 @@ class SelectedItemModel extends BaseModel
 		/* Change model value */
 		if (param.widget.is_model)
 		{
-			string widget_name = param.widget.getName();
-			this.parent_widget.changeModelValue(widget_name, param.name, value);
+			var iframeWindow = this.parent_widget.iframe.contentWindow
+			param.changeModelValue(iframeWindow);
 		}
 		
 		/* Update render */

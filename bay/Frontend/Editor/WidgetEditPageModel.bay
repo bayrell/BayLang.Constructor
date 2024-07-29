@@ -391,15 +391,6 @@ class WidgetEditPageModel extends BasePageModel
 	
 	
 	/**
-	 * Change model value
-	 */
-	void changeModelValue(string widget_name, string key, var value)
-	{
-		this.getFramePageModel().changeModelValue(widget_name, key, value);
-	}
-	
-	
-	/**
 	 * Update render
 	 */
 	void updateFrameRender(string render_name = "render")

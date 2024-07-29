@@ -1,0 +1,88 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Editor;
+
+use BayLang.Constructor.Frontend.Editor.CodeModel;
+use BayLang.Constructor.Frontend.Editor.ParameterModel;
+use BayLang.OpCodes.OpDict;
+use BayLang.OpCodes.OpDictPair;
+
+
+class ParameterDictModel extends ParameterModel
+{
+	Collection path = null;
+	
+	
+	/**
+	 * Is op_code
+	 */
+	void isOpCode(OpDictPair op_attr)
+	{
+		if (not this.path) return false;
+		if (this.path.count() == 0) return false;
+		return op_attr instanceof OpDictPair and this.path.first() == op_attr.key;
+	}
+	
+	
+	/**
+	 * Get OpDictPair from OpDict by name
+	 */
+	OpDictPair findCodeByName(OpDict code, string name)
+	{
+		if (not (code instanceof OpDict)) return false;
+		for (int i=0; i<code.values.count(); i++)
+		{
+			OpDictPair pair = code.values.get(i);
+			if (pair.key == name) return pair;
+		}
+		return null;
+	}
+	
+	
+	/**
+	 * Find OpDictPair by path
+	 */
+	OpDictPair getCode()
+	{
+		OpDictPair code = this.op_code;
+		Collection<string> path = this.path.slice(1);
+		while (path.count() > 0 and code != null)
+		{
+			string name = path.first();
+			code = this.findCodeByName(code.value, name);
+			path = path.slice(1);
+		}
+		
+		return code;
+	}
+	
+	
+	/**
+	 * Set op_code
+	 */
+	void setOpCode(OpDictPair op_dict_pair)
+	{
+		this.op_code = op_dict_pair;
+		OpDictPair code = this.getCode();
+		if (code)
+		{
+			this.value = CodeModel::getValueFromOpCode(code.value);
+		}
+	}
+	
+	
+	/**
+	 * Set value
+	 */
+	void setValue(var value)
+	{
+		this.value = value;
+		OpDictPair code = this.getCode();
+		if (code)
+		{
+			code.value = CodeModel::getOpCodeByValue(value);
+		}
+	}
+}
