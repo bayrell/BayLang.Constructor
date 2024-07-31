@@ -445,6 +445,8 @@ class ComponentProcessor extends CodeModel
 		this.registerWidgetItems(parent_src_widget, false);
 		
 		/* Add widget */
+		if (not parent_dest_widget.code.items) parent_dest_widget.code.items = new OpHtmlItems;
+		if (not parent_dest_widget.code.items.items) parent_dest_widget.code.items.items = [];
 		parent_dest_widget.code.items.items.addItem(src_op_code, dest_op_code, kind);
 		
 		/* Update tree items */
