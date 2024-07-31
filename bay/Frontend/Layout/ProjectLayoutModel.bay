@@ -6,6 +6,7 @@ namespace BayLang.Constructor.Frontend.Layout;
 
 use Runtime.Serializer;
 use Runtime.Web.BaseLayoutModel;
+use Runtime.Web.RenderContainer;
 use BayLang.Constructor.Frontend.Layout.ProjectLayout;
 
 
@@ -18,11 +19,11 @@ class ProjectLayoutModel extends BaseLayoutModel
     
     
     /**
-	 * Init widget settings
+	 * Load data
 	 */
-	void initWidget(Dict params)
+	async void loadData(RenderContainer container)
 	{
-		parent(params);
+		parent(container);
 		this.project_id = this.layout.route.matches.get("project_id");
 		this.module_id = this.layout.route.matches.get("module_id");
 	}
@@ -33,7 +34,9 @@ class ProjectLayoutModel extends BaseLayoutModel
 	 */
 	void serialize(Serializer serializer, Map data)
 	{
+		serializer.process(this, "module_id", data);
 		serializer.process(this, "page_title", data);
+		serializer.process(this, "project_id", data);
 		parent(serializer, data);
 	}
 }
