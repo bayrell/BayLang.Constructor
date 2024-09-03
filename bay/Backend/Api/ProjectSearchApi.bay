@@ -22,7 +22,7 @@ class ProjectSearchApi extends SearchApi
 	 * Action search
 	 */
 	@ApiMethod
-	async static void actionSearch(SearchApi api)
+	async void actionSearch()
 	{
 		/* Get projects */
 		Collection items = await Project::readProjects(
@@ -39,10 +39,10 @@ class ProjectSearchApi extends SearchApi
 		);
 		
 		/* Set result */
-		api.success({
+		this.success({
 			"data": {
 				"items": items,
-				"page": 1,
+				"page": 0,
 				"pages": 1,
 			}
 		})

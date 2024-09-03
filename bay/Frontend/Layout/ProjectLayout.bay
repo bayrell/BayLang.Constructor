@@ -105,14 +105,6 @@ Collection<string> getMenu()
 			)
 		},
 		{
-			"label": "Modules",
-			"name": "baylang:project:modules",
-			"href": this.layout.url(
-				"baylang:project:modules",
-				{"project_id": this.layout.project_id}
-			)
-		},
-		{
 			"label": "Code",
 			"name": "baylang:project:code",
 			"href": this.layout.url(
@@ -120,19 +112,15 @@ Collection<string> getMenu()
 				{"project_id": this.layout.project_id}
 			)
 		},
-	];
-	
-	if (this.layout.project_id and this.layout.module_id)
-	{
-		arr.push({
+		{
 			"label": "Widgets",
 			"name": "baylang:project:widgets",
 			"href": this.layout.url(
 				"baylang:project:widgets",
-				{"project_id": this.layout.project_id, "module_id": this.layout.module_id}
+				{"project_id": this.layout.project_id}
 			)
-		});
-	}
+		}
+	];
 	
 	return arr;
 }

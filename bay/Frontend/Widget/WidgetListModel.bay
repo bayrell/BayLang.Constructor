@@ -11,11 +11,13 @@ use Runtime.Web.ModelFactory;
 use Runtime.Web.RenderContainer;
 use Runtime.Web.Messages.ClickMessage;
 use Runtime.Widget.Form.FormDeleteStorage;
+use Runtime.Widget.Form.FormMessage;
 use Runtime.Widget.Form.FormModel;
 use Runtime.Widget.Form.FormSubmitStorage;
 use Runtime.Widget.Table.TableDialogModel;
 use Runtime.Widget.Label;
 use Runtime.Widget.RowButtonsModel;
+use Runtime.Widget.SelectModel;
 use BayLang.Constructor.Frontend.Widget.WidgetList;
 
 
@@ -24,6 +26,7 @@ class WidgetListModel extends BasePageModel
 	string component = classof WidgetList;
 	string project_id = "";
 	string module_id = "";
+	SelectModel modules = null;
 	
 	
 	/**
@@ -35,26 +38,26 @@ class WidgetListModel extends BasePageModel
 		
 		/* Set route matches */
 		this.project_id = this.layout.route.matches.get("project_id");
-		this.module_id = this.layout.route.matches.get("module_id");
 		
-		/* Add top buttons */
-		this.top_buttons = this.addWidget(
-			classof RowButtonsModel,
+		/* Modules */
+		this.modules = this.addWidget(
+			classof SelectModel,
 			{
-				"widget_name": "top_buttons",
-				"buttons":
-				[
+				"storage": new Factory
+				(
+					"Runtime.Widget.Table.TableStorage",
 					{
-						"content": "Add",
-						"widget_name": "add_button",
-						"styles": [
-							"success",
-						]
-					},
-				],
-				"events":
+						"api_name": "baylang.constructor.module::search",
+					}
+				),
+				"widget_name": "modules",
+				"transform": Map (Dict item) => {
+					"key": item.get("id"),
+					"value": item.get("id"),
+				},
+				"foreign_key":
 				{
-					"click": new Callback(this, "onTopButtonsClick"),
+					"project_id": this.project_id,
 				},
 			}
 		);
@@ -102,7 +105,6 @@ class WidgetListModel extends BasePageModel
 						"foreign_key":
 						{
 							"project_id": this.project_id,
-							"module_id": this.module_id,
 						},
 						"storage": new Factory(
 							classof FormSubmitStorage,
@@ -113,12 +115,21 @@ class WidgetListModel extends BasePageModel
 						"fields":
 						[
 							{
+								"name": "module_id",
+								"label": "Modules",
+								"model": this.modules,
+							},
+							{
 								"name": "id",
 								"label": "Name",
 								"component": "Runtime.Widget.Input",
-								"default": this.module_id ~ ".WidgetModel",
+								"default": "WidgetModel",
 							}
 						],
+						"events":
+						{
+							"field_change": new Callback(this, "onFormFieldChange"),
+						},
 					}
 				),
 				
@@ -207,6 +218,24 @@ class WidgetListModel extends BasePageModel
 				],
 			}
 		);
+		
+		/* Add top buttons */
+		this.top_buttons = this.addWidget(
+			classof RowButtonsModel,
+			{
+				"widget_name": "top_buttons",
+				"buttons":
+				[
+					new ModelFactory
+					(
+						"Runtime.Widget.Table.AddButtonModel",
+						{
+							"table": this.table,
+						}
+					)
+				],
+			}
+		);
 	}
 	
 	
@@ -229,13 +258,29 @@ class WidgetListModel extends BasePageModel
 	
 	
 	/**
-	 * Top buttons click
+	 * Form field change
 	 */
-	void onTopButtonsClick(ClickMessage message)
+	void onFormFieldChange(FormMessage message)
 	{
-		if (message.widget.widget_name == "add_button")
+		string field_name = message.field_name;
+		string old_value = message.old_value;
+		string value = message.value;
+		if (field_name != "module_id") return;
+		
+		FormModel form = message.widget;
+		string widget_id = form.item.get("id");
+		if (rs::indexOf(widget_id, old_value) == 0)
 		{
-			this.table.save_dialog.showAdd();
+			widget_id = rs::substr(widget_id, rs::strlen(old_value));
 		}
+		if (rs::substr(widget_id, 0, 1) == ".")
+		{
+			widget_id = rs::substr(widget_id, 1);
+		}
+		if (value != "")
+		{
+			widget_id = value ~ "." ~ widget_id;
+		}
+		form.item.set("id", widget_id);
 	}
 }

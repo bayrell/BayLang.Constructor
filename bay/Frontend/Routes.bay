@@ -46,7 +46,7 @@ class Routes extends BaseRoute
 			},
 			new RouteInfo
 			{
-				"uri": "/project/{project_id}/modules/{module_id}/widgets",
+				"uri": "/project/{project_id}/widgets",
 				"name": "baylang:project:widgets",
 				"model": "BayLang.Constructor.Frontend.Widget.WidgetListModel",
 				"layout": "project",

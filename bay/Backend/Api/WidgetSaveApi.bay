@@ -35,6 +35,27 @@ class WidgetSaveApi extends SaveApi
 	Vector<CrudRule> getRules() =>
 	[
 		new Required{"name": "id"},
+		new Required{"name": "module_id"},
+	];
+	
+	
+	/**
+	 * Returns item fields
+	 */
+	Collection getItemFields() =>
+	[
+		"id",
+		"module_id",
+	];
+	
+	
+	/**
+	 * Returns save fields
+	 */
+	Collection getSaveFields() =>
+	[
+		"id",
+		"module_id",
 	];
 	
 	
@@ -71,14 +92,6 @@ class WidgetSaveApi extends SaveApi
 		
 		/* Load project */
 		await this.project.load();
-		
-		/* Get module */
-		string module_id = this.post_data["foreign_key", "module_id"];
-		this.module = this.project.getModule(module_id);
-		if (not this.module)
-		{
-			throw new ApiError(new ItemNotFound(module_id, "Module"));
-		}
 	}
 	
 	
@@ -228,8 +241,18 @@ class WidgetSaveApi extends SaveApi
 	async void actionSave()
 	{
 		/* Load data */
-		await this.loadItem();
 		await this.loadData();
+		
+		/* Get module */
+		string module_id = this.data["module_id"];
+		this.module = this.project.getModule(module_id);
+		if (not this.module)
+		{
+			throw new ApiError(new ItemNotFound(module_id, "Module"));
+		}
+		
+		/* Load item */
+		await this.loadItem();
 		
 		/* Create widget */
 		if (this.pk == null)

@@ -17,7 +17,6 @@ use BayLang.Helper.Widget;
 class WidgetSearchApi extends SearchApi
 {
 	Project project = null;
-	Module module = null;
 	
 	
 	/**
@@ -45,16 +44,14 @@ class WidgetSearchApi extends SearchApi
 		/* Load project */
 		await this.project.load();
 		
-		/* Get module */
-		string module_id = this.post_data["foreign_key", "module_id"];
-		this.module = this.project.getModule(module_id);
-		if (not this.module)
-		{
-			throw new ApiError(new ItemNotFound(module_id, "Module"));
-		}
-		
 		/* Get widgets */
-		Collection items = this.module.getWidgets();
+		Collection items = this.project.modules
+			.transition(Module (Module module) => module)
+			.map(
+				Collection (Module module) => module.getWidgets()
+			)
+			.flatten()
+		;
 		
 		/* Sort widgets */
 		items = items.sort(
@@ -75,7 +72,7 @@ class WidgetSearchApi extends SearchApi
 		this.success({
 			"data": {
 				"items": items,
-				"page": 1,
+				"page": 0,
 				"pages": 1,
 			}
 		})

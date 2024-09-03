@@ -65,7 +65,7 @@ class ModuleSearchApi extends SearchApi
 		this.success({
 			"data": {
 				"items": items,
-				"page": 1,
+				"page": 0,
 				"pages": 1,
 			}
 		})

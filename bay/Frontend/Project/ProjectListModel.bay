@@ -32,28 +32,6 @@ class ProjectListModel extends BasePageModel
 	{
 		parent(params);
 		
-		/* Add top buttons */
-		this.top_buttons = this.addWidget(
-			classof RowButtonsModel,
-			{
-				"widget_name": "top_buttons",
-				"buttons":
-				[
-					{
-						"content": "Add",
-						"widget_name": "add_button",
-						"styles": [
-							"success",
-						]
-					},
-				],
-				"events":
-				{
-					"click": new Callback(this, "onTopButtonsClick"),
-				},
-			}
-		);
-		
 		/* Add table */
 		this.table = this.addWidget(
 			classof TableDialogModel,
@@ -199,33 +177,54 @@ class ProjectListModel extends BasePageModel
 					},
 					{
 						"name": "row_buttons",
-						"model": new ModelFactory("Runtime.Widget.Table.TableRowButtonsModel"),
+						"model": new ModelFactory(
+							"Runtime.Widget.Table.TableRowButtonsModel",
+							{
+								"buttons":
+								[
+									{
+										"href": void (Dict data)
+										{
+											Dict item = data.get("item");
+											return this.layout.url(
+												"baylang:project:settings",
+												{"project_id": item.get("id")}
+											);
+										},
+										"kind": "before",
+										"dest": "edit_button",
+										"content": "Open",
+										"widget_name": "open",
+										"styles":
+										[
+											"default",
+											"small"
+										],
+									}
+								],
+							}
+						),
 					},
 				],
 			}
 		);
 		
-		/* Get row buttons */
-		TableRowButtonsModel row_buttons = this.table.getWidget("row_buttons");
-		
-		/* Add open button */
-		row_buttons.addButton(
+		/* Add top buttons */
+		this.top_buttons = this.addWidget(
+			classof RowButtonsModel,
 			{
-				"href": void (Dict data)
-				{
-					Dict item = data.get("item");
-					return this.layout.url("baylang:project:settings", {"project_id": item.get("id")});
-				},
-				"content": "Open",
-				"widget_name": "open",
-				"styles":
+				"widget_name": "top_buttons",
+				"buttons":
 				[
-					"default",
-					"small"
+					new ModelFactory
+					(
+						"Runtime.Widget.Table.AddButtonModel",
+						{
+							"table": this.table,
+						}
+					)
 				],
-			},
-			"edit_button",
-			"before"
+			}
 		);
 	}
 	
@@ -236,17 +235,5 @@ class ProjectListModel extends BasePageModel
 	void buildTitle(RenderContainer container)
 	{
 		this.layout.setPageTitle("Projects");
-	}
-	
-	
-	/**
-	 * Top buttons click
-	 */
-	void onTopButtonsClick(ClickMessage message)
-	{
-		if (message.widget.widget_name == "add_button")
-		{
-			this.table.save_dialog.showAdd();
-		}
 	}
 }

@@ -35,6 +35,28 @@ class ProjectSaveApi extends SaveApi
 	
 	
 	/**
+	 * Returns item fields
+	 */
+	Collection getItemFields() =>
+	[
+		"id",
+		"name",
+		"template",
+	];
+	
+	
+	/**
+	 * Returns save fields
+	 */
+	Collection getSaveFields() =>
+	[
+		"id",
+		"name",
+		"template",
+	];
+	
+	
+	/**
 	 * New item
 	 */
 	async void newItem() => new Project(null);
