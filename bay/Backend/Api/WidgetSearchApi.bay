@@ -65,6 +65,7 @@ class WidgetSearchApi extends SearchApi
 		items = items.map(
 			Dict (Widget widget) => {
 				"id": widget.name,
+				"module_id": widget.module.getName(),
 			}
 		);
 		

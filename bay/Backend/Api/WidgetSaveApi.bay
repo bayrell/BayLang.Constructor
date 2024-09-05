@@ -92,6 +92,14 @@ class WidgetSaveApi extends SaveApi
 		
 		/* Load project */
 		await this.project.load();
+		
+		/* Get module */
+		string module_id = this.post_data["foreign_key", "module_id"];
+		this.module = this.project.getModule(module_id);
+		if (not this.module)
+		{
+			throw new ApiError(new ItemNotFound(module_id, "Module"));
+		}
 	}
 	
 	
@@ -241,18 +249,8 @@ class WidgetSaveApi extends SaveApi
 	async void actionSave()
 	{
 		/* Load data */
-		await this.loadData();
-		
-		/* Get module */
-		string module_id = this.data["module_id"];
-		this.module = this.project.getModule(module_id);
-		if (not this.module)
-		{
-			throw new ApiError(new ItemNotFound(module_id, "Module"));
-		}
-		
-		/* Load item */
 		await this.loadItem();
+		await this.loadData();
 		
 		/* Create widget */
 		if (this.pk == null)

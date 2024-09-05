@@ -15,6 +15,8 @@ use Runtime.Widget.Form.FormMessage;
 use Runtime.Widget.Form.FormModel;
 use Runtime.Widget.Form.FormSubmitStorage;
 use Runtime.Widget.Table.TableDialogModel;
+use Runtime.Widget.Table.TableMessage;
+use Runtime.Widget.ButtonModel;
 use Runtime.Widget.Label;
 use Runtime.Widget.RowButtonsModel;
 use Runtime.Widget.SelectModel;
@@ -142,7 +144,6 @@ class WidgetListModel extends BasePageModel
 						"foreign_key":
 						{
 							"project_id": this.project_id,
-							"module_id": this.module_id,
 						},
 						"storage": new Factory(
 							classof FormDeleteStorage,
@@ -173,13 +174,15 @@ class WidgetListModel extends BasePageModel
 					{
 						"name": "row_buttons",
 						"model": new ModelFactory(
-							"Runtime.Widget.RowButtonsModel",
+							"Runtime.Widget.Table.TableRowButtonsModel",
 							{
+								"edit": false,
 								"buttons":
 								[
 									{
-										"widget_name": "edit",
-										"content": "Edit",
+										"widget_name": "edit_button",
+										"dest": "delete_button",
+										"kind": "before",
 										"href": void (Dict data)
 										{
 											Dict item = data.get("item");
@@ -192,26 +195,20 @@ class WidgetListModel extends BasePageModel
 												}
 											);
 										},
+										"content": "Edit",
 										"styles":
 										[
 											"default",
 											"small"
 										],
-									},
-									{
-										"widget_name": "delete",
-										"content": "Delete",
-										"events":
-										{
-											"click": new Callback(this, "onDeleteClick"),
-										},
-										"styles":
-										[
-											"danger",
-											"small"
-										],
 									}
 								],
+								
+								/* Events */
+								"events":
+								{
+									"click": new Callback(this, "onRowButtonClick"),
+								},
 							}
 						),
 					},
@@ -249,11 +246,16 @@ class WidgetListModel extends BasePageModel
 	
 	
 	/**
-	 * Delete click
+	 * Table row button click
 	 */
-	void onDeleteClick(ClickMessage message)
+	void onRowButtonClick(ClickMessage message)
 	{
-		this.table.delete_dialog.showDelete(message.data.get("item"));
+		ButtonModel button = message.widget;
+		if (button.widget_name != "delete_button") return;
+		
+		/* Set delete form foreign key */
+		string module_id = message.data.get("item").get("module_id");
+		this.table.delete_form.foreign_key.set("module_id", module_id);
 	}
 	
 	
@@ -267,19 +269,33 @@ class WidgetListModel extends BasePageModel
 		string value = message.value;
 		if (field_name != "module_id") return;
 		
+		/* Get form */
 		FormModel form = message.widget;
 		string widget_id = form.item.get("id");
+		
+		/* Set foreign key */
+		form.foreign_key.set("module_id", value);
+		
+		/* Set widget name */
 		if (rs::indexOf(widget_id, old_value) == 0)
 		{
 			widget_id = rs::substr(widget_id, rs::strlen(old_value));
+		}
+		if (value != "" and rs::indexOf(widget_id, value) == 0)
+		{
+			return;
 		}
 		if (rs::substr(widget_id, 0, 1) == ".")
 		{
 			widget_id = rs::substr(widget_id, 1);
 		}
+		if (rs::substr(widget_id, 0, 11) == "Components.")
+		{
+			widget_id = rs::substr(widget_id, 11);
+		}
 		if (value != "")
 		{
-			widget_id = value ~ "." ~ widget_id;
+			widget_id = value ~ ".Components." ~ widget_id;
 		}
 		form.item.set("id", widget_id);
 	}

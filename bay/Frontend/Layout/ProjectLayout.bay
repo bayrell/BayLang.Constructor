@@ -105,6 +105,14 @@ Collection<string> getMenu()
 			)
 		},
 		{
+			"label": "Widgets",
+			"name": "baylang:project:widgets",
+			"href": this.layout.url(
+				"baylang:project:widgets",
+				{"project_id": this.layout.project_id}
+			)
+		},
+		{
 			"label": "Code",
 			"name": "baylang:project:code",
 			"href": this.layout.url(
@@ -112,14 +120,6 @@ Collection<string> getMenu()
 				{"project_id": this.layout.project_id}
 			)
 		},
-		{
-			"label": "Widgets",
-			"name": "baylang:project:widgets",
-			"href": this.layout.url(
-				"baylang:project:widgets",
-				{"project_id": this.layout.project_id}
-			)
-		}
 	];
 	
 	return arr;
