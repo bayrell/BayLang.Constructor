@@ -5,6 +5,7 @@
 <class name="BayLang.Constructor.WidgetDebug.WidgetPage">
 
 <use name="Runtime.Web.BaseLayoutModel" />
+<use name="Runtime.Web.BasePageModel" />
 <use name="Runtime.Widget.Button" component="true" />
 
 
@@ -22,20 +23,46 @@
 	border-style: solid;
 }
 .widget_box__item--top{
-	border-top-width: 1px;
-	border-top-color: var(--widget-color-border);
+	border-top-width: 2px;
+	border-top-color: #e0e1e6;
 }
 .widget_box__item--left{
-	border-left-width: 1px;
-	border-left-color: var(--widget-color-border);
+	border-left-width: 2px;
+	border-left-color: #e0e1e6;
 }
 .widget_box__item--bottom{
-	border-bottom-width: 1px;
-	border-bottom-color: var(--widget-color-border);
+	border-bottom-width: 2px;
+	border-bottom-color: #e0e1e6;
 }
 .widget_box__item--right{
-	border-right-width: 1px;
-	border-right-color: var(--widget-color-border);
+	border-right-width: 2px;
+	border-right-color: #e0e1e6;
+}
+.widget_box__item_control{
+	display: inline-block;
+	position: relative;
+	background-color: white;
+	min-width: 98px;
+	left: calc(50% - 48px);
+	top: -13px;
+	border-width: 1px;
+	border-style: solid;
+	border-color: #e0e1e6;
+	z-index: 10;
+}
+.widget_box__item_control_button{
+	display: inline-block;
+	cursor: pointer;
+	font-size: 16px;
+	padding: 4px;
+	text-align: center;
+	user-select: none;
+	width: 24px;
+}
+.widget_page__add_section_button{
+	text-align: center;
+	padding-top: 10px;
+	padding: 5px;
 }
 </style>
 
@@ -46,16 +73,42 @@
 
 
 <template name="renderSelectedBox">
+	%set BasePageModel page_model = this.model.getEditPageModel();
 	%if (this.model.selected_box)
 	{
 		<div class="widget_box__item widget_box__item--top widget_box__item--current"
-			style={{ this.model.selected_box.get("top") }}></div>
+			style={{ this.model.selected_box.get("top") }}>
+			%if (page_model.selected.widget != null)
+			{
+				<div class="widget_box__item_control">
+					<div class="widget_box__item_control_button">@raw{{ "&#9776;" }}</div>
+					<div class="widget_box__item_control_button">@raw{{ "&#9652;" }}</div>
+					<div class="widget_box__item_control_button">@raw{{ "&#9662;" }}</div>
+					<div class="widget_box__item_control_button"
+						@event:click={{ this.onAddWidgetClick }}
+					>@raw{{ "+" }}</div>
+				</div>
+			}
+		</div>
 		<div class="widget_box__item widget_box__item--bottom widget_box__item--current"
 			style={{ this.model.selected_box.get("bottom") }}></div>
 		<div class="widget_box__item widget_box__item--left widget_box__item--current"
 			style={{ this.model.selected_box.get("left") }}></div>
 		<div class="widget_box__item widget_box__item--right widget_box__item--current"
 			style={{ this.model.selected_box.get("right") }}></div>
+	}
+</template>
+
+
+<template name="renderAddWidgetButton">
+	%set BasePageModel page_model = this.model.getEditPageModel();
+	%if (this.is_loaded and page_model != null and page_model.selected.widget == null)
+	{
+		<div class="widget_page__add_section_button">
+			<Button styles={{ ["small"] }}
+				@event:click={{ this.onAddWidgetClick }}
+			>Add widget</Button>
+		</div>
 	}
 </template>
 
@@ -68,11 +121,26 @@
 		%render this.renderStyle();
 		%render this.renderWidget(this.model.widget_model, {"ref": "widget_component"});
 		%render this.renderSelectedBox();
+		%render this.renderAddWidgetButton();
 	</div>
 </template>
 
 
 <script>
+
+bool is_loaded = false;
+
+
+/**
+ * Add widget click event
+ */
+void onAddWidgetClick()
+{
+	BasePageModel page_model = this.model.getEditPageModel();
+	Collection<int> path = page_model.selected.path;
+	page_model.showAddWidgetDialog(path, "after");
+}
+
 
 /**
  * Returns component
@@ -190,6 +258,7 @@ async void onMounted()
 		this.model.buildCSS();
 		this.model.buildGlobalCSS();
 		this.model.sendAppLoaded();
+		this.is_loaded = true;
 	});
 }
 

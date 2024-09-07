@@ -14,6 +14,7 @@ use BayLang.OpCodes.OpDeclareClass;
 use BayLang.OpCodes.OpHtmlStyle;
 use BayLang.OpCodes.OpModule;
 use BayLang.OpCodes.OpString;
+use BayLang.OpCodes.OpUse;
 
 
 class StylesModel extends BaseModel
@@ -27,7 +28,7 @@ class StylesModel extends BaseModel
 	/**
 	 * Returns CSS content
 	 */
-	void getCSS()
+	string getCSS()
 	{
 		Vector items = [];
 		Collection selectors = this.items.keys().sort();
@@ -127,6 +128,7 @@ class StylesModel extends BaseModel
 		OpDeclareClass op_code_class = op_code.findClass();
 		if (not op_code_class) return;
 		
+		/* Add styles */
 		for (int i=0; i<op_code_class.items.count(); i++)
 		{
 			BaseOpCode item = op_code_class.items.get(i);
@@ -135,6 +137,43 @@ class StylesModel extends BaseModel
 				this.addHtmlStyle(item);
 			}
 		}
+		
+		/* Add style if not exists */
+		if (this.main_style_code == null)
+		{
+			this.createMainHtmlStyle(op_code);
+		}
+	}
+	
+	
+	/**
+	 * Create main HTML Style
+	 */
+	void createMainHtmlStyle(OpModule op_code)
+	{
+		if (this.main_style_code != null) return;
+		
+		OpDeclareClass op_code_class = op_code.findClass();
+		if (not op_code_class) return;
+		
+		/* Create main style code */
+		this.main_style_code = new OpHtmlStyle
+		{
+			"value": new OpString
+			{
+				"value": ""
+			}
+		};
+		
+		/* Find use */
+		int pos = -1;
+		for (int i=0; i<op_code.items.count(); i++)
+		{
+			if (op_code.items.get(i) instanceof OpUse) pos = i;
+		}
+		
+		/* Register main style */
+		op_code_class.items.add(this.main_style_code, pos);
 	}
 	
 	

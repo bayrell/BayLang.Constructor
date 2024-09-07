@@ -81,6 +81,9 @@ class WidgetPageModel extends BasePageModel
 	 */
 	BasePageModel getEditPageModel()
 	{
+		#ifdef BACKEND then
+		return null;
+		#endif
 		BasePageModel page_model = window.parent.app_layout.getPageModel();
 		string page_model_class_name = page_model::getClassName();
 		if (page_model_class_name != "BayLang.Constructor.Frontend.Editor.WidgetEditPageModel")
@@ -321,8 +324,8 @@ class WidgetPageModel extends BasePageModel
 		
 		left = elem.offsetLeft;
 		top = elem.offsetTop;
-		width = elem.clientWidth - 1;
-		height = elem.clientHeight - 1;
+		width = elem.clientWidth - 2;
+		height = elem.clientHeight - 2;
 		
 		Map box = {};
 		box.set("left", rs::join(";", [

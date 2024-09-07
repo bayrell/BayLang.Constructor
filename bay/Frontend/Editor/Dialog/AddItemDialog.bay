@@ -83,6 +83,7 @@
 		}
 		%else if (this.model.step == 2)
 		{
+			<!--
 			<div class="row row_flex" @key="kind">
 				<div class="row_item row_label">Kind</div>
 				<div class="row_item row_content">
@@ -106,6 +107,7 @@
 					</div>
 				}
 			</div>
+			-->
 			<div class="row row_flex" @key="widget_name">
 				<div class="row_item row_label">Widget name</div>
 				<div class="row_item row_content">

@@ -169,10 +169,12 @@ class WidgetEditPageModel extends BasePageModel
 		
 		/* Create ContextMenu */
 		this.context_menu = this.addWidget(classof ContextMenuModel);
+		/*
 		this.context_menu.addItem({
 			"label": "Append item",
 			"key": "append"
 		});
+		*/
 		this.context_menu.addItem({
 			"label": "Insert item",
 			"key": "insert"
@@ -330,15 +332,13 @@ class WidgetEditPageModel extends BasePageModel
 		/* Add item */
 		if (item_key == "append")
 		{
-			this.add_item_dialog.kind = "after";
-			this.add_item_dialog.show(this.selected.path);
+			this.add_item_dialog.show(this.selected.path, "after");
 		}
 		
 		/* Insert item */
 		if (item_key == "insert")
 		{
-			this.add_item_dialog.kind = "last";
-			this.add_item_dialog.show(this.selected.path);
+			this.add_item_dialog.show(this.selected.path, "last");
 		}
 		
 		/* Rename item */
@@ -360,6 +360,15 @@ class WidgetEditPageModel extends BasePageModel
 			this.remove_item_dialog.content = "Do you want to remove this item?";
 			this.remove_item_dialog.show();
 		}
+	}
+	
+	
+	/**
+	 * Show add widget dialog
+	 */
+	void showAddWidgetDialog(Collection<int> selected_path, string kind)
+	{
+		this.add_item_dialog.show(selected_path, kind);
 	}
 	
 	
@@ -541,8 +550,17 @@ class WidgetEditPageModel extends BasePageModel
 	{
 		BaseOpCode dest_op_code = this.component_processor.getOpCode(path);
 		
+		/* Root insert */
+		if (dest_op_code == null)
+		{
+			dest_op_code = this.tree.root.code;
+			kind = "last";
+			path = [];
+		}
+		
 		/* Add op code */
 		int pos = this.component_processor.addOpCode(op_code, dest_op_code, kind);
+		if (pos < 0) return;
 		
 		/* Build new path */
 		Vector new_src_path = (kind == "first" or kind == "last")

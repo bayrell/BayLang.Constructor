@@ -121,9 +121,10 @@ class AddItemDialogModel extends ConfirmDialogModel
 	/**
 	 * Show dialog
 	 */
-	void show(Collection<string> selected_path = null)
+	void show(Collection<string> selected_path = null, string kind = "after")
 	{
 		this.step = 1;
+		this.kind = kind;
 		this.widget_name_class = "";
 		this.widget_name_value = "item";
 		this.title = "Add item";

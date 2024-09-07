@@ -385,8 +385,6 @@ class ComponentProcessor extends CodeModel
 		/* Get widgets */
 		Widget dest_widget = this.hash.get(dest_op_code);
 		Widget parent_widget = this.hash.get(dest_widget.parent_code);
-		if (not dest_widget) return;
-		if (not parent_widget) return;
 		
 		/* Insert first */
 		if (kind == "first")
@@ -403,6 +401,9 @@ class ComponentProcessor extends CodeModel
 			dest_op_code = null;
 			kind = "after";
 		}
+		
+		/* Check widget exists */
+		if (not parent_widget) return -1;
 		
 		/* Add item */
 		int pos = parent_widget.code.items.items.addItem(new_op_code, dest_op_code, kind);
