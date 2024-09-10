@@ -82,8 +82,12 @@
 			{
 				<div class="widget_box__item_control">
 					<div class="widget_box__item_control_button">@raw{{ "&#9776;" }}</div>
-					<div class="widget_box__item_control_button">@raw{{ "&#9652;" }}</div>
-					<div class="widget_box__item_control_button">@raw{{ "&#9662;" }}</div>
+					<div class="widget_box__item_control_button"
+						@event:click={{ this.onUpWidgetClick }}
+					>@raw{{ "&#9652;" }}</div>
+					<div class="widget_box__item_control_button"
+						@event:click={{ this.onDownWidgetClick }}
+					>@raw{{ "&#9662;" }}</div>
 					<div class="widget_box__item_control_button"
 						@event:click={{ this.onAddWidgetClick }}
 					>@raw{{ "+" }}</div>
@@ -129,6 +133,28 @@
 <script>
 
 bool is_loaded = false;
+
+
+/**
+ * Up widget click
+ */
+void onUpWidgetClick()
+{
+	BasePageModel page_model = this.model.getEditPageModel();
+	Collection<int> path = page_model.selected.path;
+	page_model.moveUpWidget(path);
+}
+
+
+/**
+ * Down widget click
+ */
+void onDownWidgetClick()
+{
+	BasePageModel page_model = this.model.getEditPageModel();
+	Collection<int> path = page_model.selected.path;
+	page_model.moveDownWidget(path);
+}
 
 
 /**

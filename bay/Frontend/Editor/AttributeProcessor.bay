@@ -20,6 +20,17 @@ class AttributeProcessor extends BaseObject
 	
 	
 	/**
+	 * Create widget name
+	 */
+	string createWidgetName(string widget_name)
+	{
+		string name = widget_name ~ "_" ~ this.widget_inc;
+		this.widget_inc = this.widget_inc + 1;
+		return name;
+	}
+	
+	
+	/**
 	 * Generate widget name
 	 */
 	string generateWidgetName(string widget_name, string item)
@@ -38,13 +49,12 @@ class AttributeProcessor extends BaseObject
 	{
 		string css_name = null;
 		
-		/* Generate css name */
-		fn generateCssName = string () use (css_name)
+		/* Create widget name */
+		fn createWidgetName = string () use (css_name)
 		{
 			if (css_name == null)
 			{
-				css_name = "widget_" ~ this.widget_inc;
-				this.widget_inc = this.widget_inc + 1;
+				css_name = this.createWidgetName("widget");
 			}
 			return css_name;
 		};
@@ -69,7 +79,7 @@ class AttributeProcessor extends BaseObject
 			op_code.attrs.push(new OpHtmlAttribute{
 				"key": "@key_debug",
 				"value": new OpString{
-					"value": generateCssName(),
+					"value": createWidgetName(),
 				},
 			});
 		}
@@ -84,11 +94,11 @@ class AttributeProcessor extends BaseObject
 			Collection attrs = rs::split(" ", class_name);
 			attrs = attrs.filter(lib::equalNot(""));
 			attrs = attrs.map(
-				string (string item) use (generateCssName, generateWidgetName)
+				string (string item) use (createWidgetName, generateWidgetName)
 				{
 					if (item == "[widget_name]")
 					{
-						return generateCssName();
+						return createWidgetName();
 					}
 					if (rs::substr(item, 0, 2) == "[&" and rs::substr(item, -1) == "]")
 					{

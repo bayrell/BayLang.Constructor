@@ -544,6 +544,44 @@ class WidgetEditPageModel extends BasePageModel
 	
 	
 	/**
+	 * Up widget
+	 */
+	void moveUpWidget(Collection<int> path)
+	{
+		Collection dest_path = path.setIm(path.count() - 1, path.last() - 1);
+		BaseOpCode src_op_code = this.component_processor.getOpCode(path);
+		BaseOpCode dest_op_code = this.component_processor.getOpCode(dest_path);
+		if (not dest_op_code) return;
+		
+		/* Move op code */
+		this.component_processor.moveOpCode(src_op_code, dest_op_code, "before");
+		this.selectItem(dest_path);
+		
+		/* Update frame render */
+		this.updateFrameRender();
+	}
+	
+	
+	/**
+	 * Down widget
+	 */
+	void moveDownWidget(Collection<int> path)
+	{
+		Collection dest_path = path.setIm(path.count() - 1, path.last() + 1);
+		BaseOpCode src_op_code = this.component_processor.getOpCode(path);
+		BaseOpCode dest_op_code = this.component_processor.getOpCode(dest_path);
+		if (not dest_op_code) return;
+		
+		/* Move op code */
+		this.component_processor.moveOpCode(src_op_code, dest_op_code, "after");
+		this.selectItem(dest_path);
+		
+		/* Update frame render */
+		this.updateFrameRender();
+	}
+	
+	
+	/**
 	 * Add widget op_code
 	 */
 	void addOpCode(OpHtmlTag op_code, Collection<int> path, string kind)
