@@ -356,9 +356,7 @@ class WidgetEditPageModel extends BasePageModel
 		/* Remove item */
 		if (item_key == "remove")
 		{
-			this.remove_item_dialog.title = "Remove item";
-			this.remove_item_dialog.content = "Do you want to remove this item?";
-			this.remove_item_dialog.show();
+			this.showRemoveWidgetDialog();
 		}
 	}
 	
@@ -369,6 +367,17 @@ class WidgetEditPageModel extends BasePageModel
 	void showAddWidgetDialog(Collection<int> selected_path, string kind)
 	{
 		this.add_item_dialog.show(selected_path, kind);
+	}
+	
+	
+	/**
+	 * Show remove widget dialog
+	 */
+	void showRemoveWidgetDialog()
+	{
+		this.remove_item_dialog.title = "Remove item";
+		this.remove_item_dialog.content = "Do you want to remove this item?";
+		this.remove_item_dialog.show();
 	}
 	
 	
@@ -501,10 +510,25 @@ class WidgetEditPageModel extends BasePageModel
 	 */
 	void onCanTreeDrop(TreeMessage message)
 	{
-		/*if (message.dest.count() < 2 and (message.kind == "before" or message.kind == "after"))
+		Widget src_widget = this.component_processor.getWidget(message.src);
+		Widget dest_widget = this.component_processor.getWidget(message.dest);
+		if (message.dest == null) return;
+		if (dest_widget == null) return;
+		if (dest_widget.component_settings == null)
 		{
-			message.result.setValue(false);
-		}*/
+			dest_widget.setupSettings();
+		}
+		if (dest_widget.component_settings == null) return;
+		
+		/* Check into drag */
+		if (
+			message.kind == "into" and
+			not dest_widget.component_settings.canDrag(src_widget, "into")
+		)
+		{
+			message.result = false;
+			return;
+		}
 	}
 	
 	

@@ -4,6 +4,8 @@
 
 namespace BayLang.Constructor.Frontend.Annotations;
 
+use BayLang.Constructor.Frontend.Editor.Widget;
+
 
 interface WidgetSettingsInterface
 {
@@ -17,6 +19,12 @@ interface WidgetSettingsInterface
 	 * Returns short name
 	 */
 	string getShortName();
+	
+	
+	/**
+	 * Can drag
+	 */
+	bool canDrag(Widget widget, string kind);
 	
 	
 	/**

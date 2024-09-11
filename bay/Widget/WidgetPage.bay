@@ -81,7 +81,12 @@
 			%if (page_model.selected.widget != null)
 			{
 				<div class="widget_box__item_control">
+					<!--
 					<div class="widget_box__item_control_button">@raw{{ "&#9776;" }}</div>
+					-->
+					<div class="widget_box__item_control_button"
+						@event:click={{ this.onAddWidgetClick }}
+					>@raw{{ "+" }}</div>
 					<div class="widget_box__item_control_button"
 						@event:click={{ this.onUpWidgetClick }}
 					>@raw{{ "&#9652;" }}</div>
@@ -89,8 +94,8 @@
 						@event:click={{ this.onDownWidgetClick }}
 					>@raw{{ "&#9662;" }}</div>
 					<div class="widget_box__item_control_button"
-						@event:click={{ this.onAddWidgetClick }}
-					>@raw{{ "+" }}</div>
+						@event:click={{ this.onRemoveWidgetClick }}
+					>@raw{{ "&#128465;" }}</div>
 				</div>
 			}
 		</div>
@@ -106,7 +111,7 @@
 
 <template name="renderAddWidgetButton">
 	%set BasePageModel page_model = this.model.getEditPageModel();
-	%if (this.is_loaded and page_model != null and page_model.selected.widget == null)
+	%if (this.is_loaded and page_model != null)
 	{
 		<div class="widget_page__add_section_button">
 			<Button styles={{ ["small"] }}
@@ -165,6 +170,17 @@ void onAddWidgetClick()
 	BasePageModel page_model = this.model.getEditPageModel();
 	Collection<int> path = page_model.selected.path;
 	page_model.showAddWidgetDialog(path, "after");
+}
+
+
+/**
+ * Remove widget click event
+ */
+void onRemoveWidgetClick()
+{
+	BasePageModel page_model = this.model.getEditPageModel();
+	Collection<int> path = page_model.selected.path;
+	page_model.showRemoveWidgetDialog();
 }
 
 
