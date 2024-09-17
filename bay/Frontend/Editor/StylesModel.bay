@@ -52,9 +52,9 @@ class StylesModel extends BaseModel
 	
 	
 	/**
-	 * Returns CSS Content
+	 * Returns css content
 	 */
-	string getCSSValue(string selector_name)
+	string getSelectorContent(string selector_name)
 	{
 		if (not this.items.has(selector_name)) return "";
 		return this.items.get(selector_name).source;
@@ -76,9 +76,9 @@ class StylesModel extends BaseModel
 	
 	
 	/**
-	 * Set CSS value
+	 * Set css content
 	 */
-	void setCSSValue(string selector_name, string source, OpHtmlStyle op_code = null)
+	void setSelectorContent(string selector_name, string source, OpHtmlStyle op_code = null)
 	{
 		/* Default item */
 		if (op_code == null)
@@ -94,17 +94,17 @@ class StylesModel extends BaseModel
 		
 		/* Set content */
 		StyleItem style_item = this.items.get(selector_name);
-		style_item.setSource(source);
+		style_item.setContent(source);
 	}
 	
 	
 	/**
-	 * Change CSS
+	 * Change css content
 	 */
-	void changeCSSValue(string selector_name, string value)
+	void changeSelectorContent(string selector_name, string value)
 	{
 		/* Set CSS Value */
-		this.setCSSValue(selector_name, value);
+		this.setSelectorContent(selector_name, value);
 		
 		/* Update CSS */
 		this.parent_widget.updateFrameCSS();
@@ -196,7 +196,7 @@ class StylesModel extends BaseModel
 			
 			/* Set CSS Value */
 			string source = styles.get(selector_name);
-			this.setCSSValue(selector_name, source, op_code);
+			this.setSelectorContent(selector_name, source, op_code);
 		}
 	}
 	

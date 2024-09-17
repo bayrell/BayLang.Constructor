@@ -109,9 +109,9 @@ class StyleItem extends BaseObject
 	
 	
 	/**
-	 * Build source
+	 * Build content
 	 */
-	string buildSource()
+	string buildContent()
 	{
 		Collection items = [];
 		Collection keys = this.css_values.keys().sort();
@@ -124,6 +124,16 @@ class StyleItem extends BaseObject
 		items.push(this.css_ignore);
 		string source = rs::join(";\n", items);
 		return rs::trim(source);
+	}
+	
+	
+	/**
+	 * Returns css value
+	 */
+	void getCSSValue(string key, string default_value = "")
+	{
+		if (not this.css_values.has(key)) return default_value;
+		return this.css_values.get(key);
 	}
 	
 	
@@ -144,8 +154,8 @@ class StyleItem extends BaseObject
 		}
 		
 		/* Update source */
-		string source = this.buildSource();
-		this.setSource(source, false);
+		string source = this.buildContent();
+		this.setContent(source, false);
 	}
 	
 	
@@ -163,9 +173,9 @@ class StyleItem extends BaseObject
 	
 	
 	/**
-	 * Update CSS values
+	 * Parse CSS values
 	 */
-	void updateCSSValues()
+	void parseCSSValues()
 	{
 		string content = this.source;
 		list res = static::parseCSS(content);
@@ -189,9 +199,9 @@ class StyleItem extends BaseObject
 	
 	
 	/**
-	 * Set source
+	 * Set content
 	 */
-	void setSource(string source, bool update_css = true)
+	void setContent(string source, bool parse_css = true)
 	{
 		ComponentProcessor component_processor = this.parent_widget.parent_widget.component_processor;
 		ParserBay parser = component_processor.createParser();
@@ -204,9 +214,9 @@ class StyleItem extends BaseObject
 		/* Set content */
 		this.source = source;
 		this.content = content;
-		if (update_css)
+		if (parse_css)
 		{
-			this.updateCSSValues();
+			this.parseCSSValues();
 		}
 	}
 }

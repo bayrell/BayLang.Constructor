@@ -2,10 +2,10 @@
  *  BayLang Constructor
  */
 
-namespace BayLang.Constructor.Frontend.Editor;
+namespace BayLang.Constructor.Frontend.Editor.Parameters;
 
+use BayLang.Constructor.Frontend.Editor.Parameters.Parameter;
 use BayLang.Constructor.Frontend.Editor.CodeModel;
-use BayLang.Constructor.Frontend.Editor.Parameter;
 use BayLang.Constructor.Frontend.Editor.Widget;
 use BayLang.OpCodes.OpHtmlAttribute;
 

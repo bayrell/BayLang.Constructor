@@ -1,8 +1,8 @@
 /*!
- *  BayLang.Constructor.WidgetDebug
+ *  BayLang.Constructor.WidgetPage
  */
 
-namespace BayLang.Constructor.WidgetDebug;
+namespace BayLang.Constructor.WidgetPage;
 
 use Runtime.Web.BaseRoute;
 use Runtime.Web.RouteInfo;
@@ -27,7 +27,7 @@ class Routes extends BaseRoute
 			{
 				"uri": "/open/widget",
 				"name": "baylang:widget:debug",
-				"model": "BayLang.Constructor.WidgetDebug.WidgetPageModel",
+				"model": "BayLang.Constructor.WidgetPage.WidgetPageModel",
 			},
 		];
 	}

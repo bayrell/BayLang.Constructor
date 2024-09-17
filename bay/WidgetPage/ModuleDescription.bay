@@ -2,7 +2,7 @@
  *  BayLang Constructor
  */
 
-namespace BayLang.Constructor.WidgetDebug;
+namespace BayLang.Constructor.WidgetPage;
 
 use Runtime.Web.Annotations.FooterComponents;
 use Runtime.Entity.Hook;
@@ -16,7 +16,7 @@ static class ModuleDescription
 	 * Returns module name
 	 * @return string
 	 */
-	pure string getModuleName() => "BayLang.Constructor.WidgetDebug";
+	pure string getModuleName() => "BayLang.Constructor.WidgetPage";
 	
 	
 	/**
@@ -40,13 +40,13 @@ static class ModuleDescription
 	 */
 	pure Collection<Dict> entities() =>
 	[
-		new Hook("BayLang.Constructor.WidgetDebug.AppHook"),
+		new Hook("BayLang.Constructor.WidgetPage.AppHook"),
 		
 		#ifdef BACKEND then
 		new Hook("Runtime.Web.Hooks.Environments", {
 			"frontend": ["CONSTRUCTOR"],
 		}),
-		new Route("BayLang.Constructor.WidgetDebug.Routes"),
+		new Route("BayLang.Constructor.WidgetPage.Routes"),
 		#endif
 	];
 }

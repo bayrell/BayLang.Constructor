@@ -2,7 +2,7 @@
  *  BayLang Constructor
  */
 
-namespace BayLang.Constructor.WidgetDebug;
+namespace BayLang.Constructor.WidgetPage;
 
 use Runtime.Web.Hooks.AppHook as BaseAppHook;
 

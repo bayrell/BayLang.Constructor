@@ -74,9 +74,9 @@
 			<TextEditable
 				class="widget_style__editable overflow"
 				name={{ selector_name }}
-				value={{ this.model.getCSSValue(selector_name) }}
+				value={{ this.model.getSelectorContent(selector_name) }}
 				@event:valueChange={{ void (var message) use (selector_name) {
-					this.model.changeCSSValue(selector_name, message.value);
+					this.model.changeSelectorContent(selector_name, message.value);
 				} }}
 			/>
 		</div>
@@ -180,7 +180,7 @@ void onAddStyle(DialogMessage message)
 	{
 		throw new DialogModelException("selector " ~ selector_name ~ " allready exists");
 	}
-	this.model.changeCSSValue(selector_name, "");
+	this.model.changeSelectorContent(selector_name, "");
 }
 
 
@@ -200,7 +200,7 @@ void onRenameStyle(DialogMessage message)
 	/* Rename style */
 	string css_content = this.model.getCSSValue(this.old_selector_name)
 	this.model.items.remove(this.old_selector_name);
-	this.model.changeCSSValue(new_selector_name, css_content);
+	this.model.changeSelectorContent(new_selector_name, css_content);
 }
 
 
@@ -209,7 +209,7 @@ void onRenameStyle(DialogMessage message)
  */
 void onDeleteStyle()
 {
-	this.model.changeCSSValue(this.old_selector_name, "");
+	this.model.changeSelectorContent(this.old_selector_name, "");
 	this.model.items.remove(this.old_selector_name);
 }
 

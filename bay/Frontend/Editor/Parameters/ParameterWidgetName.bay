@@ -2,23 +2,23 @@
  *  BayLang Constructor
  */
 
-namespace BayLang.Constructor.Frontend.Editor;
+namespace BayLang.Constructor.Frontend.Editor.Parameters;
 
 use Runtime.BaseObject;
+use BayLang.Constructor.Frontend.Editor.Parameters.ParameterClassName;
+use BayLang.Constructor.Frontend.Editor.Parameters.ParameterComponent;
 use BayLang.Constructor.Frontend.Editor.CodeModel;
-use BayLang.Constructor.Frontend.Editor.ParameterComponent;
-use BayLang.Constructor.Frontend.Editor.ParameterWidgetName;
 use BayLang.Constructor.Frontend.Editor.SelectedItemModel;
 use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
 use BayLang.OpCodes.OpHtmlAttribute;
 
 
-class ParameterClassName extends ParameterComponent
+class ParameterWidgetName extends ParameterComponent
 {
 	bool display = false;
-	string name = "class_name";
-	Collection<string> value = [];
-	ParameterWidgetName param_widget_name = null;
+	string name = "widget_name";
+	string value = "";
+	ParameterClassName param_class_name = null;
 	
 	
 	/**
@@ -38,7 +38,7 @@ class ParameterClassName extends ParameterComponent
 		string class_name = CodeModel::getValueFromOpCode(op_attr.value);
 		Collection<string> value = rs::split(" ", class_name);
 		value = value.filter(bool (string s) => s != "");
-		this.value = value.slice(1);
+		this.value = value.get(0);
 		this.op_attr = op_attr;
 	}
 	
@@ -46,7 +46,7 @@ class ParameterClassName extends ParameterComponent
 	/**
 	 * Set value
 	 */
-	void setValue(Collection<string> value)
+	void setValue(string value)
 	{
 		/* Create html attribute */
 		if (this.op_attr == null)
@@ -55,9 +55,8 @@ class ParameterClassName extends ParameterComponent
 		}
 		
 		/* Set value */
-		Collection arr = [ this.param_widget_name.value ];
-		arr.appendItems(value);
-		this.value = arr.slice(1);
+		Collection arr = this.param_class_name.value.insertIm(0, value);
+		this.value = arr.get(0);
 		this.op_attr.value = CodeModel::getOpCodeByValue(rs::join(" ", arr));
 	}
 }

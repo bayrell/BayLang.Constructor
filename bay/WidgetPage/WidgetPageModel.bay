@@ -2,7 +2,7 @@
  *  BayLang Constructor
  */
 
-namespace BayLang.Constructor.WidgetDebug;
+namespace BayLang.Constructor.WidgetPage;
 
 use Runtime.lib;
 use Runtime.Web.ApiResult;
@@ -13,7 +13,7 @@ use Runtime.Web.RenderProvider;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpDeclareClass;
 use BayLang.OpCodes.OpDeclareFunction;
-use BayLang.Constructor.WidgetDebug.WidgetPage;
+use BayLang.Constructor.WidgetPage.WidgetPage;
 
 
 class WidgetPageModel extends BasePageModel

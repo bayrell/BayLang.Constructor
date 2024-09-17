@@ -338,9 +338,9 @@
 <template name="renderCSS">
 	%set string selector_name = this.model.selected.widget.getSelector();
 	<TextEditable class="overflow"
-		value={{ this.model.styles.getCSSValue(selector_name) }}
+		value={{ this.model.styles.getSelectorContent(selector_name) }}
 		@event:valueChange={{ void (var message) use (selector_name) {
-			this.model.styles.changeCSSValue(selector_name, message.value)
+			this.model.styles.changeSelectorContent(selector_name, message.value)
 		} }}
 	/>
 </template>
@@ -398,8 +398,7 @@ bool isAllowClassName(string class_name)
 string getCSSValue(StyleItem style_item, string key, string default_value = "")
 {
 	if (style_item == null) return default_value;
-	if (not style_item.css_values.has(key)) return default_value;
-	return style_item.css_values.get(key);
+	return style_item.getCSSValue(key, default_value);
 }
 
 

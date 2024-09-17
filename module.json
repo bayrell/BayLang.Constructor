@@ -13,18 +13,18 @@
 		"Frontend/Editor/Dialog/AddItemDialogModel.bay",
 		"Frontend/Editor/Dialog/RemoveItemDialog.bay",
 		"Frontend/Editor/Dialog/RemoveItemDialogModel.bay",
+		"Frontend/Editor/Parameters/Parameter.bay",
+		"Frontend/Editor/Parameters/ParameterComponent.bay",
+		"Frontend/Editor/Parameters/ParameterClassName.bay",
+		"Frontend/Editor/Parameters/ParameterModel.bay",
+		"Frontend/Editor/Parameters/ParameterDictModel.bay",
+		"Frontend/Editor/Parameters/ParameterFactoryModel.bay",
+		"Frontend/Editor/Parameters/ParameterWidgetName.bay",
 		"Frontend/Editor/AttributeProcessor.bay",
 		"Frontend/Editor/Breadcrumbs.bay",
 		"Frontend/Editor/CodeModel.bay",
 		"Frontend/Editor/ComponentProcessor.bay",
 		"Frontend/Editor/ModelProcessor.bay",
-		"Frontend/Editor/Parameter.bay",
-		"Frontend/Editor/ParameterComponent.bay",
-		"Frontend/Editor/ParameterClassName.bay",
-		"Frontend/Editor/ParameterModel.bay",
-		"Frontend/Editor/ParameterDictModel.bay",
-		"Frontend/Editor/ParameterFactoryModel.bay",
-		"Frontend/Editor/ParameterWidgetName.bay",
 		"Frontend/Editor/SelectedItem.bay",
 		"Frontend/Editor/SelectedItemModel.bay",
 		"Frontend/Editor/StyleItem.bay",
@@ -55,7 +55,7 @@
 	"modules":
 	[
 		{
-			"src": "bay/Widget",
+			"src": "bay/WidgetPage",
 			"type": "module"
 		}
 	],

@@ -1,5 +1,5 @@
 {
-	"name": "BayLang.Constructor.WidgetDebug",
+	"name": "BayLang.Constructor.WidgetPage",
 	"assets":
 	[
 		"AppHook.bay",
@@ -12,8 +12,8 @@
 	"src": "./",
 	"dest":
 	{
-		"php": "./../../php/WidgetDebug",
-		"es6": "./../../es6/WidgetDebug"
+		"php": "./../../php/WidgetPage",
+		"es6": "./../../es6/WidgetPage"
 	},
 	"allow":
 	[

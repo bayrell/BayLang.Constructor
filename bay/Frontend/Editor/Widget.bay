@@ -6,11 +6,11 @@ namespace BayLang.Constructor.Frontend.Editor;
 
 use Runtime.BaseObject;
 use BayLang.Constructor.Frontend.Annotations.WidgetSettingsInterface;
+use BayLang.Constructor.Frontend.Editor.Parameters.Parameter;
+use BayLang.Constructor.Frontend.Editor.Parameters.ParameterClassName;
+use BayLang.Constructor.Frontend.Editor.Parameters.ParameterComponent;
+use BayLang.Constructor.Frontend.Editor.Parameters.ParameterWidgetName;
 use BayLang.Constructor.Frontend.Editor.CodeModel;
-use BayLang.Constructor.Frontend.Editor.Parameter;
-use BayLang.Constructor.Frontend.Editor.ParameterClassName;
-use BayLang.Constructor.Frontend.Editor.ParameterComponent;
-use BayLang.Constructor.Frontend.Editor.ParameterWidgetName;
 use BayLang.Constructor.Frontend.Editor.WidgetEditPageModel;
 use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
 use BayLang.Constructor.Frontend.Providers.EditorProvider;
