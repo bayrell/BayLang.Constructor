@@ -10,8 +10,9 @@
 <use name="Runtime.Widget.Tag" component="true" />
 <use name="Runtime.Widget.TextArea" component="true" />
 <use name="Runtime.Widget.TextEditable" component="true" />
-<use name="BayLang.Constructor.Frontend.Editor.Parameter" />
-<use name="BayLang.Constructor.Frontend.Editor.StyleItem" />
+<use name="BayLang.Constructor.Frontend.Editor.Parameters.Parameter" />
+<use name="BayLang.Constructor.Frontend.Editor.Styles.Selector" />
+<use name="BayLang.Constructor.Frontend.Editor.Styles.StyleItem" />
 <use name="BayLang.Constructor.Frontend.Editor.WidgetStyle" component="true" />
 <use name="BayLang.Constructor.Frontend.Providers.EditorProvider" />
 
@@ -74,18 +75,18 @@
 
 
 <template name="renderInput" args="
-	StyleItem style_item, string key,
+	Selector selector, string key,
 	string label, string default_value = ''"
 >
-	%set string value = this.getCSSValue(style_item, key, default_value);
+	%set string value = this.getCSSValue(selector, key, default_value);
 	<div class="widget_css__row">
 		<div class="widget_css__key">{{ label ? label : key }}</div>
 		<div class="widget_css__value">
 			<Input value={{ value }}
 				@event:valueChange={{
-					void (var message) use (style_item, key)
+					void (var message) use (selector, key)
 					{
-						this.setCSSValue(style_item, key, message.value);
+						this.setCSSValue(selector, key, message.value);
 					}
 				}}
 			/>
@@ -95,10 +96,10 @@
 
 
 <template name="renderSelect" args="
-	StyleItem style_item, string key,
+	Selector selector, string key,
 	string label, Collection options"
 >
-	%set string value = this.getCSSValue(style_item, key);
+	%set string value = this.getCSSValue(selector, key);
 	<div class="widget_css__row">
 		<div class="widget_css__key">{{ label ? label : key }}</div>
 		<div class="widget_css__value">
@@ -106,9 +107,9 @@
 				value={{ value }}
 				options={{ options }}
 				@event:valueChange={{
-					void (var message) use (style_item, key)
+					void (var message) use (selector, key)
 					{
-						this.setCSSValue(style_item, key, message.value);
+						this.setCSSValue(selector, key, message.value);
 					}
 				}}
 			/>
@@ -233,66 +234,66 @@
 
 <template name="renderStyles">
 	%set string selector_name = this.model.selected.widget.getSelector();
-	%set StyleItem style_item = this.model.styles.items.get(selector_name);
+	%set Selector selector = this.model.styles.getSelector(selector_name);
 	<div class="widget_css__content">
 		<div class="widget_css__label">Common</div>
 		<div class="widget_css__items">
-			%render this.renderInput(style_item, "width", "");
-			%render this.renderInput(style_item, "height", "");
-			%render this.renderInput(style_item, "min-width", "");
-			%render this.renderInput(style_item, "min-height", "");
+			%render this.renderInput(selector, "width", "");
+			%render this.renderInput(selector, "height", "");
+			%render this.renderInput(selector, "min-width", "");
+			%render this.renderInput(selector, "min-height", "");
 		</div>
 	</div>
 	<div class="widget_css__content">
 		<div class="widget_css__label">Padding</div>
 		<div class="widget_css__items">
-			%render this.renderInput(style_item, "padding-top", "");
-			%render this.renderInput(style_item, "padding-bottom", "");
-			%render this.renderInput(style_item, "padding-left", "");
-			%render this.renderInput(style_item, "padding-right", "");
+			%render this.renderInput(selector, "padding-top", "");
+			%render this.renderInput(selector, "padding-bottom", "");
+			%render this.renderInput(selector, "padding-left", "");
+			%render this.renderInput(selector, "padding-right", "");
 		</div>
 	</div>
 	<div class="widget_css__content">
 		<div class="widget_css__label">Margin</div>
 		<div class="widget_css__items">
-			%render this.renderInput(style_item, "margin-top", "");
-			%render this.renderInput(style_item, "margin-bottom", "");
-			%render this.renderInput(style_item, "margin-left", "");
-			%render this.renderInput(style_item, "margin-right", "");
+			%render this.renderInput(selector, "margin-top", "");
+			%render this.renderInput(selector, "margin-bottom", "");
+			%render this.renderInput(selector, "margin-left", "");
+			%render this.renderInput(selector, "margin-right", "");
 		</div>
 	</div>
 	<div class="widget_css__content">
 		<div class="widget_css__label">Font</div>
 		<div class="widget_css__items">
-			%render this.renderInput(style_item, "color", "");
-			%render this.renderInput(style_item, "font-size", "");
-			%render this.renderSelect(style_item, "font-weight", "", [
+			%render this.renderInput(selector, "color", "");
+			%render this.renderInput(selector, "font-size", "");
+			%render this.renderSelect(selector, "font-weight", "", [
 				{"key": "light", "value": "lighter"},
 				{"key": "normal", "value": "normal"},
 				{"key": "bold", "value": "bold"},
 				{"key": "bolder", "value": "bolder"},
 			]);
-			%render this.renderSelect(style_item, "text-align", "", [
+			%render this.renderSelect(selector, "text-align", "", [
 				{"key": "left", "value": "left"},
 				{"key": "center", "value": "center"},
 				{"key": "right", "value": "right"},
 				{"key": "justify", "value": "justify"},
 			]);
-			%render this.renderSelect(style_item, "text-transform", "", [
+			%render this.renderSelect(selector, "text-transform", "", [
 				{"key": "capitalize", "value": "capitalize"},
 				{"key": "lowercase", "value": "lowercase"},
 				{"key": "uppercase", "value": "uppercase"},
 				{"key": "inherit", "value": "inherit"},
 				{"key": "none", "value": "none"},
 			]);
-			%render this.renderInput(style_item, "line-height", "");
+			%render this.renderInput(selector, "line-height", "");
 		</div>
 	</div>
 	<div class="widget_css__content">
 		<div class="widget_css__label">Border</div>
 		<div class="widget_css__items">
-			%render this.renderInput(style_item, "border-color", "");
-			%render this.renderSelect(style_item, "border-style", "", [
+			%render this.renderInput(selector, "border-color", "");
+			%render this.renderSelect(selector, "border-style", "", [
 				{"key": "dashed", "value": "dashed"},
 				{"key": "dotted", "value": "dotted"},
 				{"key": "double", "value": "double"},
@@ -304,23 +305,23 @@
 				{"key": "inherit", "value": "inherit"},
 				{"key": "unset", "value": "unset"},
 			]);
-			%render this.renderInput(style_item, "border-width", "");
-			%render this.renderInput(style_item, "border-radius", "");
+			%render this.renderInput(selector, "border-width", "");
+			%render this.renderInput(selector, "border-radius", "");
 		</div>
 	</div>
 	<div class="widget_css__content">
 		<div class="widget_css__label">Background</div>
 		<div class="widget_css__items">
-			%render this.renderInput(style_item, "background-color", "Color");
-			%render this.renderInput(style_item, "background-image", "Image");
-			%render this.renderInput(style_item, "background-position", "Position");
-			%render this.renderSelect(style_item, "background-repeat", "Repeat", [
+			%render this.renderInput(selector, "background-color", "Color");
+			%render this.renderInput(selector, "background-image", "Image");
+			%render this.renderInput(selector, "background-position", "Position");
+			%render this.renderSelect(selector, "background-repeat", "Repeat", [
 				{"key": "repeat", "value": "repeat"},
 				{"key": "repeat-x", "value": "repeat-x"},
 				{"key": "repeat-y", "value": "repeat-y"},
 				{"key": "no-repeat", "value": "no-repeat"},
 			]);
-			%render this.renderSelect(style_item, "background-size", "Size", [
+			%render this.renderSelect(selector, "background-size", "Size", [
 				{"key": "contain", "value": "contain"},
 				{"key": "cover", "value": "cover"},
 			]);
@@ -387,34 +388,40 @@ Collection<string> tabs_items = [
  */
 bool isAllowClassName(string class_name)
 {
-	EditorProvider editor = @.provider(classof EditorProvider);
-	return editor.allowParamClassName(class_name);
+	if (class_name == "Runtime.Widget.Input") return true;
+	if (class_name == "Runtime.Widget.Select") return true;
+	if (class_name == "Runtime.Widget.SortableList") return true;
+	if (class_name == "Runtime.Widget.Tag") return true;
+	if (class_name == "Runtime.Widget.TextArea") return true;
+	if (class_name == "Runtime.Widget.TextEditable") return true;
+	return false;
 }
 
 
 /**
  * Returns css value
  */
-string getCSSValue(StyleItem style_item, string key, string default_value = "")
+string getCSSValue(Selector selector, string key, string default_value = "")
 {
-	if (style_item == null) return default_value;
-	return style_item.getCSSValue(key, default_value);
+	if (selector == null) return default_value;
+	StyleItem value = selector.getStyle(key);
+	return value ? value.getValue() : default_value;
 }
 
 
 /**
  * Set css value
  */
-void setCSSValue(StyleItem style_item, string key, string value = "")
+void setCSSValue(Selector selector, string key, string value = "")
 {
-	if (style_item)
+	if (selector)
 	{
-		style_item.changeCSSValue(key, value);
+		selector.changeStyleValue(key, value);
 	}
 	else
 	{
 		string selector_name = this.model.selected.widget.getSelector();
-		this.model.styles.changeCSSValue(selector_name, key ~ ": " ~ value);
+		this.model.styles.changeSelectorContent(selector_name, key ~ ": " ~ value);
 	}
 }
 

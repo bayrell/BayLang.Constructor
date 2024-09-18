@@ -1,0 +1,30 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Editor.Styles;
+
+
+class StyleItem
+{
+	string key = "";
+	string value = "";
+	
+	
+	/**
+	 * Set value
+	 */
+	void setValue(string value)
+	{
+		this.value = value;
+	}
+	
+	
+	/**
+	 * Returns value
+	 */
+	void getValue()
+	{
+		return this.value;
+	}
+}

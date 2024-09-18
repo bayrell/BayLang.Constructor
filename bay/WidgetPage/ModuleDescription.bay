@@ -41,6 +41,7 @@ static class ModuleDescription
 	pure Collection<Dict> entities() =>
 	[
 		new Hook("BayLang.Constructor.WidgetPage.AppHook"),
+		new Provider("BayLang.Constructor.WidgetPage.EditorProvider"),
 		
 		#ifdef BACKEND then
 		new Hook("Runtime.Web.Hooks.Environments", {

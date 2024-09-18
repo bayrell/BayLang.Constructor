@@ -78,7 +78,7 @@ class ComponentProcessor extends CodeModel
 	/**
 	 * Get widget by path
 	 */
-	BaseOpCode getWidget(Collection<int> path)
+	Widget getWidget(Collection<int> path)
 	{
 		BaseOpCode op_code = this.getOpCode(path);
 		return op_code ? this.hash.get(op_code) : null;

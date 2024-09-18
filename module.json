@@ -2,9 +2,6 @@
 	"name": "BayLang.Constructor",
 	"assets":
 	[
-		"Frontend/Annotations/WidgetManagerAnnotation.bay",
-		"Frontend/Annotations/WidgetManagerInterface.bay",
-		"Frontend/Annotations/WidgetSettingsInterface.bay",
 		"Frontend/Code/CodeEditor.bay",
 		"Frontend/Code/CodeEditorModel.bay",
 		"Frontend/Code/TreeItem.bay",
@@ -27,9 +24,11 @@
 		"Frontend/Editor/ModelProcessor.bay",
 		"Frontend/Editor/SelectedItem.bay",
 		"Frontend/Editor/SelectedItemModel.bay",
-		"Frontend/Editor/StyleItem.bay",
-		"Frontend/Editor/Styles.bay",
-		"Frontend/Editor/StylesModel.bay",
+		"Frontend/Editor/Styles/Selector.bay",
+		"Frontend/Editor/Styles/StyleItem.bay",
+		"Frontend/Editor/Styles/Styles.bay",
+		"Frontend/Editor/Styles/StylesModel.bay",
+		"Frontend/Editor/Styles/BackgroundImage.bay",
 		"Frontend/Editor/Widget.bay",
 		"Frontend/Editor/WidgetEditPage.bay",
 		"Frontend/Editor/WidgetEditPageModel.bay",
@@ -46,7 +45,6 @@
 		"Frontend/Settings/SettingsModel.bay",
 		"Frontend/Widget/WidgetList.bay",
 		"Frontend/Widget/WidgetListModel.bay",
-		"Frontend/Providers/EditorProvider.bay",
 		"Frontend/ModuleDescription.bay"
 	],
 	"groups": [

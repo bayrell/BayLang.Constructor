@@ -2,13 +2,13 @@
  *  BayLang Constructor
  */
 
-namespace BayLang.Constructor.Frontend.Editor;
+namespace BayLang.Constructor.Frontend.Editor.Styles;
 
 use Runtime.lib;
 use Runtime.Callback;
 use Runtime.Web.BaseModel;
-use BayLang.Constructor.Frontend.Editor.StyleItem;
-use BayLang.Constructor.Frontend.Editor.Styles;
+use BayLang.Constructor.Frontend.Editor.Styles.Styles;
+use BayLang.Constructor.Frontend.Editor.Styles.Selector;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpDeclareClass;
 use BayLang.OpCodes.OpHtmlStyle;
@@ -21,7 +21,7 @@ class StylesModel extends BaseModel
 {
 	string component = classof Styles;
 	string widget_name = "styles";
-	Dict<StyleItem> items = {};
+	Dict<Selector> selectors = {};
 	OpHtmlStyle main_style_code = null;
 	
 	
@@ -31,11 +31,11 @@ class StylesModel extends BaseModel
 	string getCSS()
 	{
 		Vector items = [];
-		Collection selectors = this.items.keys().sort();
+		Collection selectors = this.selectors.keys().sort();
 		for (int i=0; i<selectors.count(); i++)
 		{
 			string selector_name = selectors.get(i);
-			StyleItem item = this.items.get(selector_name);
+			Selector item = this.selectors.get(selector_name);
 			items.push(item.content);
 		}
 		return rs::join("\n", items);
@@ -52,26 +52,36 @@ class StylesModel extends BaseModel
 	
 	
 	/**
-	 * Returns css content
+	 * Returns selector by selector name
+	 */
+	Selector getSelector(string selector_name)
+	{
+		if (not this.selectors.has(selector_name)) return null;
+		return this.selectors.get(selector_name);
+	}
+	
+	
+	/**
+	 * Returns selector content
 	 */
 	string getSelectorContent(string selector_name)
 	{
-		if (not this.items.has(selector_name)) return "";
-		return this.items.get(selector_name).source;
+		if (not this.selectors.has(selector_name)) return "";
+		return this.selectors.get(selector_name).source;
 	}
 	
 	
 	/**
 	 * Create style item
 	 */
-	StyleItem createStyleItem(string selector_name, OpHtmlStyle op_code = null)
+	Selector createSelector(string selector_name, OpHtmlStyle op_code = null)
 	{
-		StyleItem style_item = new StyleItem();
-		style_item.op_code = op_code;
-		style_item.selector_name = selector_name;
-		style_item.parent_widget = this;
-		this.items.set(selector_name, style_item);
-		return style_item;
+		Selector selector = new Selector();
+		selector.op_code = op_code;
+		selector.selector_name = selector_name;
+		selector.parent_widget = this;
+		this.selectors.set(selector_name, selector);
+		return selector;
 	}
 	
 	
@@ -87,14 +97,14 @@ class StylesModel extends BaseModel
 		}
 		
 		/* Create style item if does not exists */
-		if (not this.items.has(selector_name))
+		if (not this.selectors.has(selector_name))
 		{
-			this.createStyleItem(selector_name, op_code);
+			this.createSelector(selector_name, op_code);
 		}
 		
 		/* Set content */
-		StyleItem style_item = this.items.get(selector_name);
-		style_item.setContent(source);
+		Selector selector = this.selectors.get(selector_name);
+		selector.setContent(source);
 	}
 	
 	
@@ -114,9 +124,9 @@ class StylesModel extends BaseModel
 	/**
 	 * Clear styles
 	 */
-	void clearStyles()
+	void clear()
 	{
-		this.items = {};
+		this.selectors = {};
 	}
 	
 	
@@ -188,11 +198,11 @@ class StylesModel extends BaseModel
 		}
 		
 		Dict styles = op_code.readStyles();
-		Collection selectors = styles.keys();
-		for (int i=0; i<selectors.count(); i++)
+		Collection arr = styles.keys();
+		for (int i=0; i<arr.count(); i++)
 		{
-			string selector_name = selectors.get(i);
-			if (this.items.has(selector_name)) continue;
+			string selector_name = arr.get(i);
+			if (this.selectors.has(selector_name)) continue;
 			
 			/* Set CSS Value */
 			string source = styles.get(selector_name);
@@ -208,16 +218,16 @@ class StylesModel extends BaseModel
 	{
 		/* Build style source */
 		Vector source = [];
-		Collection selectors = this.items.keys().sort();
+		Collection selectors = this.selectors.keys().sort();
 		for (int i=0; i<selectors.count(); i++)
 		{
 			string selector_name = selectors.get(i);
-			StyleItem style_item = this.items.get(selector_name);
-			if (style_item.op_code != op_code) continue;
+			Selector selector = this.selectors.get(selector_name);
+			if (selector.op_code != op_code) continue;
 			
 			/* Add content to source */
 			source.push(selector_name ~ "{");
-			Collection lines = rs::split("\n", style_item.source);
+			Collection lines = rs::split("\n", selector.source);
 			lines = lines.map(string (string s) => "\t" ~ s);
 			source.appendItems(lines);
 			source.push("}");

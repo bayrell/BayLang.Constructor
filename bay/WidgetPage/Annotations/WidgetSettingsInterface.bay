@@ -2,9 +2,9 @@
  *  BayLang Constructor
  */
 
-namespace BayLang.Constructor.Frontend.Annotations;
+namespace BayLang.Constructor.WidgetPage.Annotations;
 
-use BayLang.Constructor.Frontend.Editor.Widget;
+use Runtime.Entity.Factory;
 
 
 interface WidgetSettingsInterface
@@ -24,13 +24,13 @@ interface WidgetSettingsInterface
 	/**
 	 * Can drag
 	 */
-	bool canDrag(Widget widget, string kind);
+	bool canDrag(var widget, string kind);
 	
 	
 	/**
 	 * Returns params
 	 */
-	Collection<string> getParams();
+	Collection<Factory> getParams();
 	
 	
 	/**

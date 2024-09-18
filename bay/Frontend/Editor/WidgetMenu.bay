@@ -5,7 +5,7 @@
 <class name="BayLang.Constructor.Frontend.Editor.WidgetMenu">
 
 <use name="BayLang.Constructor.Frontend.Editor.SelectedItem" component="true" />
-<use name="BayLang.Constructor.Frontend.Editor.Styles" component="true" />
+<use name="BayLang.Constructor.Frontend.Editor.Styles.Styles" component="true" />
 
 
 <style>

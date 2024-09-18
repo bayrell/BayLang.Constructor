@@ -5,6 +5,7 @@
 namespace BayLang.Constructor.Frontend.Editor;
 
 use Runtime.BaseObject;
+use Runtime.Entity.Factory;
 use BayLang.Constructor.Frontend.Annotations.WidgetSettingsInterface;
 use BayLang.Constructor.Frontend.Editor.Parameters.Parameter;
 use BayLang.Constructor.Frontend.Editor.Parameters.ParameterClassName;
@@ -143,14 +144,12 @@ class Widget extends BaseObject
 		/* Set component */
 		this.is_component = true;
 		
-		/* Get EditorProvider */
-		EditorProvider editor = @.provider(classof EditorProvider);
-		
 		/* Find component settings */
 		this.component_class_name = this.page_model.component_processor
 			.getModuleClassName(selected_tag_name)
 		;
-		this.component_settings = editor.getWidget(this.component_class_name);
+		this.component_settings = this.page_model.getFrameEditor()
+			.getWidget(this.component_class_name);
 	}
 	
 	
@@ -170,8 +169,9 @@ class Widget extends BaseObject
 		/* Setup params */
 		this.params.appendItems(
 			this.component_settings.getParams().map(
-				Parameter (Parameter param)
+				Parameter (Factory factory)
 				{
+					Parameter param = rtl::newInstance(factory.name, [factory.params]);
 					param.widget = this;
 					return param;
 				}

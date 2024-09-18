@@ -2,12 +2,17 @@
 	"name": "BayLang.Constructor.WidgetPage",
 	"assets":
 	[
+		"Annotations/WidgetManagerAnnotation.bay",
+		"Annotations/WidgetManagerInterface.bay",
+		"Annotations/WidgetSettingsInterface.bay",
 		"AppHook.bay",
+		"EditorProvider.bay",
 		"WidgetPage.bay",
 		"WidgetPageModel.bay",
 		"ModuleDescription.bay"
 	],
 	"groups": [
+		"baylang"
 	],
 	"src": "./",
 	"dest":

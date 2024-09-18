@@ -28,14 +28,14 @@ use Runtime.Widget.Tree.TreeModel;
 use BayLang.LangBay.TranslatorBay;
 use BayLang.Constructor.Frontend.Editor.Dialog.AddItemDialogModel;
 use BayLang.Constructor.Frontend.Editor.Dialog.RemoveItemDialogModel;
+use BayLang.Constructor.Frontend.Editor.Styles.StylesModel;
 use BayLang.Constructor.Frontend.Editor.ComponentProcessor;
 use BayLang.Constructor.Frontend.Editor.ModelProcessor;
 use BayLang.Constructor.Frontend.Editor.SelectedItemModel;
-use BayLang.Constructor.Frontend.Editor.StylesModel;
 use BayLang.Constructor.Frontend.Editor.WidgetEditPage;
 use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
-use BayLang.Constructor.Frontend.Providers.EditorProvider;
-use BayLang.Constructor.WidgetDebug.WidgetPageModel;
+use BayLang.Constructor.WidgetPage.EditorProvider;
+use BayLang.Constructor.WidgetPage.WidgetPageModel;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpDeclareClass;
 use BayLang.OpCodes.OpDeclareFunction;
@@ -60,7 +60,7 @@ class WidgetEditPageModel extends BasePageModel
 	string module_id = "";
 	string current_widget = "";
 	string component_class_name = "";
-	string menu_selected = "params";
+	string menu_selected = "css";
 	string iframe_current_size = "";
 	int app_status = static::STATUS_LOADING;
 	int breadcrumbs_selected = -1;
@@ -111,6 +111,17 @@ class WidgetEditPageModel extends BasePageModel
 		var app_layout = this.getFrameLayout();
 		if (not app_layout) return null;
 		return app_layout.getPageModel();
+	}
+	
+	
+	/**
+	 * Returns frame editor
+	 */
+	EditorProvider getFrameEditor()
+	{
+		var app_window = this.getFrameWindow();
+		if (not app_window) return null;
+		return app_window.global_context.provider(classof EditorProvider);
 	}
 	
 	
@@ -193,10 +204,6 @@ class WidgetEditPageModel extends BasePageModel
 		});
 		this.context_menu.addListener("clickItem", new Callback(this, "onContextClickItem"));
 		this.tree.setContextMenu(this.context_menu);
-		
-		/* Add components */
-		EditorProvider editor = @.provider(classof EditorProvider);
-		editor.addComponents(this.layout);
 	}
 	
 	

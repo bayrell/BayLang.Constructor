@@ -2,9 +2,11 @@
  *  BayLang Constructor
  */
 
-namespace BayLang.Constructor.Frontend.Editor;
+namespace BayLang.Constructor.Frontend.Editor.Styles;
 
 use Runtime.BaseObject;
+use BayLang.Constructor.Frontend.Editor.Styles.BackgroundImage;
+use BayLang.Constructor.Frontend.Editor.Styles.StyleItem;
 use BayLang.Constructor.Frontend.Editor.ComponentProcessor;
 use BayLang.Constructor.Frontend.Editor.WidgetEditPageModel;
 use BayLang.Exceptions.ParserUnknownError;
@@ -14,7 +16,7 @@ use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpHtmlStyle;
 
 
-class StyleItem extends BaseObject
+class Selector extends BaseObject
 {
 	WidgetEditPageModel parent_widget = null;
 	OpHtmlStyle op_code = null;
@@ -22,7 +24,7 @@ class StyleItem extends BaseObject
 	string source = "";
 	string content = "";
 	string css_ignore = "";
-	Dict<string> css_values = {};
+	Dict<StyleItem> styles = {};
 	
 	
 	/**
@@ -63,7 +65,7 @@ class StyleItem extends BaseObject
 		int content_sz = rs::strlen(content);
 		int pos = 0;
 		int start = 0;
-		Collection css_values = [];
+		Collection styles = [];
 		Collection css_ignore = [];
 		while (pos < content_sz)
 		{
@@ -77,7 +79,7 @@ class StyleItem extends BaseObject
 					Collection<string> items = rs::split(";", s);
 					if (items.count() > 1)
 					{
-						css_values.push(rs::join(";", items.slice(0, -1)) ~ ";");
+						styles.push(rs::join(";", items.slice(0, -1)) ~ ";");
 					}
 					css_ignore.push(rs::trim(items.last()));
 				}
@@ -99,10 +101,10 @@ class StyleItem extends BaseObject
 				pos = pos + 1;
 			}
 		}
-		if (start != pos) css_values.push(rs::substr(content, start, pos - start));
+		if (start != pos) styles.push(rs::substr(content, start, pos - start));
 		return
 		[
-			rs::join("", css_values),
+			rs::join("", styles),
 			rs::join("", css_ignore)
 		];
 	}
@@ -114,12 +116,12 @@ class StyleItem extends BaseObject
 	string buildContent()
 	{
 		Collection items = [];
-		Collection keys = this.css_values.keys().sort();
+		Collection keys = this.styles.keys().sort();
 		for (int i=0; i<keys.count(); i++)
 		{
 			string key = keys.get(i);
-			string value = this.css_values.get(key);
-			items.push(key ~ ": " ~ value);
+			StyleItem value = this.styles.get(key);
+			items.push(key ~ ": " ~ value.value);
 		}
 		items.push(this.css_ignore);
 		string source = rs::join(";\n", items);
@@ -128,30 +130,44 @@ class StyleItem extends BaseObject
 	
 	
 	/**
-	 * Returns css value
+	 * Create style
 	 */
-	void getCSSValue(string key, string default_value = "")
+	StyleItem createStyle(string key)
 	{
-		if (not this.css_values.has(key)) return default_value;
-		return this.css_values.get(key);
+		StyleItem value;
+		if (key == "background-image") value = new BackgroundImage();
+		else value = new StyleItem();
+		value.key = key;
+		return value;
 	}
 	
 	
 	/**
-	 * Set css value
+	 * Returns style
 	 */
-	void setCSSValue(string key, string value)
+	StyleItem getStyle(string key)
 	{
-		/* Set value */
+		if (not this.styles.has(key)) return null;
+		return this.styles.get(key);
+	}
+	
+	
+	/**
+	 * Set style value
+	 */
+	void setStyleValue(string key, string value)
+	{
+		/* Get CSS Value */
+		StyleItem css_value = this.getStyle(key);
+		if (not css_value)
+		{
+			css_value = this.createStyle(key);
+			this.styles.set(css_value.key, css_value);
+		}
+		
+		/* Set CSS Value */
 		value = rs::trim(value);
-		if (value == "")
-		{
-			this.css_values.remove(key);
-		}
-		else
-		{
-			this.css_values.set(key, value);
-		}
+		css_value.setValue(value);
 		
 		/* Update source */
 		string source = this.buildContent();
@@ -160,12 +176,12 @@ class StyleItem extends BaseObject
 	
 	
 	/**
-	 * Change css value
+	 * Change style value
 	 */
-	void changeCSSValue(string key, string value)
+	void changeStyleValue(string key, string value)
 	{
 		/* Set CSS Value */
-		this.setCSSValue(key, value);
+		this.setStyleValue(key, value);
 		
 		/* Update CSS */
 		this.parent_widget.parent_widget.updateFrameCSS();
@@ -173,15 +189,15 @@ class StyleItem extends BaseObject
 	
 	
 	/**
-	 * Parse CSS values
+	 * Parse styles
 	 */
-	void parseCSSValues()
+	void parseStyles()
 	{
 		string content = this.source;
 		list res = static::parseCSS(content);
 		
 		/* CSS Values */
-		this.css_values = {};
+		this.styles = {};
 		Collection items = rs::split(";", res.get(0));
 		for (int i=0; i<items.count(); i++)
 		{
@@ -189,7 +205,9 @@ class StyleItem extends BaseObject
 			Collection item_arr = rs::split(":", item);
 			if (item_arr.count() == 2)
 			{
-				this.css_values.set(rs::trim(item_arr.get(0)), rs::trim(item_arr.get(1)));
+				StyleItem value = this.createStyle(rs::trim(item_arr.get(0)));
+				value.value = rs::trim(item_arr.get(1));
+				this.styles.set(value.key, value);
 			}
 		}
 		
@@ -201,7 +219,7 @@ class StyleItem extends BaseObject
 	/**
 	 * Set content
 	 */
-	void setContent(string source, bool parse_css = true)
+	void setContent(string source, bool parse_styles = true)
 	{
 		ComponentProcessor component_processor = this.parent_widget.parent_widget.component_processor;
 		ParserBay parser = component_processor.createParser();
@@ -214,9 +232,9 @@ class StyleItem extends BaseObject
 		/* Set content */
 		this.source = source;
 		this.content = content;
-		if (parse_css)
+		if (parse_styles)
 		{
-			this.parseCSSValues();
+			this.parseStyles();
 		}
 	}
 }

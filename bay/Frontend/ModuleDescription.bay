@@ -7,7 +7,6 @@ namespace BayLang.Constructor.Frontend;
 use Runtime.Entity.Provider;
 use Runtime.Web.Annotations.Route;
 use Runtime.Web.Annotations.SetupLayout;
-use BayLang.Constructor.Frontend.Providers.EditorProvider;
 
 
 static class ModuleDescription
@@ -43,7 +42,6 @@ static class ModuleDescription
 	 */
 	pure Collection<Dict> entities() =>
 	[
-		new Provider(classof EditorProvider),
 		new SetupLayout({
 			"project": "BayLang.Constructor.Frontend.Layout.ProjectLayoutModel",
 		}),

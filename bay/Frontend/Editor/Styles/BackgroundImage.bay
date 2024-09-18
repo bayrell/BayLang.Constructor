@@ -1,0 +1,31 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Editor.Styles;
+
+use BayLang.Constructor.Frontend.Editor.Styles.StyleItem;
+
+
+class BackgroundImage extends StyleItem
+{
+    /**
+	 * Set value
+	 */
+	void setValue(string value)
+	{
+		this.value = "url(" ~ value ~ ")";
+	}
+	
+	
+	/**
+	 * Returns value
+	 */
+	void getValue()
+	{
+        string value = this.value;
+        if (rs::substr(value, 0, 4) == "url(") value = rs::substr(value, 4);
+        if (rs::substr(value, -1) == ")") value = rs::substr(value, 0, -1);
+		return value;
+	}
+}

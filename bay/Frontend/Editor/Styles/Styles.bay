@@ -2,7 +2,7 @@
  *  BayLang Constructor
 -->
 
-<class name="BayLang.Constructor.Frontend.Editor.Styles">
+<class name="BayLang.Constructor.Frontend.Editor.Styles.Styles">
 
 <use name="Runtime.Callback" />
 <use name="Runtime.Widget.Button" component="true" />
@@ -92,7 +92,7 @@
 			>Add</Button>
 		</div>
 		<div class="widget_styles__items">
-			%set Collection<string> keys = this.model.items.keys().sort();
+			%set Collection<string> keys = this.model.selectors.keys().sort();
 			%for (int i=0; i<keys.count(); i++)
 			{
 				%render this.renderStyle(keys.get(i));
@@ -198,7 +198,7 @@ void onRenameStyle(DialogMessage message)
 	}
 	
 	/* Rename style */
-	string css_content = this.model.getCSSValue(this.old_selector_name)
+	string css_content = this.model.getSelectorContent(this.old_selector_name)
 	this.model.items.remove(this.old_selector_name);
 	this.model.changeSelectorContent(new_selector_name, css_content);
 }
