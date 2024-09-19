@@ -5,6 +5,7 @@
 namespace BayLang.Constructor.Frontend.Editor.Styles;
 
 use Runtime.BaseObject;
+use Runtime.Reference;
 use BayLang.Constructor.Frontend.Editor.Styles.BackgroundImage;
 use BayLang.Constructor.Frontend.Editor.Styles.StyleItem;
 use BayLang.Constructor.Frontend.Editor.ComponentProcessor;
@@ -14,6 +15,7 @@ use BayLang.LangBay.ParserBay;
 use BayLang.LangES6.TranslatorES6;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpHtmlStyle;
+use BayLang.Caret;
 
 
 class Selector extends BaseObject
@@ -30,7 +32,7 @@ class Selector extends BaseObject
 	/**
 	 * Translate CSS
 	 */
-	pure list translateCSS(ParserBay parser, TranslatorES6 translator, string source)
+	pure string translateCSS(ParserBay parser, TranslatorES6 translator, string source)
 	{
 		/* Parse source */
 		BaseOpCode op_code = null;
@@ -47,61 +49,89 @@ class Selector extends BaseObject
 		/* Translate source */
 		if (not op_code) return "";
 		
-		Vector items = [];
-		items.push("var content = \"\";");
+		translator <= is_static_function <= true;
 		list res = translator.expression::Expression(translator, op_code);
-		items.push("content += Runtime.rtl.toStr(" ~ res.get(1) ~ ");");
-		
-		string content = window.eval(rs::join("\n", items));
-		return content;
+		return res.get(1);
 	}
 	
 	
 	/**
 	 * Parse CSS
 	 */
-	pure list parseCSS(string content)
+	pure list parseCSS(ParserBay parser, string content)
 	{
-		int content_sz = rs::strlen(content);
-		int pos = 0;
+		Caret caret = new Caret{ "content": new Reference(content) };
 		int start = 0;
 		Collection styles = [];
 		Collection css_ignore = [];
-		while (pos < content_sz)
+		while (not caret.eof())
 		{
-			string ch = rs::charAt(content, pos);
+			string ch = caret.nextChar();
+			string ch2 = caret.nextString(2);
 			if (ch == "{")
 			{
 				int level = 1;
-				if (start != pos)
+				if (start != caret.pos)
 				{
-					string s = rs::substr(content, start, pos - start);
-					Collection<string> items = rs::split(";", s);
-					if (items.count() > 1)
-					{
-						styles.push(rs::join(";", items.slice(0, -1)) ~ ";");
-					}
-					css_ignore.push(rs::trim(items.last()));
+					string s = rs::substr(content, start, caret.pos - start);
+					css_ignore.push(s);
 				}
-				start = pos;
-				while (pos < content_sz and (
+				start = caret.pos;
+				while (not caret.eof() and (
 					ch != "}" and level == 0 or level > 0)
 				)
 				{
-					pos = pos + 1;
-					ch = rs::charAt(content, pos);
+					caret.readChar();
+					ch = caret.nextChar();
 					if (ch == "{") level = level + 1;
 					if (ch == "}") level = level - 1;
 				}
-				if (start != pos) css_ignore.push(rs::substr(content, start, pos - start + 1));
-				if (pos < content_sz) start = pos + 1;
+				if (start != caret.pos)
+				{
+					css_ignore.push(rs::substr(content, start, caret.pos - start + 1));
+				}
+				if (caret.pos < caret.content_sz) start = caret.pos + 1;
+			}
+			else if (ch2 == "${")
+			{
+				/* Save caret */
+				caret.matchString("${");
+				parser <= caret <= caret;
+				
+				/* Read expression */
+				try
+				{
+					list res = parser.parser_expression::readExpression(parser);
+					parser = res[0];
+				}
+				catch (ParserUnknownError e)
+				{
+				}
+				
+				/* Restore caret */
+				caret = parser.getCaret();
+				caret.skipSpace();
+				if (caret.isNextChar("}"))
+				{
+					caret.matchChar("}");
+				}
+			}
+			else if (ch == ";")
+			{
+				caret.readChar();
+				string s = rs::substr(content, start, caret.pos - start);
+				styles.push(s);
+				start = caret.pos;
 			}
 			else
 			{
-				pos = pos + 1;
+				caret.readChar();
 			}
 		}
-		if (start != pos) styles.push(rs::substr(content, start, pos - start));
+		if (start != caret.pos)
+		{
+			styles.push(rs::substr(content, start, caret.pos - start));
+		}
 		return
 		[
 			rs::join("", styles),
@@ -121,7 +151,7 @@ class Selector extends BaseObject
 		{
 			string key = keys.get(i);
 			StyleItem value = this.styles.get(key);
-			items.push(key ~ ": " ~ value.value);
+			items.push(key ~ ": " ~ value.buildValue());
 		}
 		items.push(this.css_ignore);
 		string source = rs::join(";\n", items);
@@ -157,17 +187,28 @@ class Selector extends BaseObject
 	 */
 	void setStyleValue(string key, string value)
 	{
-		/* Get CSS Value */
-		StyleItem css_value = this.getStyle(key);
-		if (not css_value)
-		{
-			css_value = this.createStyle(key);
-			this.styles.set(css_value.key, css_value);
-		}
-		
-		/* Set CSS Value */
 		value = rs::trim(value);
-		css_value.setValue(value);
+		if (value != "")
+		{
+			/* Get CSS Value */
+			StyleItem css_value = this.getStyle(key);
+			if (not css_value)
+			{
+				css_value = this.createStyle(key);
+				this.styles.set(css_value.key, css_value);
+			}
+			
+			/* Set CSS Value */
+			css_value.setValue(value);
+		}
+		else
+		{
+			/* Remove style item */
+			if (this.styles.has(key))
+			{
+				this.styles.remove(key);
+			}
+		}
 		
 		/* Update source */
 		string source = this.buildContent();
@@ -194,7 +235,14 @@ class Selector extends BaseObject
 	void parseStyles()
 	{
 		string content = this.source;
-		list res = static::parseCSS(content);
+		
+		/* Create parser */
+		ComponentProcessor component_processor = this.parent_widget.parent_widget.component_processor;
+		ParserBay parser = component_processor.createParser();
+		parser = parser::setContent(parser, content);
+		
+		/* Parse CSS */
+		list res = static::parseCSS(parser, content);
 		
 		/* CSS Values */
 		this.styles = {};
@@ -202,13 +250,13 @@ class Selector extends BaseObject
 		for (int i=0; i<items.count(); i++)
 		{
 			string item = items.get(i);
-			Collection item_arr = rs::split(":", item);
-			if (item_arr.count() == 2)
-			{
-				StyleItem value = this.createStyle(rs::trim(item_arr.get(0)));
-				value.value = rs::trim(item_arr.get(1));
-				this.styles.set(value.key, value);
-			}
+			int pos = rs::indexOf(item, ":");
+			if (pos == -1) continue;
+			string item_key = rs::trim(rs::substr(item, 0, pos));
+			string item_value = rs::trim(rs::substr(item, pos + 1));
+			StyleItem value = this.createStyle(item_key);
+			value.initValue(item_value);
+			this.styles.set(value.key, value);
 		}
 		
 		/* CSS Ignore */

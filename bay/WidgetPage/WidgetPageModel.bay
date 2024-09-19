@@ -28,6 +28,10 @@ class WidgetPageModel extends BasePageModel
 	string widget_css = "";
 	Map components = {};
 	
+	#ifcode JAVASCRIPT then
+	var current_window = window;
+	#endif
+	
 	
 	/**
 	 * Is model based widget
@@ -73,6 +77,10 @@ class WidgetPageModel extends BasePageModel
 		provider.events.add("onBeforeUpdate", method this.updateComponent);
 		provider.events.add("onMounted", method this.addComponent);
 		provider.events.add("onUnmount", method this.removeComponent);
+		
+		#ifcode JAVASCRIPT then
+		window.addEventListener("message", (event) => { Vue.reactive(this).onPostMessage(event); });
+		#endif
 	}
 	
 	
@@ -141,24 +149,26 @@ class WidgetPageModel extends BasePageModel
 	
 	
 	/**
-	 * Get CSS
+	 * Returns components
 	 */
-	string getCSS()
+	Collection<string> getComponents()
 	{
 		if (not this.widget_model) return "";
 		if (not this.widget_model.component) return "";
 		Vector res = [];
 		Vector cache = {};
 		string component = this.widget_model.component;
-		string css = BaseLayoutModel::_getRequiredComponents(res, cache, [component]);
-		return css;
+		Collection<string> components = BaseLayoutModel::_getRequiredComponents(
+			res, cache, [component]
+		);
+		return components;
 	}
 	
 	
 	/**
-	 * Add model widget
+	 * Add widget model
 	 */
-	void addModelWidget(string widget_name, string content)
+	void addWidgetModel(string widget_name, string content)
 	{
 		content = rs::substr(content, 5);
 		content = "fn_new = function (){ return this.widget_model." + content + "; };";
@@ -205,7 +215,20 @@ class WidgetPageModel extends BasePageModel
 		if (not page_model) return;
 		
 		/* Get css content */
-		this.widget_css = page_model.styles.getCSS();
+		Vector items = [];
+		items.push("var content = \"\";");
+		items.appendItems(
+			page_model.styles.getCSS().map(
+				string (string s) => "content += Runtime.rtl.toStr(" ~ s ~ ");"
+			)
+		);
+		items.push("return content;");
+		string content = "fn_new = function (){" ~ rs::join("\n", items) ~ "};";
+		#ifcode JAVASCRIPT then
+		var fn_new = window.eval(content);
+		fn_new = fn_new.bind(window.Runtime.Web.Component);
+		this.widget_css = fn_new();
+		#endif
 		
 		/* Update selected box */
 		RenderProvider::nextTick(void(){
@@ -235,15 +258,83 @@ class WidgetPageModel extends BasePageModel
 	
 	
 	/**
+	 * Post message event
+	 */
+	void onPostMessage(var event)
+	{
+		if (not event.data) return;
+		string name = event.data.name;
+		if (name = "add_widget_model")
+		{
+			this.addWidgetModel(event.data.widget, event.data.content);
+		}
+		else if (name == "update_css")
+		{
+			this.buildCSS();
+		}
+		else if (name == "update_global_css")
+		{
+			this.buildGlobalCSS();
+		}
+		else if (name == "update_render")
+		{
+			this.buildRender(event.data.render);
+		}
+		else if (name == "update_selected_box")
+		{
+			this.updateSelectedBox();
+		}
+		else if (name == "select_item")
+		{
+			Collection<int> path = rs::split(".", event.data.path);
+			path = path.map(int (string item) => (int)item);
+			this.selectItem(path);
+		}
+	}
+	
+	
+	/**
+	 * Send message
+	 */
+	void sendMessage(Dict data)
+	{
+		window.parent.postMessage(data.toObject());
+	}
+	
+	
+	/**
 	 * Send loaded
 	 */
 	void sendAppLoaded()
 	{
-		var page_model = this.getEditPageModel();
-		if (not page_model) return;
-		
-		/* Send app loaded */
-		page_model.onAppLoaded();
+		this.sendMessage({
+			"name": "app_loaded",
+		});
+	}
+	
+	
+	/**
+	 * Send select item
+	 */
+	void sendSelectItem(Collection<int> path)
+	{
+		this.sendMessage({
+			"name": "select_item",
+			"path": rs::join(".", path),
+		});
+	}
+	
+	
+	/**
+	 * Send context menu
+	 */
+	void sendContextMenu(int x, int y)
+	{
+		this.sendMessage({
+			"name": "context_menu",
+			"x": x,
+			"y": y,
+		});
 	}
 	
 	

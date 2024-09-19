@@ -12,6 +12,21 @@ class StyleItem
 	
 	
 	/**
+	 * Build value
+	 */
+	string buildValue() => this.value;
+	
+	
+	/**
+	 * Init value
+	 */
+	string initValue(string value)
+	{
+		this.value = value;
+	}
+	
+	
+	/**
 	 * Set value
 	 */
 	void setValue(string value)
@@ -23,8 +38,5 @@ class StyleItem
 	/**
 	 * Returns value
 	 */
-	void getValue()
-	{
-		return this.value;
-	}
+	void getValue() => this.value;
 }

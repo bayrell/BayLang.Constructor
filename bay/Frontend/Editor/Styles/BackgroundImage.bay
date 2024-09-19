@@ -4,28 +4,97 @@
 
 namespace BayLang.Constructor.Frontend.Editor.Styles;
 
+use Runtime.Reference;
 use BayLang.Constructor.Frontend.Editor.Styles.StyleItem;
+use BayLang.Exceptions.ParserUnknownError;
+use BayLang.Caret;
+use BayLang.TokenReader;
 
 
 class BackgroundImage extends StyleItem
 {
-    /**
-	 * Set value
-	 */
-	void setValue(string value)
-	{
-		this.value = "url(" ~ value ~ ")";
-	}
+	string original_value = "";
 	
 	
 	/**
-	 * Returns value
+	 * Build value
 	 */
-	void getValue()
+	string buildValue() => "url(${ static::assets(\"" ~ this.value ~ "\")})";
+	
+	
+	/**
+	 * Init value
+	 */
+	void initValue(string original_value)
 	{
-        string value = this.value;
-        if (rs::substr(value, 0, 4) == "url(") value = rs::substr(value, 4);
-        if (rs::substr(value, -1) == ")") value = rs::substr(value, 0, -1);
-		return value;
+		string value = "";
+		
+		try
+		{
+			TokenReader reader = new TokenReader();
+			reader.init(
+				new Caret{
+					"content": new Reference(original_value),
+				}
+			);
+			
+			/* Match url expression */
+			reader.matchToken("url");
+			reader.matchToken("(");
+			reader.matchToken("$");
+			reader.matchToken("{");
+			reader.matchToken("static");
+			reader.matchToken(":");
+			reader.matchToken(":");
+			reader.matchToken("assets");
+			reader.matchToken("(");
+			
+			/* Read begin of string */
+			string open_string = reader.readToken();
+			if (open_string != "'" and open_string != "\"")
+			{
+				throw new ParserUnknownError("String expected", reader.main_caret);
+			}
+			
+			/* Init caret */
+			Caret caret = reader.main_caret;
+			
+			/* Read string value */
+			while (not caret.eof() and not caret.isNextString(open_string))
+			{
+				string ch = caret.readChar();
+				if (ch == "\\")
+				{
+					string ch2 = caret.readChar();
+					if (ch2 == "n") value ~= "\n";
+					else if (ch2 == "r") value ~= "\r";
+					else if (ch2 == "t") value ~= "\t";
+					else if (ch2 == "s") value ~= " ";
+					else if (ch2 == "\\") value ~= "\\";
+					else if (ch2 == "'") value ~= "'";
+					else if (ch2 == '"') value ~= '"';
+					else value ~= ch ~ ch2;
+				}
+				else
+				{
+					value ~= ch;
+				}
+			}
+			
+			/* Restore caret */
+			reader.init(caret);
+			
+			/* Match end of expression */
+			reader.matchToken(open_string);
+			reader.matchToken(")");
+			reader.matchToken("}");
+			reader.matchToken(")");
+		}
+		catch (ParserUnknownError e)
+		{
+		}
+		
+		this.original_value = original_value;
+		this.value = value;
 	}
 }

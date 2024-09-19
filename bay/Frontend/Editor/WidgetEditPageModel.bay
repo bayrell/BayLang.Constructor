@@ -204,6 +204,10 @@ class WidgetEditPageModel extends BasePageModel
 		});
 		this.context_menu.addListener("clickItem", new Callback(this, "onContextClickItem"));
 		this.tree.setContextMenu(this.context_menu);
+		
+		#ifcode JAVASCRIPT then
+		window.addEventListener("message", (event) => { Vue.reactive(this).onPostMessage(event); });
+		#endif
 	}
 	
 	
@@ -322,6 +326,39 @@ class WidgetEditPageModel extends BasePageModel
 	
 	
 	/**
+	 * Post message event
+	 */
+	void onPostMessage(var event)
+	{
+		if (event.data.name == "app_loaded")
+		{
+			this.onAppLoaded();
+		}
+		else if (event.data.name == "select_item")
+		{
+			Collection<int> path = rs::split(".", event.data.path);
+			path = path.map(int (string item) => (int)item);
+			this.selectItem(path);
+		}
+		else if (event.data.name == "context_menu")
+		{
+			this.onEditorContextMenuClick(event.data.x, event.data.y);
+		}
+	}
+	
+	
+	/**
+	 * Send message
+	 */
+	void sendMessage(Dict data)
+	{
+		var app_window = this.getFrameWindow();
+		if (not app_window) return;
+		app_window.postMessage(data.toObject());
+	}
+	
+	
+	/**
 	 * Returns true if app is loaded
 	 */
 	bool isLoaded() => this.app_status > 0;
@@ -411,7 +448,7 @@ class WidgetEditPageModel extends BasePageModel
 		}
 		
 		/* Update selected box */
-		this.getFramePageModel().updateSelectedBox();
+		this.sendMessage({"name": "update_selected_box"});
 	}
 	
 	
@@ -424,7 +461,10 @@ class WidgetEditPageModel extends BasePageModel
 		this.onAppChanged();
 		
 		/* Build render */
-		this.getFramePageModel().buildRender("render");
+		this.sendMessage({
+			"name": "update_render",
+			"render": render_name,
+		});
 	}
 	
 	
@@ -437,7 +477,7 @@ class WidgetEditPageModel extends BasePageModel
 		this.onAppChanged();
 		
 		/* Build global css */
-		this.getFramePageModel().buildGlobalCSS();
+		this.sendMessage({"name": "update_global_css"});
 	}
 	
 	
@@ -450,7 +490,7 @@ class WidgetEditPageModel extends BasePageModel
 		this.onAppChanged();
 		
 		/* Build CSS */
-		this.getFramePageModel().buildCSS();
+		this.sendMessage({"name": "update_css"});
 	}
 	
 	
@@ -476,11 +516,14 @@ class WidgetEditPageModel extends BasePageModel
 		/* Select item */
 		this.selected.selectItem(path);
 		
-		/* Select item in frame */
-		this.getFramePageModel().selectItem(path);
-		
 		/* Select tree */
 		this.tree.selectItem(path);
+		
+		/* Select item in frame */
+		this.sendMessage({
+			"name": "select_item",
+			"path": rs::join(".", path),
+		});
 	}
 	
 	
@@ -503,11 +546,11 @@ class WidgetEditPageModel extends BasePageModel
 	/**
 	 * Context menu click
 	 */
-	void onEditorContextMenuClick(var e)
+	void onEditorContextMenuClick(int x, int y)
 	{
 		var rect = this.iframe.getBoundingClientRect();
-		int x = e.clientX + rect.x;
-		int y = e.clientY + rect.y;
+		x = x + rect.x;
+		y = y + rect.y;
 		this.context_menu.show(x, y);
 	}
 	
@@ -652,7 +695,11 @@ class WidgetEditPageModel extends BasePageModel
 			string content = this.model_processor.buildPrimaryContent(widget);
 			if (content)
 			{
-				this.getFramePageModel().addModelWidget(widget.getName(), content);
+				this.sendMessage({
+					"name": "add_widget_model",
+					"widget": widget.getName(),
+					"content": content,
+				});
 			}
 		}
 		

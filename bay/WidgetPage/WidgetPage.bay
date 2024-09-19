@@ -261,7 +261,7 @@ void onClick(var e)
 	
 	Collection<int> widget_path = rs::split(".", widget_path_str);
 	Collection<int> path = this.model.convertWidgetToTreePath(widget_path);
-	page_model.selectItem(path);
+	this.model.sendSelectItem(path);
 	return false;
 }
 
@@ -277,20 +277,16 @@ void onContextMenu(var e)
 	string widget_path_str = this.getWidgetPath(elem);
 	if (not widget_path_str) return;
 	
-	/* Get page model */
-	var page_model = this.model.getEditPageModel();
-	if (not page_model) return;
-	
 	/* Prevent default */
 	e.preventDefault();
 	
 	/* Send select item */
 	Collection<int> widget_path = rs::split(".", widget_path_str);
 	Collection<int> path = this.model.convertWidgetToTreePath(widget_path);
-	page_model.selectItem(path);
+	this.model.sendSelectItem(path);
 	
 	/* Send event context menu */
-	page_model.onEditorContextMenuClick(e);
+	this.model.sendContextMenu(e.clientX, e.clientY);
 	return false;
 }
 

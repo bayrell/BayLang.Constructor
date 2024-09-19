@@ -6,7 +6,7 @@ namespace BayLang.Constructor.Frontend.Editor;
 
 use Runtime.BaseObject;
 use Runtime.Entity.Factory;
-use BayLang.Constructor.Frontend.Annotations.WidgetSettingsInterface;
+use BayLang.Constructor.Frontend.Editor.Styles.Selector;
 use BayLang.Constructor.Frontend.Editor.Parameters.Parameter;
 use BayLang.Constructor.Frontend.Editor.Parameters.ParameterClassName;
 use BayLang.Constructor.Frontend.Editor.Parameters.ParameterComponent;
@@ -15,6 +15,7 @@ use BayLang.Constructor.Frontend.Editor.CodeModel;
 use BayLang.Constructor.Frontend.Editor.WidgetEditPageModel;
 use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
 use BayLang.Constructor.Frontend.Providers.EditorProvider;
+use BayLang.Constructor.WidgetPage.Annotations.WidgetSettingsInterface;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpHtmlAttribute;
 use BayLang.OpCodes.OpHtmlContent;
@@ -90,7 +91,17 @@ class Widget extends BaseObject
 	/**
 	 * Returns CSS Content
 	 */
-	string getSelector() => "." ~ this.param_widget_name.value;
+	string getSelectorName() => "." ~ this.param_widget_name.value;
+	
+	
+	/**
+	 * Returns selector
+	 */
+	Selector getSelector()
+	{
+		string selector_name = this.getSelectorName();
+		return this.page_model.styles.getSelector(selector_name);
+	}
 	
 	
 	/**

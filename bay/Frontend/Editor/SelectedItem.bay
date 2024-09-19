@@ -233,8 +233,7 @@
 
 
 <template name="renderStyles">
-	%set string selector_name = this.model.selected.widget.getSelector();
-	%set Selector selector = this.model.styles.getSelector(selector_name);
+	%set Selector selector = this.model.selected.widget.getSelector();
 	<div class="widget_css__content">
 		<div class="widget_css__label">Common</div>
 		<div class="widget_css__items">
@@ -337,7 +336,7 @@
 
 
 <template name="renderCSS">
-	%set string selector_name = this.model.selected.widget.getSelector();
+	%set string selector_name = this.model.selected.widget.getSelectorName();
 	<TextEditable class="overflow"
 		value={{ this.model.styles.getSelectorContent(selector_name) }}
 		@event:valueChange={{ void (var message) use (selector_name) {
@@ -420,7 +419,7 @@ void setCSSValue(Selector selector, string key, string value = "")
 	}
 	else
 	{
-		string selector_name = this.model.selected.widget.getSelector();
+		string selector_name = this.model.selected.widget.getSelectorName();
 		this.model.styles.changeSelectorContent(selector_name, key ~ ": " ~ value);
 	}
 }

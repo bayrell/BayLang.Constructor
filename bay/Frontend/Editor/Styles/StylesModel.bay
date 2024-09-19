@@ -28,7 +28,7 @@ class StylesModel extends BaseModel
 	/**
 	 * Returns CSS content
 	 */
-	string getCSS()
+	Collection<string> getCSS()
 	{
 		Vector items = [];
 		Collection selectors = this.selectors.keys().sort();
@@ -38,7 +38,7 @@ class StylesModel extends BaseModel
 			Selector item = this.selectors.get(selector_name);
 			items.push(item.content);
 		}
-		return rs::join("\n", items);
+		return items;
 	}
 	
 	
