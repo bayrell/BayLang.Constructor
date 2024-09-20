@@ -1,0 +1,108 @@
+<!--
+ *  BayLang Constructor
+-->
+
+<class name="BayLang.Constructor.Frontend.Editor.Dialog.SelectImageDialog"
+	extends="Runtime.Widget.Dialog.Dialog"
+>
+
+
+<style>
+.select_image_items{
+	display: flex;
+	flex-wrap: wrap;
+	.item{
+		margin: 5px;
+		text-align: center;
+		cursor: pointer;
+	}
+	.item_image_wrap{
+		display: flex;
+		position: relative;
+		align-items: center;
+		justify-content: center;
+		width: 100px;
+		height: 100px;
+		padding: 2px;
+		border: 2px transparent solid;
+	}
+	.item_image{
+		max-width: 100%;
+		max-height: 100%;
+	}
+	.item_label{
+		margin-top: 5px;
+		overflow-wrap: break-word;
+		width: 100px;
+		text-align: center;
+		span{
+			display: inline-block;
+			padding: 5px;
+		}
+	}
+	.item.active{
+		.item_image_wrap{
+			border-color: var(--widget-color-primary);
+		}
+		.item_label span{
+			background-color: var(--widget-color-primary);
+			color: white;
+		}
+	}
+}
+</style>
+
+
+<template name="renderContent">
+	<div class="select_image_items">
+	%for (int i=0; i<this.model.items.count(); i++)
+	{
+		%set Dict item = this.model.items.get(i);
+		%set string file_path = item.get("file_path");
+		%if (this.isImage(item))
+		{
+			<div class="item"
+				class={{ this.model.selected == i ? "active" : "" }}
+				@event:click={{ void () use (i){ this.model.selectItem(i) } }}
+			>
+				<div class="item_image_wrap">
+					<img class="item_image" src={{ this.getImagePath(file_path) }} />
+				</div>
+				<div class="item_label">
+					<span>{{ item.get("file_name") }}</span>
+				</div>
+			</div>
+		}
+	}
+	</div>
+</template>
+
+
+<script>
+
+
+/**
+ * Returns image path
+ */
+string getImagePath(string file_path)
+{
+	string assets_path = "/project/" ~ this.model.parent_widget.project_id ~ "/iframe/assets/";
+	return rs::join_path([assets_path, file_path]);
+}
+
+
+/**
+ * Returns true if item is image
+ */
+bool isImage(Dict item)
+{
+	string file_name = item.get("file_name");
+	string file_extension = rs::extname(file_name);
+	Collection arr = ["jpg", "jpeg", "png"];
+	if (arr.indexOf(file_extension) == -1) return false;
+	return true;
+}
+
+</script>
+
+</class>

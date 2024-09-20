@@ -38,6 +38,7 @@ static class ModuleDescription
 	 */
 	pure Collection<Dict> entities() =>
 	[
+		new Api("BayLang.Constructor.Backend.Api.AssetsApi"),
 		new Api("BayLang.Constructor.Backend.Api.CodeApi"),
 		new Api("BayLang.Constructor.Backend.Api.ModuleSearchApi"),
 		new Api("BayLang.Constructor.Backend.Api.ProjectSaveApi"),

@@ -28,6 +28,7 @@ use Runtime.Widget.Tree.TreeModel;
 use BayLang.LangBay.TranslatorBay;
 use BayLang.Constructor.Frontend.Editor.Dialog.AddItemDialogModel;
 use BayLang.Constructor.Frontend.Editor.Dialog.RemoveItemDialogModel;
+use BayLang.Constructor.Frontend.Editor.Dialog.SelectImageDialogModel;
 use BayLang.Constructor.Frontend.Editor.Styles.StylesModel;
 use BayLang.Constructor.Frontend.Editor.ComponentProcessor;
 use BayLang.Constructor.Frontend.Editor.ModelProcessor;
@@ -76,6 +77,7 @@ class WidgetEditPageModel extends BasePageModel
 	AddItemDialogModel add_item_dialog = null;
 	RemoveItemDialogModel remove_item_dialog = null;
 	PromptDialogModel rename_item_dialog = null;
+	SelectImageDialogModel select_image_dialog = null;
 	
 	
 	/**
@@ -176,6 +178,11 @@ class WidgetEditPageModel extends BasePageModel
 			"events": {
 				"confirm": new Callback(this, "onRename")
 			},
+		});
+		
+		/* Select image dialog */
+		this.select_image_dialog = this.addWidget(classof SelectImageDialogModel, {
+			"widget_name": "select_image_dialog",
 		});
 		
 		/* Create ContextMenu */

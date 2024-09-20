@@ -1,0 +1,96 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Backend.Api;
+
+use Runtime.fs;
+use Runtime.Exceptions.ApiError;
+use Runtime.Exceptions.ItemNotFound;
+use Runtime.Web.BaseApi;
+use Runtime.Web.Annotations.ApiMethod;
+use BayLang.Helper.Project;
+
+
+class AssetsApi extends BaseApi
+{
+	Project project;
+	
+	
+	/**
+	 * Returns api name
+	 */
+	static string getApiName() => "baylang.constructor.assets";
+	
+	
+	/**
+	 * Action before
+	 */
+	async void onActionBefore()
+	{
+		/* Get project */
+		string project_id = this.post_data.get("project_id");
+		this.project = await Project::readProject(
+			fs::join([@.env("constructor_path"), "projects", project_id])
+		);
+		if (not this.project)
+		{
+			throw new ApiError(new ItemNotFound(project_id, "Project"));
+		}
+		
+		/* Load project */
+		await this.project.load();
+	}
+	
+	
+	/**
+	 * Returns files
+	 */
+	@ApiMethod
+	async void getFiles()
+	{
+		string file_path = this.post_data.get("path");
+		string project_path = this.project.getPath();
+		string folder_path = fs::join([project_path, "src", "public", "assets", file_path]);
+		
+		/* Check file path */
+		if (rs::indexOf(folder_path, "/..") != -1)
+		{
+			throw new ApiError(new ItemNotFound(file_path, "Folder"));
+		}
+		
+		/* File not exists */
+		if (not await fs::isFolder(folder_path))
+		{
+			throw new ApiError(new ItemNotFound(file_path, "Folder"));
+		}
+		
+		/* Get items */
+		Collection items = [];
+		Collection<string> files = await fs::listDir(folder_path);
+		for (int i=0; i<files.count(); i++)
+		{
+			string item_name = files.get(i);
+			string item_path = fs::join([folder_path, item_name]);
+			string item_kind = "";
+			
+			if (await fs::isFile(item_path)) item_kind = "file";
+			else if (await fs::isDir(item_path)) item_kind = "dir";
+			
+			items.push({
+				"kind": item_kind,
+				"file_name": item_name,
+				"file_path": fs::join([file_path, item_name]),
+			});
+		}
+		
+		/* Result */
+		this.success({
+			"data":
+			{
+				"items": items,
+				"path": file_path,
+			}
+		});
+	}
+}

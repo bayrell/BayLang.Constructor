@@ -1,0 +1,118 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Editor.Dialog;
+
+use Runtime.Callback;
+use Runtime.Serializer;
+use Runtime.Web.ApiResult;
+use Runtime.Web.RenderContainer;
+use Runtime.Widget.ButtonModel;
+use Runtime.Widget.Dialog.ConfirmDialogModel;
+use BayLang.Constructor.Frontend.Editor.Dialog.SelectImageDialog;
+
+
+class SelectImageDialogModel extends ConfirmDialogModel
+{
+	string component = classof SelectImageDialog;
+	string title = "Select image";
+	string width = "90%";
+	string path = "";
+	Collection<Dict> items = [];
+	int selected = -1;
+	
+	
+	/**
+	 * Init widget settings
+	 */
+	void initWidget(Dict params)
+	{
+		parent(params);
+		
+		/* Clear button */
+		this.buttons.addButton({
+			"content": "Clear",
+			"widget_name": "clear_button",
+			"dest": "confirm_button",
+			"kind": "before",
+			"styles": ["danger"],
+			"events": {
+				"click": new Callback(this, "onClearButtonClick"),
+			},
+		});
+		
+		/* Select button */
+		ButtonModel confirm_button = this.buttons.getWidget("confirm_button");
+		confirm_button.content = "Select";
+	}
+	
+	
+	/**
+	 * Load data
+	 */
+	async void loadData(RenderContainer container)
+	{
+		ApiResult result = await this.layout.callApi({
+			"api_name": "baylang.constructor.assets",
+			"method_name": "getFiles",
+			"data": {
+				"project_id": this.parent_widget.project_id,
+				"path": "images",
+			}
+		});
+		if (result.isSuccess())
+		{
+			this.items = result.data.get("items");
+			this.path = result.data.get("path");
+		}
+	}
+	
+	
+	/**
+	 * Process frontend data
+	 */
+	void serialize(Serializer serializer, Map data)
+	{
+		serializer.process(this, "items", data);
+		serializer.process(this, "path", data);
+		parent(serializer, data);
+	}
+	
+	
+	/**
+	 * Clear button click
+	 */
+	void onClearButtonClick()
+	{
+		this.value = "";
+		this.selected = -1;
+		this.onConfirmButtonClick();
+	}
+	
+	
+	/**
+	 * Select item
+	 */
+	void selectItem(int i)
+	{
+		this.selected = i;
+	}
+	
+	
+	/**
+	 * Returns selected item
+	 */
+	Dict getSelectedItem() => this.items.get(this.selected);
+	
+	
+	/**
+	 * Show dialog
+	 */
+	void show()
+	{
+		this.clearListener("confirm");
+		this.selected = -1;
+		parent();
+	}
+}

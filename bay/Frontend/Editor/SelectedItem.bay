@@ -5,6 +5,7 @@
 <class name="BayLang.Constructor.Frontend.Editor.SelectedItem">
 
 <use name="Runtime.Callback" />
+<use name="Runtime.Widget.Button" component="true" />
 <use name="Runtime.Widget.Input" component="true" />
 <use name="Runtime.Widget.Select" component="true" />
 <use name="Runtime.Widget.Tag" component="true" />
@@ -113,6 +114,24 @@
 					}
 				}}
 			/>
+		</div>
+	</div>
+</template>
+
+
+<template name="renderSelectImage" args="Selector selector, string key, string label">
+	%set string value = this.getCSSValue(selector, key);
+	<div class="widget_css__row">
+		<div class="widget_css__key">{{ label ? label : key }}</div>
+		<div class="widget_css__value">
+			<Button
+				@event:click={{
+					void () use (selector, key)
+					{
+						this.onSelectImageClick(selector, key);
+					}
+				}}
+			>Select image</Button>
 		</div>
 	</div>
 </template>
@@ -312,7 +331,7 @@
 		<div class="widget_css__label">Background</div>
 		<div class="widget_css__items">
 			%render this.renderInput(selector, "background-color", "Color");
-			%render this.renderInput(selector, "background-image", "Image");
+			%render this.renderSelectImage(selector, "background-image", "Image");
 			%render this.renderInput(selector, "background-position", "Position");
 			%render this.renderSelect(selector, "background-repeat", "Repeat", [
 				{"key": "repeat", "value": "repeat"},
@@ -423,6 +442,36 @@ void setCSSValue(Selector selector, string key, string value = "")
 		this.model.styles.changeSelectorContent(selector_name, key ~ ": " ~ value);
 	}
 }
+
+
+/**
+ * Select image
+ */
+void onSelectImageClick(Selector selector, string key)
+{
+	StyleItem style_item = selector.getStyle(key);
+	string value = style_item ? style_item.getValue() : "";
+	this.model.select_image_dialog.show();
+	this.model.select_image_dialog.data = {
+		"key": key,
+		"selector": selector,
+	};
+	this.model.select_image_dialog.addListener("confirm", new Callback(this, "onSelectImage"));
+}
+
+
+/**
+ * Select image
+ */
+void onSelectImage()
+{
+	Selector selector = this.model.select_image_dialog.data.get("selector");
+	Dict selected_item = this.model.select_image_dialog.getSelectedItem();
+	string key = this.model.select_image_dialog.data.get("key");
+	string value = selected_item ? selected_item.get("file_path") : "";
+	this.setCSSValue(selector, key, value);
+}
+
 
 </script>
 

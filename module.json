@@ -10,6 +10,8 @@
 		"Frontend/Editor/Dialog/AddItemDialogModel.bay",
 		"Frontend/Editor/Dialog/RemoveItemDialog.bay",
 		"Frontend/Editor/Dialog/RemoveItemDialogModel.bay",
+		"Frontend/Editor/Dialog/SelectImageDialog.bay",
+		"Frontend/Editor/Dialog/SelectImageDialogModel.bay",
 		"Frontend/Editor/Parameters/Parameter.bay",
 		"Frontend/Editor/Parameters/ParameterComponent.bay",
 		"Frontend/Editor/Parameters/ParameterClassName.bay",
