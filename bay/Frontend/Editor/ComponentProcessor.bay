@@ -172,7 +172,9 @@ class ComponentProcessor extends CodeModel
 			);
 			if (op_code_style)
 			{
-				this.page_model.styles.setCSSValue("." ~ widget_name, op_code_style.content);
+				this.page_model.styles.setSelectorContent(
+					"." ~ widget_name, op_code_style.content
+				);
 			}
 		}
 		
@@ -239,7 +241,7 @@ class ComponentProcessor extends CodeModel
 		};
 		
 		/* Default template */
-		EditorProvider editor = @.provider(classof EditorProvider);
+		EditorProvider editor = this.page_model.getFrameEditor();
 		WidgetSettingsInterface widget_settings = editor.getWidget(class_name);
 		if (not widget_settings) return op_code;
 		

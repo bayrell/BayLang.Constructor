@@ -8,6 +8,7 @@ use Runtime.Callback;
 use Runtime.Serializer;
 use Runtime.Web.ApiResult;
 use Runtime.Web.RenderContainer;
+use Runtime.Web.Messages.ClickMessage;
 use Runtime.Widget.ButtonModel;
 use Runtime.Widget.Dialog.ConfirmDialogModel;
 use BayLang.Constructor.Frontend.Editor.Dialog.SelectImageDialog;
@@ -34,11 +35,11 @@ class SelectImageDialogModel extends ConfirmDialogModel
 		this.buttons.addButton({
 			"content": "Clear",
 			"widget_name": "clear_button",
-			"dest": "confirm_button",
+			"dest": "cancel_button",
 			"kind": "before",
 			"styles": ["danger"],
 			"events": {
-				"click": new Callback(this, "onClearButtonClick"),
+				"click": new Callback(this, "onConfirmButtonClick"),
 			},
 		});
 		
@@ -83,11 +84,21 @@ class SelectImageDialogModel extends ConfirmDialogModel
 	/**
 	 * Clear button click
 	 */
-	void onClearButtonClick()
+	void onConfirmButtonClick(ClickMessage message)
 	{
-		this.value = "";
-		this.selected = -1;
-		this.onConfirmButtonClick();
+		if (message.widget.widget_name == "confirm_button")
+		{
+			if (this.selected == -1)
+			{
+				return;
+			}
+		}
+		else if (message.widget.widget_name == "clear_button")
+		{
+			this.value = "";
+			this.selected = -1;
+		}
+		parent(message);
 	}
 	
 	

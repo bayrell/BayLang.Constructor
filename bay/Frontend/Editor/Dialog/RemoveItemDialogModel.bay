@@ -4,6 +4,7 @@
 
 namespace BayLang.Constructor.Frontend.Editor.Dialog;
 
+use Runtime.Web.Messages.ClickMessage;
 use Runtime.Widget.ButtonModel;
 use Runtime.Widget.Messages.ValueChangeMessage;
 use Runtime.Widget.Dialog.ConfirmDialogModel;
@@ -54,7 +55,7 @@ class RemoveItemDialogModel extends ConfirmDialogModel
 	/**
 	 * Confirm button click
 	 */
-	void onConfirmButtonClick()
+	void onConfirmButtonClick(ClickMessage message)
 	{
 		Collection path = this.parent_widget.selected.path.slice();
 		if (path)

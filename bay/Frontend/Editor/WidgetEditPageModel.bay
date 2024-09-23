@@ -333,6 +333,16 @@ class WidgetEditPageModel extends BasePageModel
 	
 	
 	/**
+	 * Convert widget_path to tree_path
+	 */
+	pure Collection<int> convertWidgetPath(string path)
+	{
+		if (not path) return null;
+		return rs::split(".", path).map(int (string s) => rtl::toInt(s));
+	}
+	
+	
+	/**
 	 * Post message event
 	 */
 	void onPostMessage(var event)
@@ -341,11 +351,23 @@ class WidgetEditPageModel extends BasePageModel
 		{
 			this.onAppLoaded();
 		}
+		else if (event.data.name == "add_widget")
+		{
+			this.showAddWidgetDialog(
+				static::convertWidgetPath(event.data.path), event.data.kind
+			);
+		}
+		else if (event.data.name == "move_widget")
+		{
+			this.moveWidget(static::convertWidgetPath(event.data.path), event.data.kind);
+		}
+		else if (event.data.name == "remove_widget")
+		{
+			this.showRemoveWidgetDialog();
+		}
 		else if (event.data.name == "select_item")
 		{
-			Collection<int> path = rs::split(".", event.data.path);
-			path = path.map(int (string item) => (int)item);
-			this.selectItem(path);
+			this.selectItem(static::convertWidgetPath(event.data.path));
 		}
 		else if (event.data.name == "context_menu")
 		{
@@ -625,36 +647,30 @@ class WidgetEditPageModel extends BasePageModel
 	
 	
 	/**
-	 * Up widget
+	 * Move widget
 	 */
-	void moveUpWidget(Collection<int> path)
+	void moveWidget(Collection<int> path, string kind)
 	{
-		Collection dest_path = path.setIm(path.count() - 1, path.last() - 1);
+		int dest_path_item = 0;
+		string dest_path_kind = "";
+		if (kind == "down")
+		{
+			dest_path_kind = "after";
+			dest_path_item = path.last() + 1;
+		}
+		else if (kind == "up")
+		{
+			dest_path_kind = "before";
+			dest_path_item = path.last() - 1;
+		}
+		
+		Collection dest_path = path.setIm(path.count() - 1, dest_path_item);
 		BaseOpCode src_op_code = this.component_processor.getOpCode(path);
 		BaseOpCode dest_op_code = this.component_processor.getOpCode(dest_path);
 		if (not dest_op_code) return;
 		
 		/* Move op code */
-		this.component_processor.moveOpCode(src_op_code, dest_op_code, "before");
-		this.selectItem(dest_path);
-		
-		/* Update frame render */
-		this.updateFrameRender();
-	}
-	
-	
-	/**
-	 * Down widget
-	 */
-	void moveDownWidget(Collection<int> path)
-	{
-		Collection dest_path = path.setIm(path.count() - 1, path.last() + 1);
-		BaseOpCode src_op_code = this.component_processor.getOpCode(path);
-		BaseOpCode dest_op_code = this.component_processor.getOpCode(dest_path);
-		if (not dest_op_code) return;
-		
-		/* Move op code */
-		this.component_processor.moveOpCode(src_op_code, dest_op_code, "after");
+		this.component_processor.moveOpCode(src_op_code, dest_op_code, dest_path_kind);
 		this.selectItem(dest_path);
 		
 		/* Update frame render */

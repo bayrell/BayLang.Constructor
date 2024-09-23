@@ -12,7 +12,7 @@ use BayLang.Constructor.Frontend.Annotations.WidgetSettingsInterface;
 use BayLang.Constructor.Frontend.Editor.Dialog.AddItemDialog;
 use BayLang.Constructor.Frontend.Editor.CodeModel;
 use BayLang.Constructor.Frontend.Editor.Widget;
-use BayLang.Constructor.Frontend.Providers.EditorProvider;
+use BayLang.Constructor.WidgetPage.EditorProvider;
 use BayLang.OpCodes.OpHtmlAttribute;
 use BayLang.OpCodes.OpHtmlTag;
 
@@ -49,7 +49,7 @@ class AddItemDialogModel extends ConfirmDialogModel
 		string default_widget_name = "widget";
 		
 		/* Default template */
-		EditorProvider editor = @.provider(classof EditorProvider);
+		EditorProvider editor = this.parent_widget.getFrameEditor();
 		WidgetSettingsInterface widget_settings = editor.getWidget(widget_name);
 		if (widget_settings)
 		{
@@ -107,7 +107,7 @@ class AddItemDialogModel extends ConfirmDialogModel
 	 */
 	Collection<WidgetSettingsInterface> getFrameWidgets()
 	{
-		EditorProvider editor = @.provider(classof EditorProvider);
+		EditorProvider editor = this.parent_widget.getFrameEditor();
 		Collection<WidgetSettingsInterface> widgets = editor.getWidgets();
 		widgets = widgets.filter(
 			bool (WidgetSettingsInterface widget)

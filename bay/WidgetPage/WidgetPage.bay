@@ -90,7 +90,9 @@
 						<div class="widget_box__item_control_button">@raw{{ "&#9776;" }}</div>
 						-->
 						<div class="widget_box__item_control_button"
-							@event:click={{ this.onAddWidgetClick }}
+							@event:click={{ void(){
+								this.onAddWidgetClick(this.model.selected_path);
+							} }}
 						>@raw{{ "+" }}</div>
 						<div class="widget_box__item_control_button"
 							@event:click={{ this.onUpWidgetClick }}
@@ -121,7 +123,7 @@
 	{
 		<div class="widget_page__add_section_button">
 			<Button styles={{ ["small"] }}
-				@event:click={{ this.onAddWidgetClick }}
+				@event:click={{ void (){ this.onAddWidgetClick(null); } }}
 			>Add widget</Button>
 		</div>
 	}
@@ -151,9 +153,7 @@ bool is_loaded = false;
  */
 void onUpWidgetClick()
 {
-	BasePageModel page_model = this.model.getEditPageModel();
-	Collection<int> path = page_model.selected.path;
-	page_model.moveUpWidget(path);
+	this.model.sendMoveWidget(this.model.selected_path, "up");
 }
 
 
@@ -162,20 +162,16 @@ void onUpWidgetClick()
  */
 void onDownWidgetClick()
 {
-	BasePageModel page_model = this.model.getEditPageModel();
-	Collection<int> path = page_model.selected.path;
-	page_model.moveDownWidget(path);
+	this.model.sendMoveWidget(this.model.selected_path, "down");
 }
 
 
 /**
  * Add widget click event
  */
-void onAddWidgetClick()
+void onAddWidgetClick(Collection<int> path)
 {
-	BasePageModel page_model = this.model.getEditPageModel();
-	Collection<int> path = page_model.selected.path;
-	page_model.showAddWidgetDialog(path, "after");
+	this.model.sendAddWidget(path, "after");
 }
 
 
@@ -184,9 +180,7 @@ void onAddWidgetClick()
  */
 void onRemoveWidgetClick()
 {
-	BasePageModel page_model = this.model.getEditPageModel();
-	Collection<int> path = page_model.selected.path;
-	page_model.showRemoveWidgetDialog();
+	this.model.sendRemoveWidget(this.model.selected_path);
 }
 
 

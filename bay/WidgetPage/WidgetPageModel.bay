@@ -264,7 +264,7 @@ class WidgetPageModel extends BasePageModel
 	{
 		if (not event.data) return;
 		string name = event.data.name;
-		if (name = "add_widget_model")
+		if (name == "add_widget_model")
 		{
 			this.addWidgetModel(event.data.widget, event.data.content);
 		}
@@ -314,13 +314,51 @@ class WidgetPageModel extends BasePageModel
 	
 	
 	/**
+	 * Send add widget
+	 */
+	void sendAddWidget(Collection<int> path, string kind)
+	{
+		this.sendMessage({
+			"name": "add_widget",
+			"path": path ? rs::join(".", path) : null,
+			"kind": kind,
+		});
+	}
+	
+	
+	/**
+	 * Send move widget
+	 */
+	void sendMoveWidget(Collection<int> path, string kind)
+	{
+		this.sendMessage({
+			"name": "move_widget",
+			"path": path ? rs::join(".", path) : null,
+			"kind": kind,
+		});
+	}
+	
+	
+	/**
+	 * Send remove widget
+	 */
+	void sendRemoveWidget(Collection<int> path)
+	{
+		this.sendMessage({
+			"name": "remove_widget",
+			"path": path ? rs::join(".", path) : null,
+		});
+	}
+	
+	
+	/**
 	 * Send select item
 	 */
 	void sendSelectItem(Collection<int> path)
 	{
 		this.sendMessage({
 			"name": "select_item",
-			"path": rs::join(".", path),
+			"path": path ? rs::join(".", path) : null,
 		});
 	}
 	

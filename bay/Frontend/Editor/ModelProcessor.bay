@@ -251,7 +251,7 @@ class ModelProcessor extends CodeModel
 		if (not widget.primary_model_code) return;
 		
 		/* Get model settings */
-		EditorProvider editor = @.provider(classof EditorProvider);
+		EditorProvider editor = this.page_model.getFrameEditor();
 		widget.model_settings = editor.getWidget(widget.model_class_name);
 		if (not widget.model_settings) return;
 		
@@ -521,7 +521,7 @@ class ModelProcessor extends CodeModel
 		if (not getModelName.exists()) return;
 		
 		/* Get editor */
-		EditorProvider editor = @.provider(classof EditorProvider);
+		EditorProvider editor = this.page_model.getFrameEditor();
 		
 		/* Set model settings */
 		widget.model_class_name = getModelName.apply();

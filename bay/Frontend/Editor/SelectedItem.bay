@@ -432,15 +432,12 @@ string getCSSValue(Selector selector, string key, string default_value = "")
  */
 void setCSSValue(Selector selector, string key, string value = "")
 {
-	if (selector)
-	{
-		selector.changeStyleValue(key, value);
-	}
-	else
+	if (not selector)
 	{
 		string selector_name = this.model.selected.widget.getSelectorName();
-		this.model.styles.changeSelectorContent(selector_name, key ~ ": " ~ value);
+		selector = this.model.styles.createSelector(selector_name);
 	}
+	selector.changeStyleValue(key, value);
 }
 
 
@@ -449,7 +446,7 @@ void setCSSValue(Selector selector, string key, string value = "")
  */
 void onSelectImageClick(Selector selector, string key)
 {
-	StyleItem style_item = selector.getStyle(key);
+	StyleItem style_item = selector ? selector.getStyle(key) : null;
 	string value = style_item ? style_item.getValue() : "";
 	this.model.select_image_dialog.show();
 	this.model.select_image_dialog.data = {

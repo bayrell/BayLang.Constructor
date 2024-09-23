@@ -76,6 +76,10 @@ class StylesModel extends BaseModel
 	 */
 	Selector createSelector(string selector_name, OpHtmlStyle op_code = null)
 	{
+		if (op_code == null)
+		{
+			op_code = this.main_style_code;
+		}
 		Selector selector = new Selector();
 		selector.op_code = op_code;
 		selector.selector_name = selector_name;
