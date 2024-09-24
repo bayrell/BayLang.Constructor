@@ -7,7 +7,7 @@ namespace BayLang.Constructor.Frontend.Editor.Parameters;
 use Runtime.BaseObject;
 use BayLang.Constructor.Frontend.Editor.Parameters.ParameterComponent;
 use BayLang.Constructor.Frontend.Editor.Parameters.ParameterWidgetName;
-use BayLang.Constructor.Frontend.Editor.CodeModel;
+use BayLang.Constructor.Frontend.Editor.Processor.CodeProcessor;
 use BayLang.Constructor.Frontend.Editor.SelectedItemModel;
 use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
 use BayLang.OpCodes.OpHtmlAttribute;
@@ -35,7 +35,7 @@ class ParameterClassName extends ParameterComponent
 	 */
 	void setOpCode(OpHtmlAttribute op_attr)
 	{
-		string class_name = CodeModel::getValueFromOpCode(op_attr.value);
+		string class_name = CodeProcessor::getValueFromOpCode(op_attr.value);
 		Collection<string> value = rs::split(" ", class_name);
 		value = value.filter(bool (string s) => s != "");
 		this.value = value.slice(1);
@@ -58,6 +58,6 @@ class ParameterClassName extends ParameterComponent
 		Collection arr = [ this.param_widget_name.value ];
 		arr.appendItems(value);
 		this.value = arr.slice(1);
-		this.op_attr.value = CodeModel::getOpCodeByValue(rs::join(" ", arr));
+		this.op_attr.value = CodeProcessor::getOpCodeByValue(rs::join(" ", arr));
 	}
 }

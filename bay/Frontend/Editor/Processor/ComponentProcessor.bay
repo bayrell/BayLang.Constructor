@@ -2,7 +2,7 @@
  *  BayLang Constructor
  */
 
-namespace BayLang.Constructor.Frontend.Editor;
+namespace BayLang.Constructor.Frontend.Editor.Processor;
 
 use Runtime.lib;
 use Runtime.Callback;
@@ -11,8 +11,7 @@ use Runtime.Serializer;
 use Runtime.Widget.Tree.TreeModel;
 use BayLang.SaveOpCode;
 use BayLang.Constructor.Frontend.Annotations.WidgetSettingsInterface;
-use BayLang.Constructor.Frontend.Editor.AttributeProcessor;
-use BayLang.Constructor.Frontend.Editor.CodeModel;
+use BayLang.Constructor.Frontend.Editor.Processor.CodeProcessor;
 use BayLang.Constructor.Frontend.Editor.Widget;
 use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
 use BayLang.Constructor.Frontend.Providers.EditorProvider;
@@ -35,12 +34,10 @@ use BayLang.OpCodes.OpString;
 use BayLang.OpCodes.OpUse;
 
 
-class ComponentProcessor extends CodeModel
+class ComponentProcessor extends CodeProcessor
 {
-	AttributeProcessor attribute = new AttributeProcessor;
-	OpModule component = null;
-	OpModule model = null;
 	HashMap<BaseOpCode, Widget> hash = new HashMap;
+	Widget main_widget = null;
 	string component_namespace = "";
 	string component_class_name = "";
 	
@@ -58,7 +55,7 @@ class ComponentProcessor extends CodeModel
 		
 		/* Process attributes */
 		BaseOpCode op_code_expression = op_code_render.getExpression();
-		this.attribute.processHtmlItems(op_code_expression);
+		this.page_model.attribute_processor.processHtmlItems(op_code_expression);
 		
 		/* Load items */
 		this.loadItems();
@@ -96,21 +93,6 @@ class ComponentProcessor extends CodeModel
 		if (not op_code_class) return null;
 		
 		return op_code_class.items.filter(lib::isInstance(classof OpHtmlStyle));
-	}
-	
-	
-	/**
-	 * Get component render expression
-	 */
-	OpDeclareFunction findFunction(string render_name = "render")
-	{
-		if (not this.code) return null;
-		
-		OpDeclareClass op_code_class = this.code.findClass();
-		if (not op_code_class) return null;
-		
-		OpDeclareFunction op_code_render = op_code_class.findFunction(render_name);
-		return op_code_render;
 	}
 	
 	
@@ -242,7 +224,7 @@ class ComponentProcessor extends CodeModel
 		
 		/* Default template */
 		EditorProvider editor = this.page_model.getFrameEditor();
-		WidgetSettingsInterface widget_settings = editor.getWidget(class_name);
+		WidgetSettingsInterface widget_settings = editor.getWidgetSettings(class_name);
 		if (not widget_settings) return op_code;
 		
 		/* Get default template */
@@ -258,7 +240,7 @@ class ComponentProcessor extends CodeModel
 		this.addDefaultTemplate(op_code, widget_name, template_content);
 		
 		/* Add op_code attrs */
-		this.attribute.processHtmlTag(op_code, widget_name);
+		this.page_model.attribute_processor.processHtmlTag(op_code, widget_name);
 		
 		return op_code;
 	}
@@ -281,11 +263,12 @@ class ComponentProcessor extends CodeModel
 		if (not (op_code.items instanceof OpHtmlItems)) return;
 		
 		/* Create root widget */
-		Widget widget = this.registerWidget(op_code);
+		this.main_widget = this.registerWidget(op_code);
+		this.main_widget.setup();
 		
 		/* Setup tree root item */
 		TreeModel tree = this.page_model.tree;
-		tree.root = widget.item;
+		tree.root = this.main_widget.item;
 	}
 	
 	

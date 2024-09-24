@@ -29,9 +29,10 @@ use BayLang.LangBay.TranslatorBay;
 use BayLang.Constructor.Frontend.Editor.Dialog.AddItemDialogModel;
 use BayLang.Constructor.Frontend.Editor.Dialog.RemoveItemDialogModel;
 use BayLang.Constructor.Frontend.Editor.Dialog.SelectImageDialogModel;
+use BayLang.Constructor.Frontend.Editor.Processor.AttributeProcessor;
+use BayLang.Constructor.Frontend.Editor.Processor.ComponentProcessor;
+use BayLang.Constructor.Frontend.Editor.Processor.ModelProcessor;
 use BayLang.Constructor.Frontend.Editor.Styles.StylesModel;
-use BayLang.Constructor.Frontend.Editor.ComponentProcessor;
-use BayLang.Constructor.Frontend.Editor.ModelProcessor;
 use BayLang.Constructor.Frontend.Editor.SelectedItemModel;
 use BayLang.Constructor.Frontend.Editor.WidgetEditPage;
 use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
@@ -69,6 +70,7 @@ class WidgetEditPageModel extends BasePageModel
 	
 	/* Models */
 	TreeModel tree = null;
+	AttributeProcessor attribute_processor = new AttributeProcessor(this);
 	ComponentProcessor component_processor = new ComponentProcessor(this);
 	ModelProcessor model_processor = new ModelProcessor(this);
 	SelectedItemModel selected = null;
@@ -602,7 +604,7 @@ class WidgetEditPageModel extends BasePageModel
 		/* Check into drag */
 		if (
 			message.kind == "into" and
-			not dest_widget.component_settings.canDrag(src_widget, "into")
+			not dest_widget.canInsert(src_widget)
 		)
 		{
 			message.result = false;

@@ -22,12 +22,11 @@ class AddItemDialogModel extends ConfirmDialogModel
 	string component = classof AddItemDialog;
 	string widget_name = "add_item_dialog";
 	string kind = "after";
-	string widget_name_class = "";
-	string widget_name_value = "";
 	int step = 1;
 	Collection<WidgetSettingsInterface> current_widgets = null;
 	
 	/* Selected item */
+	Widget selected_widget = null;
 	Collection<int> selected_widget_path = null;
 	Dict selected_widget_info = null;
 	
@@ -50,20 +49,20 @@ class AddItemDialogModel extends ConfirmDialogModel
 		
 		/* Default template */
 		EditorProvider editor = this.parent_widget.getFrameEditor();
-		WidgetSettingsInterface widget_settings = editor.getWidget(widget_name);
+		WidgetSettingsInterface widget_settings = editor.getWidgetSettings(widget_name);
 		if (widget_settings)
 		{
-			default_widget_name = widget_settings.getShortName();
+			default_widget_name = widget_settings.getSelectorName();
 		}
 		
 		/* Create widget name */
-		this.widget_name_class = widget_name;
-		this.widget_name_value = this.parent_widget.component_processor
-			.attribute.createWidgetName(default_widget_name);
+		string widget_name_class = widget_name;
+		string widget_name_value = this.parent_widget.attribute_processor
+			.createWidgetName(default_widget_name);
 		
 		/* Create widget */
 		OpHtmlTag op_code = this.parent_widget.component_processor.createWidget(
-			this.widget_name_class, this.widget_name_value
+			widget_name_class, widget_name_value
 		);
 		this.parent_widget.addOpCode(op_code, this.selected_widget_path, this.kind);
 		this.hide();
@@ -112,7 +111,7 @@ class AddItemDialogModel extends ConfirmDialogModel
 		widgets = widgets.filter(
 			bool (WidgetSettingsInterface widget)
 			{
-				string name = widget.getName();
+				string name = widget.getComponentName();
 				if (rs::substr(name, -5) == "Model") return false;
 				return true;
 			}
@@ -128,20 +127,24 @@ class AddItemDialogModel extends ConfirmDialogModel
 	{
 		this.step = 1;
 		this.kind = kind;
-		this.widget_name_class = "";
-		this.widget_name_value = "item";
 		this.title = "Add item";
-		this.current_widgets = this.getFrameWidgets();
+		
+		/* Setup selected widget */
 		this.selected_widget_path = selected_path ? selected_path.slice() : null;
-		this.selected_widget_info = null;
 		if (this.selected_widget_path)
 		{
-			Widget selected_widget = this.parent_widget.component_processor
+			this.selected_widget = this.parent_widget.component_processor
 				.getWidget(this.selected_widget_path)
 			;
-			this.selected_widget_info = this.getTagWidgetInfo(selected_widget.code);
-			this.widget_name_value = this.selected_widget_info.get("widget_name") ~ "_item";
 		}
+		else
+		{
+			this.selected_widget = this.parent_widget.component_processor.main_widget;
+		}
+		
+		/* Get widgets list */
+		this.current_widgets = this.getFrameWidgets();
+		
 		parent();
 	}
 }

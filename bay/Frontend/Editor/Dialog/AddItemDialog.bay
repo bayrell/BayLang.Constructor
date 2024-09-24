@@ -66,7 +66,7 @@
 					%for (int i=0; i<this.model.current_widgets.count(); i++)
 					{
 						%set WidgetSettingsInterface widget = this.model.current_widgets.get(i);
-						%set string widget_name = widget.getName();
+						%set string widget_name = widget.getComponentName();
 						<div class="list_item"
 							class={{ this.model.select_name == widget_name ? "selected" : "" }}
 							@event:click={{

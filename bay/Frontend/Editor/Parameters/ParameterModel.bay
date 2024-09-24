@@ -6,7 +6,7 @@ namespace BayLang.Constructor.Frontend.Editor.Parameters;
 
 use Runtime.Web.BaseModel;
 use BayLang.Constructor.Frontend.Editor.Parameters.Parameter;
-use BayLang.Constructor.Frontend.Editor.CodeModel;
+use BayLang.Constructor.Frontend.Editor.Processor.CodeProcessor;
 use BayLang.OpCodes.OpDictPair;
 
 
@@ -31,7 +31,7 @@ class ParameterModel extends Parameter
 	void setOpCode(OpDictPair op_dict_pair)
 	{
 		this.op_code = op_dict_pair;
-		this.value = CodeModel::getValueFromOpCode(op_dict_pair.value);
+		this.value = CodeProcessor::getValueFromOpCode(op_dict_pair.value);
 	}
 	
 	
@@ -41,7 +41,7 @@ class ParameterModel extends Parameter
 	void setValue(var value)
 	{
 		this.value = value;
-		this.op_code.value = CodeModel::getOpCodeByValue(value);
+		this.op_code.value = CodeProcessor::getOpCodeByValue(value);
 	}
 	
 	

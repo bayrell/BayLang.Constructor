@@ -12,19 +12,25 @@ interface WidgetSettingsInterface
 	/**
 	 * Returns widget name
 	 */
-	string getName();
+	string getWidgetName();
 	
 	
 	/**
-	 * Returns short name
+	 * Returns component name
 	 */
-	string getShortName();
+	string getComponentName();
 	
 	
 	/**
-	 * Can drag
+	 * Returns selector name
 	 */
-	bool canDrag(var widget, string kind);
+	string getSelectorName();
+	
+	
+	/**
+	 * Can insert widget
+	 */
+	bool canInsert(var widget);
 	
 	
 	/**

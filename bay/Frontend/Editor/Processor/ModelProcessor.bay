@@ -2,11 +2,11 @@
  *  BayLang Constructor
  */
 
-namespace BayLang.Constructor.Frontend.Editor;
+namespace BayLang.Constructor.Frontend.Editor.Processor;
 
 use Runtime.Callback;
 use BayLang.SaveOpCode;
-use BayLang.Constructor.Frontend.Editor.CodeModel;
+use BayLang.Constructor.Frontend.Editor.Processor.CodeProcessor;
 use BayLang.Constructor.Frontend.Editor.Parameter;
 use BayLang.Constructor.Frontend.Editor.ParameterModel;
 use BayLang.Constructor.Frontend.Editor.Widget;
@@ -33,7 +33,7 @@ use BayLang.OpCodes.OpString;
 use BayLang.OpCodes.OpTypeIdentifier;
 
 
-class ModelProcessor extends CodeModel
+class ModelProcessor extends CodeProcessor
 {
 	/**
 	 * Setup op code
@@ -50,7 +50,7 @@ class ModelProcessor extends CodeModel
 	void setupWidget(Widget widget)
 	{
 		widget.model_codes = [];
-		widget.model_class_name = "";
+		widget.model_class_name = null;
 		widget.primary_model_code = null;
 		widget.is_model = this.checkIsModel(widget);
 		if (not widget.is_model) return;
@@ -88,21 +88,6 @@ class ModelProcessor extends CodeModel
 			}
 		}
 		return false;
-	}
-	
-	
-	/**
-	 * Returns function
-	 */
-	OpDeclareFunction findFunction(string function_name)
-	{
-		if (not this.code) return null;
-		
-		OpDeclareClass op_code_class = this.code.findClass();
-		if (not op_code_class) return null;
-		
-		OpDeclareFunction op_code = op_code_class.findFunction(function_name);
-		return op_code;
 	}
 	
 	
@@ -247,7 +232,7 @@ class ModelProcessor extends CodeModel
 	 */
 	void setupParams(Widget widget)
 	{
-		if (widget.model_class_name == "") return;
+		if (not widget.model_class_name) return;
 		if (not widget.primary_model_code) return;
 		
 		/* Get model settings */

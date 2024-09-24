@@ -2,10 +2,11 @@
  *  BayLang Constructor
  */
 
-namespace BayLang.Constructor.Frontend.Editor;
+namespace BayLang.Constructor.Frontend.Editor.Processor;
 
 use Runtime.lib;
 use Runtime.BaseObject;
+use BayLang.Constructor.Frontend.Editor.WidgetEditPageModel;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpHtmlAttribute;
 use BayLang.OpCodes.OpHtmlItems;
@@ -16,7 +17,18 @@ use BayLang.OpCodes.OpString;
 
 class AttributeProcessor extends BaseObject
 {
+	WidgetEditPageModel page_model = null;
 	int widget_inc = 1;
+	
+	
+	/**
+	 * Constructor
+	 */
+	public void constructor(WidgetEditPageModel page_model)
+	{
+		parent();
+		this.page_model = page_model;
+	}
 	
 	
 	/**

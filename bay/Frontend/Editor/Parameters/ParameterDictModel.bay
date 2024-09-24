@@ -5,7 +5,7 @@
 namespace BayLang.Constructor.Frontend.Editor.Parameters;
 
 use BayLang.Constructor.Frontend.Editor.Parameters.ParameterModel;
-use BayLang.Constructor.Frontend.Editor.CodeModel;
+use BayLang.Constructor.Frontend.Editor.Processor.CodeProcessor;
 use BayLang.OpCodes.OpDict;
 use BayLang.OpCodes.OpDictPair;
 
@@ -68,7 +68,7 @@ class ParameterDictModel extends ParameterModel
 		OpDictPair code = this.getCode();
 		if (code)
 		{
-			this.value = CodeModel::getValueFromOpCode(code.value);
+			this.value = CodeProcessor::getValueFromOpCode(code.value);
 		}
 	}
 	
@@ -82,7 +82,7 @@ class ParameterDictModel extends ParameterModel
 		OpDictPair code = this.getCode();
 		if (code)
 		{
-			code.value = CodeModel::getOpCodeByValue(value);
+			code.value = CodeProcessor::getOpCodeByValue(value);
 		}
 	}
 }

@@ -2,7 +2,7 @@
  *  BayLang Constructor
  */
 
-namespace BayLang.Constructor.Frontend.Editor;
+namespace BayLang.Constructor.Frontend.Editor.Processor;
 
 use Runtime.BaseObject;
 use BayLang.Constructor.Frontend.Editor.WidgetEditPageModel;
@@ -12,6 +12,8 @@ use BayLang.LangES6.TranslatorES6;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpCollection;
 use BayLang.OpCodes.OpDeclareClass;
+use BayLang.OpCodes.OpDeclareFunction;
+use BayLang.OpCodes.OpDeclareFunctionArg;
 use BayLang.OpCodes.OpDict;
 use BayLang.OpCodes.OpDictPair;
 use BayLang.OpCodes.OpModule;
@@ -19,7 +21,7 @@ use BayLang.OpCodes.OpNamespace;
 use BayLang.OpCodes.OpString;
 
 
-class CodeModel extends BaseObject
+class CodeProcessor extends BaseObject
 {
 	WidgetEditPageModel page_model = null;
 	OpModule code = null;
@@ -112,6 +114,21 @@ class CodeModel extends BaseObject
 			alias_name = widget_name;
 		}
 		return alias_name;
+	}
+	
+	
+	/**
+	 * Returns function
+	 */
+	OpDeclareFunction findFunction(string function_name)
+	{
+		if (not this.code) return null;
+		
+		OpDeclareClass op_code_class = this.code.findClass();
+		if (not op_code_class) return null;
+		
+		OpDeclareFunction op_code = op_code_class.findFunction(function_name);
+		return op_code;
 	}
 	
 	

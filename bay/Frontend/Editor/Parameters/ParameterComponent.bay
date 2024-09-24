@@ -5,7 +5,7 @@
 namespace BayLang.Constructor.Frontend.Editor.Parameters;
 
 use BayLang.Constructor.Frontend.Editor.Parameters.Parameter;
-use BayLang.Constructor.Frontend.Editor.CodeModel;
+use BayLang.Constructor.Frontend.Editor.Processor.CodeProcessor;
 use BayLang.Constructor.Frontend.Editor.Widget;
 use BayLang.OpCodes.OpHtmlAttribute;
 
@@ -31,7 +31,7 @@ class ParameterComponent extends Parameter
 	void setOpCode(OpHtmlAttribute op_code)
 	{
 		this.op_code = op_code;
-		this.value = CodeModel::getValueFromOpCode(op_code.value);
+		this.value = CodeProcessor::getValueFromOpCode(op_code.value);
 	}
 	
 	
@@ -61,6 +61,6 @@ class ParameterComponent extends Parameter
 		
 		/* Set value */
 		this.value = value;
-		this.op_code.value = CodeModel::getOpCodeByValue(value);
+		this.op_code.value = CodeProcessor::getOpCodeByValue(value);
 	}
 }

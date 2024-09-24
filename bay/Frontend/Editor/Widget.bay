@@ -11,7 +11,7 @@ use BayLang.Constructor.Frontend.Editor.Parameters.Parameter;
 use BayLang.Constructor.Frontend.Editor.Parameters.ParameterClassName;
 use BayLang.Constructor.Frontend.Editor.Parameters.ParameterComponent;
 use BayLang.Constructor.Frontend.Editor.Parameters.ParameterWidgetName;
-use BayLang.Constructor.Frontend.Editor.CodeModel;
+use BayLang.Constructor.Frontend.Editor.Processor.CodeProcessor;
 use BayLang.Constructor.Frontend.Editor.WidgetEditPageModel;
 use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
 use BayLang.Constructor.Frontend.Providers.EditorProvider;
@@ -33,7 +33,6 @@ class Widget extends BaseObject
 	Collection<BaseOpCode> model_codes = null;
 	WidgetEditPageModel page_model = null;
 	WidgetSettingsInterface component_settings = null;
-	WidgetSettingsInterface model_settings = null;
 	WidgetTreeItem item = null;
 	string component_class_name = null;
 	string model_class_name = null;
@@ -105,6 +104,16 @@ class Widget extends BaseObject
 	
 	
 	/**
+	 * Can insert widget
+	 */
+	bool canInsert(Widget widget)
+	{
+		if (not this.component_settings) return true;
+		return this.component_settings.canInsert(widget);
+	}
+	
+	
+	/**
 	 * Setup
 	 */
 	void setup()
@@ -116,6 +125,9 @@ class Widget extends BaseObject
 		
 		/* Setup params */
 		this.setupParams();
+		
+		/* Setup attrs */
+		this.setupAttrs();
 		
 		/* Setup model */
 		this.page_model.model_processor.setupWidget(this);
@@ -146,7 +158,7 @@ class Widget extends BaseObject
 		
 		/* Setup widget name */
 		string selected_tag_name = op_code.tag_name;
-		if (not CodeModel::isComponent(selected_tag_name))
+		if (not CodeProcessor::isComponent(selected_tag_name))
 		{
 			/* this.setupHtmlParams(); */
 			return;
@@ -160,7 +172,7 @@ class Widget extends BaseObject
 			.getModuleClassName(selected_tag_name)
 		;
 		this.component_settings = this.page_model.getFrameEditor()
-			.getWidget(this.component_class_name);
+			.getWidgetSettings(this.component_class_name);
 	}
 	
 	
@@ -198,7 +210,14 @@ class Widget extends BaseObject
 		{
 			return;
 		}
-		
+	}
+	
+	
+	/**
+	 * Setup attrs
+	 */
+	void setupAttrs()
+	{
 		Collection<OpHtmlAttribute> attrs = this.code.attrs;
 		if (not attrs) return;
 		
