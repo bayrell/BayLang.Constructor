@@ -264,7 +264,6 @@ class ComponentProcessor extends CodeProcessor
 		
 		/* Create root widget */
 		this.main_widget = this.registerWidget(op_code);
-		this.main_widget.setup();
 		
 		/* Setup tree root item */
 		TreeModel tree = this.page_model.tree;

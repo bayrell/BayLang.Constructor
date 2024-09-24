@@ -57,7 +57,20 @@ class EditorProvider extends BaseProvider
 	
 	
 	/**
-	 * Get widget by name
+	 * Find settings by class name
 	 */
-	WidgetSettingsInterface getWidgetSettings(string class_name) => this.settings.get(class_name);
+	Collection<WidgetSettingsInterface> findClassName(string class_name) =>
+		this.widgets.findItem(
+			bool (WidgetSettingsInterface item) use (class_name) =>
+				item::getClassName() == class_name
+		)
+	;
+	
+	
+	/**
+	 * Get widget by component name
+	 */
+	WidgetSettingsInterface getWidgetSettings(string component_name) =>
+		this.settings.get(component_name)
+	;
 }

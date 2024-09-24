@@ -132,16 +132,28 @@ class Widget extends BaseObject
 		/* Setup model */
 		this.page_model.model_processor.setupWidget(this);
 		
-		/* Create class attribute */
-		if (this.param_class_name.op_attr == null)
-		{
-			OpHtmlAttribute op_attr = new OpHtmlAttribute
-			{
-				"key": "class",
-			};
-			this.param_class_name.op_attr = op_attr;
-			this.param_widget_name.op_attr = op_attr;
-		}
+		/* Set flag initialized */
+		this.is_initialized = true;
+	}
+	
+	
+	/**
+	 * Setup main widget
+	 */
+	void setupMainWidget()
+	{
+		if (this.is_initialized) return;
+		
+		/* Setup settings */
+		this.component_settings = this.page_model.getFrameEditor()
+			.findClassName("Runtime.Widget.WidgetSettings.Settings.TemplateSettings")
+		;
+		
+		/* Setup params */
+		this.setupParams();
+		
+		/* Setup attrs */
+		this.setupAttrs();
 		
 		/* Set flag initialized */
 		this.is_initialized = true;
@@ -236,6 +248,17 @@ class Widget extends BaseObject
 					param.setOpCode(op_attr);
 				}
 			}
+		}
+		
+		/* Create class attribute */
+		if (this.param_class_name.op_attr == null)
+		{
+			OpHtmlAttribute op_attr = new OpHtmlAttribute
+			{
+				"key": "class",
+			};
+			this.param_class_name.op_attr = op_attr;
+			this.param_widget_name.op_attr = op_attr;
 		}
 	}
 	

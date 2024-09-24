@@ -322,6 +322,9 @@ class WidgetEditPageModel extends BasePageModel
 	void onAppLoaded()
 	{
 		this.app_status = static::STATUS_LOADED;
+		
+		/* Setup main widget */
+		this.component_processor.main_widget.setupMainWidget();
 	}
 	
 	

@@ -112,7 +112,9 @@ class AddItemDialogModel extends ConfirmDialogModel
 			bool (WidgetSettingsInterface widget)
 			{
 				string name = widget.getComponentName();
+				if (name == null) return false;
 				if (rs::substr(name, -5) == "Model") return false;
+				if (not this.selected_widget.canInsert(widget)) return false;
 				return true;
 			}
 		);
@@ -144,7 +146,6 @@ class AddItemDialogModel extends ConfirmDialogModel
 		
 		/* Get widgets list */
 		this.current_widgets = this.getFrameWidgets();
-		
 		parent();
 	}
 }

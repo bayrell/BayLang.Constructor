@@ -30,7 +30,7 @@ interface WidgetSettingsInterface
 	/**
 	 * Can insert widget
 	 */
-	bool canInsert(var widget);
+	bool canInsert(WidgetSettingsInterface widget);
 	
 	
 	/**
