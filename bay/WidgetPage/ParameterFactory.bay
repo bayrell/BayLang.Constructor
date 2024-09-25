@@ -1,0 +1,25 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.WidgetPage;
+
+use Runtime.BaseObject;
+use Runtime.SerializerNative;
+use Runtime.Entity.Factory;
+
+
+class ParameterFactory extends Factory
+{
+	/**
+	 * Factory
+	 */
+	BaseObject factory(var runtime)
+	{
+		SerializerNative encoder = new SerializerNative();
+		SerializerNative decoder = runtime::newInstance(classof SerializerNative);
+		var object = encoder.encode(this.params);
+		Dict params = decoder.decode(object);
+		return runtime::newInstance(this.name, [params]);
+	}
+}

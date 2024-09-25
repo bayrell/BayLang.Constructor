@@ -2,9 +2,9 @@
  *  BayLang Constructor
  */
 
-namespace BayLang.Constructor.WidgetPage.Annotations;
+namespace BayLang.Constructor.WidgetPage;
 
-use BayLang.Constructor.WidgetPage.Annotations.WidgetSettingsInterface;
+use BayLang.Constructor.WidgetPage.WidgetSettingsInterface;
 
 
 interface WidgetManagerInterface

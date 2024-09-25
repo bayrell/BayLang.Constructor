@@ -5,7 +5,7 @@
 namespace BayLang.Constructor.Frontend.Editor;
 
 use Runtime.BaseObject;
-use Runtime.Entity.Factory;
+use Runtime.SerializerNative;
 use BayLang.Constructor.Frontend.Editor.Styles.Selector;
 use BayLang.Constructor.Frontend.Editor.Parameters.Parameter;
 use BayLang.Constructor.Frontend.Editor.Parameters.ParameterClassName;
@@ -15,7 +15,8 @@ use BayLang.Constructor.Frontend.Editor.Processor.CodeProcessor;
 use BayLang.Constructor.Frontend.Editor.WidgetEditPageModel;
 use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
 use BayLang.Constructor.Frontend.Providers.EditorProvider;
-use BayLang.Constructor.WidgetPage.Annotations.WidgetSettingsInterface;
+use BayLang.Constructor.WidgetPage.ParameterFactory;
+use BayLang.Constructor.WidgetPage.WidgetSettingsInterface;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpHtmlAttribute;
 use BayLang.OpCodes.OpHtmlContent;
@@ -204,9 +205,9 @@ class Widget extends BaseObject
 		/* Setup params */
 		this.params.appendItems(
 			this.component_settings.getParams().map(
-				Parameter (Factory factory)
+				Parameter (ParameterFactory factory)
 				{
-					Parameter param = rtl::newInstance(factory.name, [factory.params]);
+					Parameter param = factory.factory(new rtl());
 					param.widget = this;
 					return param;
 				}

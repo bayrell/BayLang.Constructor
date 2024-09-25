@@ -7,8 +7,8 @@ namespace BayLang.Constructor.WidgetPage;
 use Runtime.BaseObject;
 use Runtime.BaseProvider;
 use Runtime.Web.BaseLayoutModel;
-use BayLang.Constructor.WidgetPage.Annotations.WidgetManagerAnnotation;
-use BayLang.Constructor.WidgetPage.Annotations.WidgetSettingsInterface;
+use BayLang.Constructor.WidgetPage.WidgetManagerAnnotation;
+use BayLang.Constructor.WidgetPage.WidgetSettingsInterface;
 
 
 class EditorProvider extends BaseProvider

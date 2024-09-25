@@ -62,7 +62,7 @@ class WidgetEditPageModel extends BasePageModel
 	string module_id = "";
 	string current_widget = "";
 	string component_class_name = "";
-	string menu_selected = "css";
+	string menu_selected = "params";
 	string iframe_current_size = "";
 	int app_status = static::STATUS_LOADING;
 	int breadcrumbs_selected = -1;
