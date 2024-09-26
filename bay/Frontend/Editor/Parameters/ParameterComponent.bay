@@ -4,6 +4,7 @@
 
 namespace BayLang.Constructor.Frontend.Editor.Parameters;
 
+use Runtime.lib;
 use BayLang.Constructor.Frontend.Editor.Parameters.Parameter;
 use BayLang.Constructor.Frontend.Editor.Processor.CodeProcessor;
 use BayLang.Constructor.Frontend.Editor.Widget;
@@ -40,6 +41,7 @@ class ParameterComponent extends Parameter
 	 */
 	void createHtmlAttribute()
 	{
+		if (this.op_code != null) return;
 		this.op_code = new OpHtmlAttribute
 		{
 			"key": this.name,
@@ -49,10 +51,29 @@ class ParameterComponent extends Parameter
 	
 	
 	/**
+	 * Remove attribute
+	 */
+	void removeHtmlAttribute()
+	{
+		if (this.op_code == null) return;
+		int pos = this.widget.item.code.attrs.findItem(lib::equalAttr("key", this.name));
+		this.widget.item.code.attrs.remove(pos);
+		this.op_code = null;
+	}
+	
+	
+	/**
 	 * Set value
 	 */
 	void setValue(var value)
 	{
+		if (value == "")
+		{
+			this.removeHtmlAttribute();
+			this.value = "";
+			return;
+		}
+		
 		/* Create html attribute */
 		if (this.op_code == null)
 		{
