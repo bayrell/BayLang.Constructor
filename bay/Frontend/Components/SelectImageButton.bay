@@ -1,0 +1,56 @@
+<!--
+ *  BayLang Constructor
+-->
+
+<class name="BayLang.Constructor.Frontend.Components.SelectImageButton">
+
+<use name="Runtime.Callback" />
+<use name="Runtime.Web.Messages.ClickMessage" />
+<use name="Runtime.Web.Messages.ValueChangeMessage" />
+<use name="Runtime.Widget.Button" component="true" />
+<use name="BayLang.Constructor.Frontend.Editor.Dialog.SelectImageDialogModel" />
+
+
+<template>
+	<Button
+		@event:click={{ this.onSelectImageClick }}
+	>Select image</Button>
+</template>
+
+
+<script>
+
+
+/**
+ * Select image click
+ */
+void onSelectImageClick(ClickMessage message)
+{
+	SelectImageDialogModel select_image_dialog =
+		this.layout.getPageModel().select_image_dialog;
+	select_image_dialog.clearListener("confirm");
+	select_image_dialog.addListener("confirm", new Callback(this, "onSelectImage"));
+	select_image_dialog.show();
+}
+
+
+/**
+ * On select image
+ */
+void onSelectImage()
+{
+	SelectImageDialogModel select_image_dialog =
+		this.layout.getPageModel().select_image_dialog;
+	Dict selected_item = select_image_dialog.getSelectedItem();
+	string value = selected_item ? selected_item.get("file_path") : "";
+	
+	/* Send value change */
+	this.emit("valueChange", new ValueChangeMessage{
+		"value": value,
+		"data": this.data,
+	});
+}
+
+</script>
+
+</class>

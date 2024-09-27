@@ -1,0 +1,84 @@
+<!--
+ *  BayLang Constructor
+-->
+
+<class name="BayLang.Constructor.Frontend.Components.SortableParams"
+	extends="Runtime.Widget.SortableList"
+>
+
+<use name="Runtime.Widget.Input" component="true" />
+<use name="Runtime.Widget.Select" component="true" />
+<use name="BayLang.Constructor.Frontend.Components.SelectImageButton" component="true" />
+
+
+<style>
+.widget_sortable_list__item_value{
+	padding: 5px;
+}
+.widget_sortable_list__item_value_row{
+	display: flex;
+	align-items: center;
+}
+.widget_sortable_list__item_value_label{
+	width: 40px;
+}
+.widget_sortable_list__item_value_item{
+	flex: 1;
+}
+</style>
+
+
+<template name="renderValue" args="int pos, Dict item">
+	%for (int i=0; i<this.fields.count(); i++)
+	{
+		%set Dict field = this.fields.get(i);
+		%set string field_name = field.get("name");
+		%set string field_component = field.get("component");
+		%set Dict field_props = field.get("props");
+		<div class="widget_sortable_list__item_value_row">
+			<div class="widget_sortable_list__item_value_label">{{ field.get("label") }}</div>
+			<div class="widget_sortable_list__item_value_item">
+				<{field_component}
+					name={{ field_name }}
+					value={{ item.get(field_name) }}
+					@event:valueChange={{
+						void (var message) use (field_name, pos)
+						{
+							Dict item = this.value.get(pos);
+							item.set(field_name, message.value);
+							this.onValueChange();
+						}
+					}}
+					...field_props
+				/>
+			</div>
+		</div>
+	}
+</template>
+
+
+<script>
+
+props Collection<Dict> fields = [];
+
+
+/**
+ * Add item click
+ */
+void onAddItemClick()
+{
+	Dict value = {};
+	for (int i=0; i<this.fields.count(); i++)
+	{
+		Dict field = this.fields.get(i);
+		string field_name = field.get("name");
+		string field_default = field.get("default", "");
+		value.set(field_name, field_default);
+	}
+	this.value.push(value);
+	this.onValueChange();
+}
+
+</script>
+
+</class>

@@ -35,6 +35,16 @@ class Parameter extends BaseObject
 	
 	
 	/**
+	 * Init parameter
+	 */
+	public void init()
+	{
+		if (not this.default) return;
+		this.setValue(this.default);
+	}
+	
+	
+	/**
 	 * Is op_code
 	 */
 	void isOpCode(BaseOpCode op_code)

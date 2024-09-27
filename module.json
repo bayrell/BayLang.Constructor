@@ -6,6 +6,8 @@
 		"Frontend/Code/CodeEditorModel.bay",
 		"Frontend/Code/TreeItem.bay",
 		"Frontend/Code/TreeWidget.bay",
+		"Frontend/Components/SelectImageButton.bay",
+		"Frontend/Components/SortableParams.bay",
 		"Frontend/Editor/Dialog/AddItemDialog.bay",
 		"Frontend/Editor/Dialog/AddItemDialogModel.bay",
 		"Frontend/Editor/Dialog/RemoveItemDialog.bay",

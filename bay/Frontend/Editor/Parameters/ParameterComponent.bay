@@ -67,7 +67,7 @@ class ParameterComponent extends Parameter
 	 */
 	void setValue(var value)
 	{
-		if (value == "")
+		if (value === "")
 		{
 			this.removeHtmlAttribute();
 			this.value = "";

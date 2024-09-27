@@ -209,6 +209,7 @@ class Widget extends BaseObject
 				{
 					Parameter param = factory.factory(new rtl());
 					param.widget = this;
+					param.init();
 					return param;
 				}
 			)

@@ -122,7 +122,6 @@ class SelectImageDialogModel extends ConfirmDialogModel
 	 */
 	void show()
 	{
-		this.clearListener("confirm");
 		this.selected = -1;
 		parent();
 	}

@@ -11,6 +11,8 @@
 <use name="Runtime.Widget.Tag" component="true" />
 <use name="Runtime.Widget.TextArea" component="true" />
 <use name="Runtime.Widget.TextEditable" component="true" />
+<use name="BayLang.Constructor.Frontend.Components.SelectImageButton" component="true" />
+<use name="BayLang.Constructor.Frontend.Components.SortableParams" component="true" />
 <use name="BayLang.Constructor.Frontend.Editor.Parameters.Parameter" />
 <use name="BayLang.Constructor.Frontend.Editor.Styles.Selector" />
 <use name="BayLang.Constructor.Frontend.Editor.Styles.StyleItem" />
@@ -124,14 +126,14 @@
 	<div class="widget_css__row">
 		<div class="widget_css__key">{{ label ? label : key }}</div>
 		<div class="widget_css__value">
-			<Button
-				@event:click={{
-					void () use (selector, key)
+			<SelectImageButton
+				@event:valueChange={{
+					void (var message) use (selector, key)
 					{
-						this.onSelectImageClick(selector, key);
+						this.setCSSValue(selector, key, message.value);
 					}
 				}}
-			>Select image</Button>
+			/>
 		</div>
 	</div>
 </template>
@@ -412,6 +414,8 @@ bool isAllowClassName(string class_name)
 	if (class_name == "Runtime.Widget.Tag") return true;
 	if (class_name == "Runtime.Widget.TextArea") return true;
 	if (class_name == "Runtime.Widget.TextEditable") return true;
+	if (class_name == "BayLang.Constructor.Frontend.Components.SelectImageButton") return true;
+	if (class_name == "BayLang.Constructor.Frontend.Components.SortableParams") return true;
 	return false;
 }
 
@@ -438,35 +442,6 @@ void setCSSValue(Selector selector, string key, string value = "")
 		selector = this.model.styles.createSelector(selector_name);
 	}
 	selector.changeStyleValue(key, value);
-}
-
-
-/**
- * Select image
- */
-void onSelectImageClick(Selector selector, string key)
-{
-	StyleItem style_item = selector ? selector.getStyle(key) : null;
-	string value = style_item ? style_item.getValue() : "";
-	this.model.select_image_dialog.show();
-	this.model.select_image_dialog.data = {
-		"key": key,
-		"selector": selector,
-	};
-	this.model.select_image_dialog.addListener("confirm", new Callback(this, "onSelectImage"));
-}
-
-
-/**
- * Select image
- */
-void onSelectImage()
-{
-	Selector selector = this.model.select_image_dialog.data.get("selector");
-	Dict selected_item = this.model.select_image_dialog.getSelectedItem();
-	string key = this.model.select_image_dialog.data.get("key");
-	string value = selected_item ? selected_item.get("file_path") : "";
-	this.setCSSValue(selector, key, value);
 }
 
 
