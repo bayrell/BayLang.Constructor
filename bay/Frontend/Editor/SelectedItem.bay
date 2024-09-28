@@ -179,9 +179,8 @@
 		<div class="widget_param__content">
 			<Tag value={{ this.model.selected.widget.param_class_name.value.slice() }}
 				@event:valueChange={{ void (var message) {
-					this.model.selected.changeParameterValue(
-						this.model.selected.widget.param_class_name, message.value
-					);
+					this.model.selected.widget.param_class_name.changeValue(message.value);
+					this.model.updateFrameRender();
 				} }}
 			/>
 		</div>
@@ -205,7 +204,8 @@
 						<{class_name}
 							value={{ param.value }}
 							@event:valueChange={{ void (var message) use (param) {
-								this.model.selected.changeParameterValue(param, message.value);
+								param.changeValue(message.value);
+								this.model.updateFrameRender();
 							} }}
 							...item_props
 						/>

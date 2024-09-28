@@ -56,6 +56,7 @@ class ComponentProcessor extends CodeProcessor
 		/* Process attributes */
 		BaseOpCode op_code_expression = op_code_render.getExpression();
 		this.page_model.attribute_processor.processHtmlItems(op_code_expression);
+		this.page_model.attribute_processor.initWidgetInc();
 		
 		/* Load items */
 		this.loadItems();
@@ -195,8 +196,7 @@ class ComponentProcessor extends CodeProcessor
 		string alias_name = this.addModule(class_name, "", true);
 		
 		/* Create op_code */
-		string css_name = "widget_" ~ this.widget_inc;
-		this.widget_inc = this.widget_inc + 1;
+		string key_debug = this.page_model.attribute_processor.createKeyName("widget");
 		OpHtmlTag op_code = new OpHtmlTag
 		{
 			"attrs":
@@ -214,7 +214,7 @@ class ComponentProcessor extends CodeProcessor
 					"key": "@key_debug",
 					"value": new OpString
 					{
-						"value": css_name,
+						"value": key_debug,
 					},
 				}
 			],

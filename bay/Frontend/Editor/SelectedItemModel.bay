@@ -41,30 +41,4 @@ class SelectedItemModel extends BaseModel
 		/* Setup widget */
 		this.widget.setup();
 	}
-	
-	
-	/**
-	 * Change param
-	 */
-	void changeParameterValue(Parameter param, var value)
-	{
-		/* Change attr value */
-		param.setValue(value);
-		
-		/* Update label */
-		if (param.name == "widget_name")
-		{
-			param.widget.item.updateLabel();
-		}
-		
-		/* Change model value */
-		if (param.widget.is_model)
-		{
-			var iframeWindow = this.parent_widget.iframe.contentWindow
-			param.changeModelValue(iframeWindow);
-		}
-		
-		/* Update render */
-		this.parent_widget.updateFrameRender();
-	}
 }

@@ -5,6 +5,7 @@
 namespace BayLang.Constructor.Frontend.Editor.Parameters;
 
 use Runtime.BaseObject;
+use BayLang.Constructor.Frontend.Editor.Parameters.ParameterModel;
 use BayLang.Constructor.Frontend.Editor.Processor.CodeProcessor;
 use BayLang.Constructor.Frontend.Editor.Widget;
 use BayLang.OpCodes.BaseOpCode;
@@ -39,7 +40,8 @@ class Parameter extends BaseObject
 	 */
 	public void init()
 	{
-		if (not this.default) return;
+		if (this.default == null) return;
+		if (this.value != null) return;
 		this.setValue(this.default);
 	}
 	
@@ -68,5 +70,14 @@ class Parameter extends BaseObject
 	void setValue(var value)
 	{
 		this.value = value;
+	}
+	
+	
+	/**
+	 * Change param
+	 */
+	void changeValue(var value)
+	{
+		this.setValue(value);
 	}
 }

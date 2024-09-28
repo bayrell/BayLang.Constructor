@@ -7,10 +7,11 @@ namespace BayLang.Constructor.Frontend.Editor.Processor;
 use Runtime.Callback;
 use BayLang.SaveOpCode;
 use BayLang.Constructor.Frontend.Editor.Processor.CodeProcessor;
-use BayLang.Constructor.Frontend.Editor.Parameter;
-use BayLang.Constructor.Frontend.Editor.ParameterModel;
+use BayLang.Constructor.Frontend.Editor.Parameters.Parameter;
+use BayLang.Constructor.Frontend.Editor.Parameters.ParameterModel;
 use BayLang.Constructor.Frontend.Editor.Widget;
 use BayLang.Constructor.Frontend.Providers.EditorProvider;
+use BayLang.Constructor.WidgetPage.ParameterFactory;
 use BayLang.LangBay.ParserBay;
 use BayLang.LangES6.TranslatorES6;
 use BayLang.OpCodes.BaseOpCode;
@@ -237,14 +238,15 @@ class ModelProcessor extends CodeProcessor
 		
 		/* Get model settings */
 		EditorProvider editor = this.page_model.getFrameEditor();
-		widget.model_settings = editor.getWidget(widget.model_class_name);
+		widget.model_settings = editor.getWidgetSettings(widget.model_class_name);
 		if (not widget.model_settings) return;
 		
 		/* Add params */
 		widget.params.appendItems(
 			widget.model_settings.getParams().map(
-				Parameter (Parameter param) use (widget)
+				Parameter (ParameterFactory factory) use (widget)
 				{
+					Parameter param = factory.factory(new rtl());
 					param.widget = widget;
 					return param;
 				}
@@ -279,17 +281,36 @@ class ModelProcessor extends CodeProcessor
 	/**
 	 * Set widget name
 	 */
-	void setWidgetName(Widget widget, string widget_name)
+	void setWidgetName(Widget widget, string new_widget_name)
 	{
 		if (not widget.primary_model_code) return;
 		
 		/* Set name */
-		widget.primary_model_code.op_code.value.value = widget_name;
+		string old_widget_name = widget.primary_model_code.op_code.value.value;
+		widget.primary_model_code.op_code.value.value = new_widget_name;
 		
 		/* Get dict */
 		OpDict op_dict = widget.primary_model_code.expression.args.get(1);
 		if (not op_dict) return;
 		if (not (op_dict instanceof OpDict)) return;
+		
+		/* Set assign name */
+		OpDeclareClass model_class_op_code = this.code.findClass();
+		if (model_class_op_code)
+		{
+			for (int i=0; i<model_class_op_code.items.count(); i++)
+			{
+				BaseOpCode op_code = model_class_op_code.items.get(i);
+				if (op_code instanceof OpAssign)
+				{
+					OpAssignValue op_assign_value = op_code.values.get(0);
+					if (op_assign_value and op_assign_value.var_name == old_widget_name)
+					{
+						op_assign_value.var_name = new_widget_name;
+					}
+				}
+			}
+		}
 		
 		/* Set widget name */
 		Collection<OpDictPair> values = op_dict.values;
@@ -298,7 +319,7 @@ class ModelProcessor extends CodeProcessor
 			OpDictPair op_dict_pair = values.get(i);
 			if (op_dict_pair.key != "widget_name") continue;
 			
-			op_dict_pair.value = static::getOpCodeByValue(widget_name);
+			op_dict_pair.value = static::getOpCodeByValue(new_widget_name);
 		}
 		
 		/* Change attr model name */
@@ -309,7 +330,7 @@ class ModelProcessor extends CodeProcessor
 				OpAttr op_code_attr = widget.code.attrs.get(i);
 				if (op_code_attr.key == "@model")
 				{
-					op_code_attr.value.value.value = widget_name;
+					op_code_attr.value.value.value = new_widget_name;
 				}
 			}
 		}
@@ -510,8 +531,9 @@ class ModelProcessor extends CodeProcessor
 		
 		/* Set model settings */
 		widget.model_class_name = getModelName.apply();
-		widget.model_settings = editor.getWidget(widget.model_class_name);
+		widget.model_settings = editor.getWidgetSettings(widget.model_class_name);
 		if (not widget.model_settings) return;
+		if (not widget.getName()) return;
 		
 		/* Add assign model code */
 		this.addAssignCode(widget);

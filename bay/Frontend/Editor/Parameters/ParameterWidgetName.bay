@@ -59,4 +59,16 @@ class ParameterWidgetName extends ParameterComponent
 		this.value = arr.get(0);
 		this.op_attr.value = CodeProcessor::getOpCodeByValue(rs::join(" ", arr));
 	}
+	
+	
+	/**
+	 * Change param
+	 */
+	void changeValue(var value)
+	{
+		parent(value);
+		
+		/* Update label */
+		this.widget.item.updateLabel();
+	}
 }

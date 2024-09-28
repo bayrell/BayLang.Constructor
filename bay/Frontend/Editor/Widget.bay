@@ -133,6 +133,9 @@ class Widget extends BaseObject
 		/* Setup model */
 		this.page_model.model_processor.setupWidget(this);
 		
+		/* Init params */
+		this.initParams();
+		
 		/* Set flag initialized */
 		this.is_initialized = true;
 	}
@@ -155,6 +158,9 @@ class Widget extends BaseObject
 		
 		/* Setup attrs */
 		this.setupAttrs();
+		
+		/* Init params */
+		this.initParams();
 		
 		/* Set flag initialized */
 		this.is_initialized = true;
@@ -209,7 +215,6 @@ class Widget extends BaseObject
 				{
 					Parameter param = factory.factory(new rtl());
 					param.widget = this;
-					param.init();
 					return param;
 				}
 			)
@@ -224,6 +229,20 @@ class Widget extends BaseObject
 		{
 			return;
 		}
+	}
+	
+	
+	/**
+	 * Init params
+	 */
+	void initParams()
+	{
+		this.params.each(
+			void (Parameter param)
+			{
+				param.init();
+			}
+		);
 	}
 	
 	

@@ -633,21 +633,43 @@ class WidgetEditPageModel extends BasePageModel
 	 */
 	void onRename(DialogMessage message)
 	{
+		string old_widget_name = this.rename_item_dialog.old_value;
 		string new_widget_name = message.value;
-		if (this.rename_item_dialog.old_value == new_widget_name) return;
+		if (old_widget_name == new_widget_name) return;
 		
 		string new_selector_name = new_widget_name;
 		if (rs::charAt(new_selector_name, 0) != ".") new_selector_name = "." ~ new_selector_name;
 		
 		/* Rename widget */
-		this.selected.changeParameterValue(this.selected.widget.param_widget_name, new_widget_name);
+		this.selected.widget.param_widget_name.changeValue(new_widget_name);
+		
+		/* Rename model name */
+		if (this.selected.widget.is_model)
+		{
+			this.model_processor.setWidgetName(this.selected.widget, new_widget_name);
+			
+			/* Rename model */
+			var iframe_page_model = this.getFramePageModel().widget_model;
+			iframe_page_model.widgets.set(
+				new_widget_name, iframe_page_model.widgets.get(old_widget_name)
+			);
+			iframe_page_model.widgets.remove(old_widget_name);
+			#ifcode JAVASCRIPT then
+			iframe_page_model[new_widget_name] = iframe_page_model[old_widget_name];
+			iframe_page_model[old_widget_name] = null;
+			#endif
+		}
 		
 		/* Create new style */
-		if (not this.styles.items.has(new_selector_name))
+		if (not this.styles.selectors.has(new_selector_name))
 		{
-			string css_content = this.styles.getCSSValue("." ~ this.rename_item_dialog.old_value)
-			this.styles.changeCSSValue(new_selector_name, css_content);
+			string old_selector_name = "." ~ old_widget_name;
+			string css_content = this.styles.getSelectorContent(old_selector_name);
+			this.styles.setSelectorContent(new_selector_name, css_content);
 		}
+		
+		/* Update render */
+		this.updateFrameRender();
 	}
 	
 	
@@ -715,6 +737,8 @@ class WidgetEditPageModel extends BasePageModel
 		{
 			widget.setupSettings();
 			widget.setupParams();
+			widget.setupAttrs();
+			widget.initParams();
 			
 			/* Create model op_code */
 			this.model_processor.createModel(widget);

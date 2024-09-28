@@ -106,15 +106,22 @@ class AddItemDialogModel extends ConfirmDialogModel
 	 */
 	Collection<WidgetSettingsInterface> getFrameWidgets()
 	{
+		Widget selected_widget = this.selected_widget;
+		if (this.kind == "before" or this.kind == "after")
+		{
+			Collection selected_widget_path = this.selected_widget_path.slice(0, -1);
+			selected_widget = this.parent_widget.component_processor
+				.getWidget(selected_widget_path);
+		}
 		EditorProvider editor = this.parent_widget.getFrameEditor();
 		Collection<WidgetSettingsInterface> widgets = editor.getWidgets();
 		widgets = widgets.filter(
-			bool (WidgetSettingsInterface widget)
+			bool (WidgetSettingsInterface widget) use (selected_widget)
 			{
 				string name = widget.getComponentName();
 				if (name == null) return false;
 				if (rs::substr(name, -5) == "Model") return false;
-				if (not this.selected_widget.canInsert(widget)) return false;
+				if (not selected_widget.canInsert(widget)) return false;
 				return true;
 			}
 		);

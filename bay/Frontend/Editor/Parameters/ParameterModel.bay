@@ -40,6 +40,7 @@ class ParameterModel extends Parameter
 	 */
 	void setValue(var value)
 	{
+		log(value);
 		this.value = value;
 		this.op_code.value = CodeProcessor::getOpCodeByValue(value);
 	}
@@ -48,24 +49,27 @@ class ParameterModel extends Parameter
 	/**
 	 * Change model value
 	 */
-	void changeModelValue(var iframeWindow)
+	void changeValue(var value)
 	{
-		var page_model = iframeWindow.app_layout.getPageModel();
+		parent(value);
+		
+		var iframe_window = this.widget.page_model.getFrameWindow();
+		var iframe_page_model = this.widget.page_model.getFramePageModel();
 		
 		/* Get page widget */
 		string widget_name = this.widget.getName();
-		BaseModel widget = page_model.widget_model.getWidget(widget_name);
+		BaseModel widget = iframe_page_model.widget_model.getWidget(widget_name);
 		if (not widget) return;
 		
 		/* Update model value */
 		if (this.onChange)
 		{
-			this.onChange(iframeWindow, widget, this);
+			this.onChange(iframe_window, widget, this);
 			return;
 		}
 		else
 		{
-			this.updateModelValue(iframeWindow, widget);
+			this.updateModelValue(iframe_window, widget);
 		}
 	}
 	
