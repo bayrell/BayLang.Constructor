@@ -139,7 +139,7 @@ class AddItemDialogModel extends ConfirmDialogModel
 		this.title = "Add item";
 		
 		/* Setup selected widget */
-		this.selected_widget_path = selected_path ? selected_path.slice() : null;
+		this.selected_widget_path = selected_path ? selected_path.slice() : [];
 		if (this.selected_widget_path)
 		{
 			this.selected_widget = this.parent_widget.component_processor

@@ -50,9 +50,9 @@ class SelectImageDialogModel extends ConfirmDialogModel
 	
 	
 	/**
-	 * Load data
+	 * Load items
 	 */
-	async void loadData(RenderContainer container)
+	async void loadItems()
 	{
 		ApiResult result = await this.layout.callApi({
 			"api_name": "baylang.constructor.assets",
@@ -67,6 +67,16 @@ class SelectImageDialogModel extends ConfirmDialogModel
 			this.items = result.data.get("items");
 			this.path = result.data.get("path");
 		}
+	}
+	
+	
+	/**
+	 * Load data
+	 */
+	async void loadData(RenderContainer container)
+	{
+		await this.loadItems();
+		parent(container);
 	}
 	
 	
@@ -123,6 +133,7 @@ class SelectImageDialogModel extends ConfirmDialogModel
 	void show()
 	{
 		this.selected = -1;
+		this.loadItems();
 		parent();
 	}
 }

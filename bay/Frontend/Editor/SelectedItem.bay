@@ -18,6 +18,7 @@
 <use name="BayLang.Constructor.Frontend.Editor.Styles.StyleItem" />
 <use name="BayLang.Constructor.Frontend.Editor.WidgetStyle" component="true" />
 <use name="BayLang.Constructor.Frontend.Providers.EditorProvider" />
+<use name="BayLang.Constructor.WidgetPage.WidgetSettingsInterface" />
 
 
 <style>
@@ -254,6 +255,7 @@
 
 
 <template name="renderStyles">
+	%set WidgetSettingsInterface component_settings = this.model.selected.widget.component_settings;
 	%set Selector selector = this.model.selected.widget.getSelector();
 	<div class="widget_css__content">
 		<div class="widget_css__label">Common</div>
@@ -264,6 +266,43 @@
 			%render this.renderInput(selector, "min-height", "");
 		</div>
 	</div>
+	%if (component_settings and rtl::is_instanceof(component_settings, "Runtime.Widget.WidgetSettings.Settings.ContainerSettings"))
+	{
+		<div class="widget_css__content">
+			<div class="widget_css__label">Flex</div>
+			<div class="widget_css__items">
+				%render this.renderSelect(selector, "display", "", [
+					{"key": "block", "value": "block"},
+					{"key": "flex", "value": "flex"},
+				]);
+				%render this.renderSelect(selector, "align-items", "", [
+					{"key": "baseline", "value": "baseline"},
+					{"key": "center", "value": "center"},
+					{"key": "end", "value": "end"},
+					{"key": "flex-end", "value": "flex-end"},
+					{"key": "flex-start", "value": "flex-start"},
+					{"key": "start", "value": "start"},
+					{"key": "stretch", "value": "stretch"},
+					{"key": "revert", "value": "revert"},
+				]);
+				%render this.renderSelect(selector, "justify-content", "", [
+					{"key": "left", "value": "left"},
+					{"key": "center", "value": "center"},
+					{"key": "right", "value": "right"},
+					{"key": "space-around", "value": "space-around"},
+					{"key": "space-between", "value": "space-between"},
+					{"key": "start", "value": "start"},
+					{"key": "stretch", "value": "stretch"},
+					{"key": "end", "value": "end"},
+				]);
+				%render this.renderSelect(selector, "flex-wrap", "", [
+					{"key": "nowrap", "value": "nowrap"},
+					{"key": "wrap", "value": "wrap"},
+				]);
+				%render this.renderInput(selector, "gap", "");
+			</div>
+		</div>
+	}
 	<div class="widget_css__content">
 		<div class="widget_css__label">Padding</div>
 		<div class="widget_css__items">
@@ -292,6 +331,15 @@
 				{"key": "normal", "value": "normal"},
 				{"key": "bold", "value": "bold"},
 				{"key": "bolder", "value": "bolder"},
+				{"key": "100", "value": "100"},
+				{"key": "200", "value": "200"},
+				{"key": "300", "value": "300"},
+				{"key": "400", "value": "400"},
+				{"key": "500", "value": "500"},
+				{"key": "600", "value": "600"},
+				{"key": "700", "value": "700"},
+				{"key": "800", "value": "800"},
+				{"key": "900", "value": "900"},
 			]);
 			%render this.renderSelect(selector, "text-align", "", [
 				{"key": "left", "value": "left"},

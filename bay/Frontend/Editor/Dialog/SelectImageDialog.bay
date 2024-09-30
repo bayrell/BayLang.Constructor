@@ -32,7 +32,7 @@
 	}
 	.item_label{
 		margin-top: 5px;
-		overflow-wrap: break-word;
+		overflow-wrap: anywhere;
 		width: 100px;
 		text-align: center;
 		span{
@@ -98,7 +98,7 @@ bool isImage(Dict item)
 {
 	string file_name = item.get("file_name");
 	string file_extension = rs::extname(file_name);
-	Collection arr = ["jpg", "jpeg", "png"];
+	Collection arr = ["jpg", "jpeg", "png", "svg"];
 	if (arr.indexOf(file_extension) == -1) return false;
 	return true;
 }
