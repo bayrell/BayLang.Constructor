@@ -69,6 +69,7 @@
 	flex-direction: column;
 	justify-content: stretch;
 	align-items: stretch;
+	width: calc(100% - 300px);
 	position: relative;
 	padding: 0px;
 	flex: 1;

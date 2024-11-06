@@ -6,6 +6,7 @@ namespace BayLang.Constructor.WidgetPage;
 
 use Runtime.Web.BaseRoute;
 use Runtime.Web.RouteInfo;
+use Runtime.Web.RouteModel;
 
 
 class Routes extends BaseRoute
@@ -13,7 +14,7 @@ class Routes extends BaseRoute
 	/**
 	 * Returns layout name
 	 */
-	static string getLayoutName() => "clear";
+	static string getLayoutName() => "default";
 	
 	
 	/**
@@ -23,7 +24,7 @@ class Routes extends BaseRoute
 	{
 		return
 		[
-			new RouteInfo
+			new RouteModel
 			{
 				"uri": "/open/widget",
 				"name": "baylang:widget:debug",
