@@ -29,6 +29,8 @@ class WidgetListModel extends BasePageModel
 	string project_id = "";
 	string module_id = "";
 	SelectModel modules = null;
+	TableDialogModel table = null;
+	RowButtonsModel top_buttons = null;
 	
 	
 	/**

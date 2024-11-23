@@ -26,6 +26,7 @@ use Runtime.Widget.Tree.TreeItem;
 use Runtime.Widget.Tree.TreeMessage;
 use Runtime.Widget.Tree.TreeModel;
 use BayLang.LangBay.TranslatorBay;
+use BayLang.Constructor.Frontend.ConstructorHook;
 use BayLang.Constructor.Frontend.Editor.Dialog.AddItemDialogModel;
 use BayLang.Constructor.Frontend.Editor.Dialog.RemoveItemDialogModel;
 use BayLang.Constructor.Frontend.Editor.Dialog.SelectImageDialogModel;
@@ -49,12 +50,13 @@ use BayLang.SaveOpCode;
 
 class WidgetEditPageModel extends BasePageModel
 {
-	static const string STATUS_LOADING = 0;
-	static const string STATUS_LOADED = 1;
-	static const string STATUS_CHANGED = 2;
-	static const string STATUS_SAVE_PROCESS = 3;
-	static const string STATUS_SAVE_SUCCESS = 4;
-	static const string STATUS_SAVE_ERROR = 5;
+	static const string STATUS_LOAD_PROCESS = 0;
+	static const string STATUS_LOAD_SUCCESS = 1;
+	static const string STATUS_LOAD_ERROR = 2;
+	static const string STATUS_CHANGED = 3;
+	static const string STATUS_SAVE_PROCESS = 4;
+	static const string STATUS_SAVE_SUCCESS = 5;
+	static const string STATUS_SAVE_ERROR = 6;
 	
 	/* Variables */
 	string component = classof WidgetEditPage;
@@ -64,7 +66,8 @@ class WidgetEditPageModel extends BasePageModel
 	string component_class_name = "";
 	string menu_selected = "params";
 	string iframe_current_size = "";
-	int app_status = static::STATUS_LOADING;
+	string load_error_message = "";
+	int app_status = static::STATUS_LOAD_PROCESS;
 	int breadcrumbs_selected = -1;
 	var iframe = null;
 	
@@ -132,9 +135,11 @@ class WidgetEditPageModel extends BasePageModel
 	/**
 	 * Returns widget frame page
 	 */
-	string getFramePageUrl() =>
-		"/project/" ~ this.project_id ~ "/iframe/open/widget?widget_name=" ~ this.current_widget
-	;
+	string getFramePageUrl()
+	{
+		string page_url = ConstructorHook::getFramePageUrl(this.project_id, this.current_widget);
+		return page_url;
+	}
 	
 	
 	/**
@@ -255,6 +260,11 @@ class WidgetEditPageModel extends BasePageModel
 			/* Load iframe page */
 			this.iframe.src = this.getFramePageUrl();
 		}
+		else
+		{
+			this.app_status = static::STATUS_LOAD_ERROR;
+			this.load_error_message = res.message;
+		}
 	}
 	
 	
@@ -321,7 +331,7 @@ class WidgetEditPageModel extends BasePageModel
 	 */
 	void onAppLoaded()
 	{
-		this.app_status = static::STATUS_LOADED;
+		this.app_status = static::STATUS_LOAD_SUCCESS;
 		
 		/* Setup main widget */
 		this.component_processor.main_widget.setupMainWidget();

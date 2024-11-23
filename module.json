@@ -49,6 +49,7 @@
 		"Frontend/Settings/SettingsModel.bay",
 		"Frontend/Widget/WidgetList.bay",
 		"Frontend/Widget/WidgetListModel.bay",
+		"Frontend/ConstructorHook.bay",
 		"Frontend/ModuleDescription.bay"
 	],
 	"groups": [

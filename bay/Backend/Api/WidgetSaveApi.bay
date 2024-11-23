@@ -12,6 +12,7 @@ use Runtime.Web.Annotations.ApiMethod;
 use Runtime.Widget.Crud.SaveApi;
 use Runtime.Widget.Crud.Rules.CrudRule;
 use Runtime.Widget.Crud.Rules.Required;
+use BayLang.Constructor.Backend.ApiHook;
 use BayLang.Helper.Module;
 use BayLang.Helper.Project;
 use BayLang.Helper.Widget;
@@ -82,9 +83,7 @@ class WidgetSaveApi extends SaveApi
 	{
 		/* Get project */
 		string project_id = this.post_data["foreign_key", "project_id"];
-		this.project = await Project::readProject(
-			fs::join([@.env("constructor_path"), "projects", project_id])
-		);
+		this.project = await ApiHook::getProject(project_id);
 		if (not this.project)
 		{
 			throw new ApiError(new ItemNotFound(project_id, "Project"));

@@ -5,6 +5,7 @@
 namespace BayLang.Constructor.Backend;
 
 use Runtime.Web.Annotations.Api;
+use Runtime.Web.Annotations.Hook;
 
 
 static class ModuleDescription
@@ -46,5 +47,6 @@ static class ModuleDescription
 		new Api("BayLang.Constructor.Backend.Api.WidgetApi"),
 		new Api("BayLang.Constructor.Backend.Api.WidgetSaveApi"),
 		new Api("BayLang.Constructor.Backend.Api.WidgetSearchApi"),
+		new Hook("BayLang.Constructor.Backend.ApiHook"),
 	];
 }

@@ -12,6 +12,7 @@ use Runtime.Exceptions.ItemNotFound;
 use Runtime.Exceptions.RuntimeException;
 use Runtime.Web.BaseApi;
 use Runtime.Web.Annotations.ApiMethod;
+use BayLang.Constructor.Backend.ApiHook;
 use BayLang.Helper.Module;
 use BayLang.Helper.Project;
 use BayLang.Helper.Widget;
@@ -38,11 +39,10 @@ class WidgetApi extends BaseApi
 		string current_widget = api.post_data.get("current_widget");
 		
 		/* Find project */
-		string project_path = fs::join([@.env("constructor_path"), "projects", project_id]);
-		Project project = await Project::readProject(project_path);
+		Project project = await ApiHook::getProject(project_id);
 		if (not project)
 		{
-			throw new ApiError( new ItemNotFound(project_path, "Project") );
+			throw new ApiError( new ItemNotFound(project_id, "Project") );
 		}
 		
 		/* Load project */
@@ -90,11 +90,10 @@ class WidgetApi extends BaseApi
 		string current_widget = api.post_data.get("current_widget");
 		
 		/* Find project */
-		string project_path = fs::join([@.env("constructor_path"), "projects", project_id]);
-		Project project = await Project::readProject(project_path);
+		Project project = await ApiHook::getProject(project_id);
 		if (not project)
 		{
-			throw new ApiError( new ItemNotFound(project_path, "Project") );
+			throw new ApiError( new ItemNotFound(project_id, "Project") );
 		}
 		
 		/* Load project */

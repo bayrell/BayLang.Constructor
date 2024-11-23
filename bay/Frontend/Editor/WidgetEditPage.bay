@@ -33,8 +33,8 @@
 	text-align: center;
 	min-width: 40px;
 }
-.widget_edit_page__menu_item--status_message{
-	width: 100px;
+.widget_edit_page__menu_item--error{
+	color: var(--widget-color-danger);
 }
 .widget_edit_page__menu_item--select_size{
 	display: flex;
@@ -128,7 +128,9 @@
 				}}
 			>Save</div>
 			<div class="widget_edit_page__menu_item">Export</div>
-			<div class="widget_edit_page__menu_item widget_edit_page__menu_item--status_message">
+			<div class="widget_edit_page__menu_item widget_edit_page__menu_item--status_message"
+				class={{ this.isAppStatusError() ? "widget_edit_page__menu_item--error" : "" }}
+			>
 				{{ this.getAppStatusMessage() }}
 			</div>
 		</div>
@@ -189,12 +191,27 @@ Collection<string> menu_items = [
 
 
 /**
+ * Returns true if app status is error
+ */
+bool isAppStatusError()
+{
+	if (this.model.app_status == WidgetEditPageModel::STATUS_LOAD_ERROR) return true;
+	if (this.model.app_status == WidgetEditPageModel::STATUS_SAVE_ERROR) return true;
+	return false;
+}
+
+
+/**
  * Returns app status message
  */
 string getAppStatusMessage()
 {
-	if (this.model.app_status == WidgetEditPageModel::STATUS_LOADING) return "Loading...";
-	if (this.model.app_status == WidgetEditPageModel::STATUS_LOADED) return "Loaded";
+	if (this.model.app_status == WidgetEditPageModel::STATUS_LOAD_PROCESS) return "Loading...";
+	if (this.model.app_status == WidgetEditPageModel::STATUS_LOAD_SUCCESS) return "Loaded";
+	if (this.model.app_status == WidgetEditPageModel::STATUS_LOAD_ERROR)
+	{
+		return this.model.load_error_message;
+	}
 	if (this.model.app_status == WidgetEditPageModel::STATUS_CHANGED) return "";
 	if (this.model.app_status == WidgetEditPageModel::STATUS_SAVE_PROCESS) return "Saving...";
 	if (this.model.app_status == WidgetEditPageModel::STATUS_SAVE_SUCCESS) return "Saved";

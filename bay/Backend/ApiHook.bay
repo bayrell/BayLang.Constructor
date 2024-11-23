@@ -1,0 +1,82 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Backend;
+
+use Runtime.fs;
+use Runtime.BaseHook;
+use BayLang.Helper.Project;
+
+
+class ApiHook extends BaseHook
+{
+	static const string GET_PROJECT_LIST = "baylang.constructor::get_project_list";
+	static const string GET_PROJECT = "baylang.constructor::get_project";
+	
+	
+	/**
+	 * Register hooks
+	 */
+	void register_hooks()
+	{
+		this.register(static::GET_PROJECT);
+		this.register(static::GET_PROJECT_LIST);
+	}
+	
+	
+	/**
+	 * Returns method name by hook name
+	 */
+	string getMethodName(string hook_name)
+	{
+		if (hook_name == static::GET_PROJECT_LIST) return "get_project_list";
+		if (hook_name == static::GET_PROJECT) return "get_project";
+		return "";
+	}
+	
+	
+	/**
+	 * Returns projects list
+	 */
+	async static Collection<Project> getProjectList()
+	{
+		Dict result = await @.callHookAsync(static::GET_PROJECT_LIST);
+		return result.get("items");
+	}
+	
+	
+	/**
+	 * Returns projects list
+	 */
+	async static Project getProject(string project_id)
+	{
+		Dict result = await @.callHookAsync(static::GET_PROJECT, {
+			"project": project_id,
+		});
+		return result.get("project");
+	}
+	
+	
+	/**
+	 * Returns projects list
+	 */
+	async void get_project_list(Dict params)
+	{
+		string project_folder = fs::join([@.env("constructor_path"), "projects"]);
+		Collection<Project> items = await Project::readProjects(project_folder);
+		params.set("items", items);
+	}
+	
+	
+	/**
+	 * Returns projects
+	 */
+	async void get_project(Dict params)
+	{
+		string project_id = params.get("project");
+		string project_path = fs::join([@.env("constructor_path"), "projects", project_id]);
+		Project project = await Project::readProject(project_path);
+		params.set("project", project);
+	}
+}

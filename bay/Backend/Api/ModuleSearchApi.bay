@@ -9,6 +9,7 @@ use Runtime.Exceptions.ApiError;
 use Runtime.Exceptions.ItemNotFound;
 use Runtime.Web.Annotations.ApiMethod;
 use Runtime.Widget.Crud.SearchApi;
+use BayLang.Constructor.Backend.ApiHook;
 use BayLang.Helper.Module;
 use BayLang.Helper.Project;
 
@@ -32,9 +33,7 @@ class ModuleSearchApi extends SearchApi
 	{
 		/* Get project */
 		string project_id = this.post_data["foreign_key", "project_id"];
-		this.project = await Project::readProject(
-			fs::join([@.env("constructor_path"), "projects", project_id])
-		);
+		this.project = await ApiHook::getProject(project_id);
 		if (not this.project)
 		{
 			throw new ApiError(new ItemNotFound(project_id, "Project"));

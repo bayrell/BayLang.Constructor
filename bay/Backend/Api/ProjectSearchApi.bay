@@ -7,6 +7,7 @@ namespace BayLang.Constructor.Backend.Api;
 use Runtime.fs;
 use Runtime.Web.Annotations.ApiMethod;
 use Runtime.Widget.Crud.SearchApi;
+use BayLang.Constructor.Backend.ApiHook;
 use BayLang.Helper.Project;
 
 
@@ -25,9 +26,7 @@ class ProjectSearchApi extends SearchApi
 	async void actionSearch()
 	{
 		/* Get projects */
-		Collection items = await Project::readProjects(
-			fs::join([@.env("constructor_path"), "projects"])
-		);
+		Collection items = await ApiHook::getProjectList();
 		
 		/* Filter items */
 		items = items.map(
