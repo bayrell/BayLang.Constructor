@@ -1,0 +1,192 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Editor.Widget;
+
+use BayLang.Constructor.Frontend.Editor.Parameters.Parameter;
+use BayLang.Constructor.Frontend.Editor.Parameters.ParameterClassName;
+use BayLang.Constructor.Frontend.Editor.Parameters.ParameterComponent;
+use BayLang.Constructor.Frontend.Editor.Parameters.ParameterWidgetName;
+use BayLang.Constructor.Frontend.Editor.Styles.Selector;
+use BayLang.Constructor.Frontend.Editor.Widget.Widget;
+use BayLang.Constructor.Frontend.Editor.WidgetEditPageModel;
+use BayLang.OpCodes.BaseOpCode;
+use BayLang.OpCodes.OpHtmlAttribute;
+use BayLang.OpCodes.OpHtmlContent;
+use BayLang.OpCodes.OpHtmlTag;
+use BayLang.OpCodes.OpHtmlValue;
+use BayLang.OpCodes.OpString;
+
+
+class WidgetTag extends Widget
+{
+	/* Params */
+	Parameter param_class_name = null;
+	Parameter param_widget_name = null;
+	
+	/* Widget content */
+	bool is_raw = false;
+	string html_content = "";
+	
+	
+	/**
+	 * Returns true if component
+	 */
+	bool isComponent() => false;
+	
+	
+	/**
+	 * Returns true if tag has model
+	 */
+	bool isModel() => false;
+	
+	
+	/**
+	 * Returns widget name
+	 */
+	string getName() => this.param_widget_name.value;
+	
+	
+	/**
+	 * Returns CSS Content
+	 */
+	string getSelectorName() => "." ~ this.param_widget_name.value;
+	
+	
+	/**
+	 * Returns selector
+	 */
+	Selector getSelector()
+	{
+		string selector_name = this.getSelectorName();
+		return this.page_model.styles.getSelector(selector_name);
+	}
+	
+	
+	/**
+	 * Can insert widget
+	 */
+	bool canInsert(Widget widget)
+	{
+		if (not this.component_settings) return true;
+		return this.component_settings.canInsert(widget);
+	}
+	
+	
+	/**
+	 * Constructor
+	 */
+	public void constructor(WidgetEditPageModel page_model, BaseOpCode code)
+	{
+		parent(page_model, code);
+		
+		/* Create params */
+		this.param_class_name = new ParameterClassName
+		{
+			"widget": this,
+		};
+		this.param_widget_name = new ParameterWidgetName
+		{
+			"widget": this,
+		};
+		this.param_class_name.param_widget_name = this.param_widget_name;
+		this.param_widget_name.param_class_name = this.param_class_name;
+		this.param_class_name.op_attr = null;
+		this.param_class_name.value = [];
+		this.param_widget_name.op_attr = null;
+		this.param_widget_name.value = "";
+	}
+	
+	
+	/**
+	 * Setup settings
+	 */
+	void setupSettings()
+	{
+		this.html_content = "";
+		
+		/* Get code */
+		BaseOpCode text_item = this.code.items.items.get(0);
+		
+		/* Setup text */
+		if (text_item instanceof OpHtmlContent)
+		{
+			this.html_content = text_item.value;
+		}
+		else if (text_item instanceof OpHtmlValue)
+		{
+			this.is_raw = text_item.kind == "raw";
+			if (text_item.value instanceof OpString)
+			{
+				this.html_content = text_item.value.value;
+			}
+		}
+	}
+	
+	
+	/**
+	 * Setup params
+	 */
+	void setupParams()
+	{
+		/* Clear params */
+		this.params = [];
+		this.params.add(this.param_widget_name);
+		this.params.add(this.param_class_name);
+	}
+	
+	
+	/**
+	 * Init params
+	 */
+	void initParams()
+	{
+		/* Setup attrs */
+		this.setupAttrs();
+		
+		/* Setup model */
+		this.page_model.model_processor.setupWidget(this);
+		
+		/* Init */
+		parent();
+	}
+	
+	
+	/**
+	 * Setup attrs
+	 */
+	void setupAttrs()
+	{
+		Collection<OpHtmlAttribute> attrs = this.code.attrs;
+		if (not attrs) return;
+		
+		/* Setup paremeters values */
+		for (int i=0; i<attrs.count(); i++)
+		{
+			OpHtmlAttribute op_attr = attrs.get(i);
+			for (int j=0; j<this.params.count(); j++)
+			{
+				Parameter param = this.params.get(j);
+				if (
+					param instanceof ParameterComponent and
+					param.isOpCode(op_attr)
+				)
+				{
+					param.setOpCode(op_attr);
+				}
+			}
+		}
+		
+		/* Create class attribute */
+		if (this.param_class_name.op_attr == null)
+		{
+			OpHtmlAttribute op_attr = new OpHtmlAttribute
+			{
+				"key": "class",
+			};
+			this.param_class_name.op_attr = op_attr;
+			this.param_widget_name.op_attr = op_attr;
+		}
+	}
+}

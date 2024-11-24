@@ -1,0 +1,22 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Editor.Widget;
+
+use BayLang.Constructor.Frontend.Editor.Widget.WidgetTag;
+
+
+class WidgetMain extends WidgetTag
+{
+	/**
+	 * Setup settings
+	 */
+	void setupSettings()
+	{
+		/* Setup settings */
+		this.component_settings = this.page_model.getFrameEditor()
+			.findClassName("Runtime.Widget.WidgetSettings.Settings.TemplateSettings")
+		;
+	}
+}

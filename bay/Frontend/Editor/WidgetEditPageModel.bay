@@ -34,6 +34,7 @@ use BayLang.Constructor.Frontend.Editor.Processor.AttributeProcessor;
 use BayLang.Constructor.Frontend.Editor.Processor.ComponentProcessor;
 use BayLang.Constructor.Frontend.Editor.Processor.ModelProcessor;
 use BayLang.Constructor.Frontend.Editor.Styles.StylesModel;
+use BayLang.Constructor.Frontend.Editor.Widget.WidgetManager;
 use BayLang.Constructor.Frontend.Editor.SelectedItemModel;
 use BayLang.Constructor.Frontend.Editor.WidgetEditPage;
 use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
@@ -76,6 +77,7 @@ class WidgetEditPageModel extends BasePageModel
 	AttributeProcessor attribute_processor = new AttributeProcessor(this);
 	ComponentProcessor component_processor = new ComponentProcessor(this);
 	ModelProcessor model_processor = new ModelProcessor(this);
+	WidgetManager widget_manager = new WidgetManager(this);
 	SelectedItemModel selected = null;
 	StylesModel styles = null;
 	ContextMenuModel context_menu = null;
@@ -334,7 +336,10 @@ class WidgetEditPageModel extends BasePageModel
 		this.app_status = static::STATUS_LOAD_SUCCESS;
 		
 		/* Setup main widget */
-		this.component_processor.main_widget.setupMainWidget();
+		this.component_processor.main_widget.setup();
+		
+		/* Setup tree root */
+		this.tree.root = this.component_processor.main_widget.tree_item;
 	}
 	
 	
@@ -544,7 +549,7 @@ class WidgetEditPageModel extends BasePageModel
 	void onTreeSelectItem(TreeMessage message)
 	{
 		if (not this.isLoaded()) return null;
-		if (this.selected.widget != null and (message.item == this.selected.widget.item)) return;
+		if (this.selected.widget != null and (message.item == this.selected.widget.tree_item)) return;
 		this.selectItem(message.path);
 	}
 	
@@ -604,15 +609,13 @@ class WidgetEditPageModel extends BasePageModel
 	 */
 	void onCanTreeDrop(TreeMessage message)
 	{
-		Widget src_widget = this.component_processor.getWidget(message.src);
-		Widget dest_widget = this.component_processor.getWidget(message.dest);
+		Widget src_widget = this.widget_manager.getWidget(message.src);
+		Widget dest_widget = this.widget_manager.getWidget(message.dest);
 		if (message.dest == null) return;
 		if (dest_widget == null) return;
-		if (dest_widget.component_settings == null)
-		{
-			dest_widget.setupSettings();
-		}
-		if (dest_widget.component_settings == null) return;
+		
+		/* Setup widget */
+		if (dest_widget.is_initialized) dest_widget.setup();
 		
 		/* Check into drag */
 		if (
@@ -703,12 +706,12 @@ class WidgetEditPageModel extends BasePageModel
 		}
 		
 		Collection dest_path = path.setIm(path.count() - 1, dest_path_item);
-		BaseOpCode src_op_code = this.component_processor.getOpCode(path);
-		BaseOpCode dest_op_code = this.component_processor.getOpCode(dest_path);
+		BaseOpCode src_op_code = this.widget_manager.getOpCode(path);
+		BaseOpCode dest_op_code = this.widget_manager.getOpCode(dest_path);
 		if (not dest_op_code) return;
 		
 		/* Move op code */
-		this.component_processor.moveOpCode(src_op_code, dest_op_code, dest_path_kind);
+		this.widget_manager.moveOpCode(src_op_code, dest_op_code, dest_path_kind);
 		this.selectItem(dest_path);
 		
 		/* Update frame render */
@@ -721,7 +724,7 @@ class WidgetEditPageModel extends BasePageModel
 	 */
 	void addOpCode(OpHtmlTag op_code, Collection<int> path, string kind)
 	{
-		BaseOpCode dest_op_code = this.component_processor.getOpCode(path);
+		BaseOpCode dest_op_code = this.widget_manager.getOpCode(path);
 		
 		/* Root insert */
 		if (dest_op_code == null)
@@ -732,7 +735,7 @@ class WidgetEditPageModel extends BasePageModel
 		}
 		
 		/* Add op code */
-		int pos = this.component_processor.addOpCode(op_code, dest_op_code, kind);
+		int pos = this.widget_manager.addOpCode(op_code, dest_op_code, kind);
 		if (pos < 0) return;
 		
 		/* Build new path */
@@ -743,13 +746,11 @@ class WidgetEditPageModel extends BasePageModel
 		new_src_path.push(pos);
 		
 		/* Add model */
-		Widget widget = this.component_processor.getWidget(new_src_path);
+		Widget widget = this.widget_manager.getWidget(new_src_path);
 		if (widget)
 		{
-			widget.setupSettings();
-			widget.setupParams();
-			widget.setupAttrs();
-			widget.initParams();
+			/* Setup widget */
+			widget.setup();
 			
 			/* Create model op_code */
 			this.model_processor.createModel(widget);
@@ -788,11 +789,11 @@ class WidgetEditPageModel extends BasePageModel
 	void duplicateWidget(Collection<int> path)
 	{
 		/* Get op_code */
-		BaseOpCode dest_op_code = this.component_processor.getOpCode(path);
+		BaseOpCode dest_op_code = this.widget_manager.getOpCode(path);
 		if (not dest_op_code) return;
 		
 		/* Duplicate */
-		this.component_processor.duplicateOpCode(dest_op_code);
+		this.widget_manager.duplicateOpCode(dest_op_code);
 		
 		/* Update frame render */
 		this.updateFrameRender();
@@ -807,18 +808,18 @@ class WidgetEditPageModel extends BasePageModel
 		if (path == null) return;
 		
 		/* Get op_code */
-		BaseOpCode dest_op_code = this.component_processor.getOpCode(this.selected.path);
+		BaseOpCode dest_op_code = this.widget_manager.getOpCode(this.selected.path);
 		if (not dest_op_code) return;
 		
 		/* Remove model */
 		if (model)
 		{
-			Widget widget = this.component_processor.hash.get(dest_op_code);
+			Widget widget = this.widget_manager.get(dest_op_code);
 			if (widget) this.model_processor.removeModel(widget);
 		}
 		
 		/* Remove */
-		this.component_processor.removeOpCode(dest_op_code);
+		this.widget_manager.removeOpCode(dest_op_code);
 		
 		/* Set selected is null */
 		this.selectItem(null);
@@ -840,7 +841,7 @@ class WidgetEditPageModel extends BasePageModel
 		TreeItem src_parent_item = message.src_parent_item;
 		
 		/* Move item */
-		this.component_processor.moveOpCode(src_item.code, dest_item.code, kind);
+		this.widget_manager.moveOpCode(src_item.code, dest_item.code, kind);
 		
 		/* Select new item */
 		this.selectItem(message.new_src_path);

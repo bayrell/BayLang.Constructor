@@ -31,7 +31,7 @@ class SelectedItemModel extends BaseModel
 		this.path = path ? path.slice() : null;
 		
 		/* Get item */
-		Widget widget = this.parent_widget.component_processor.getWidget(path);
+		Widget widget = this.parent_widget.widget_manager.getWidget(path);
 		if (widget == this.widget) return;
 		
 		/* Set widget */

@@ -1,0 +1,29 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Editor.Widget;
+
+use BayLang.Constructor.Frontend.Editor.Widget.Widget;
+use BayLang.OpCodes.BaseOpCode;
+
+
+class WidgetRender extends Widget
+{
+	/* Model params */
+	string model_class_name = null;
+	BaseOpCode primary_model_code = null;
+	Collection<BaseOpCode> model_codes = null;
+	
+	
+	/**
+	 * Returns true if component
+	 */
+	bool isComponent() => true;
+	
+	
+	/**
+	 * Returns true if component has model
+	 */
+	bool isModel() => true;
+}
