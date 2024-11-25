@@ -110,7 +110,7 @@ class AddItemDialogModel extends ConfirmDialogModel
 		if (this.kind == "before" or this.kind == "after")
 		{
 			Collection selected_widget_path = this.selected_widget_path.slice(0, -1);
-			selected_widget = this.parent_widget.component_processor
+			selected_widget = this.parent_widget.widget_manager
 				.getWidget(selected_widget_path);
 		}
 		EditorProvider editor = this.parent_widget.getFrameEditor();
@@ -142,13 +142,13 @@ class AddItemDialogModel extends ConfirmDialogModel
 		this.selected_widget_path = selected_path ? selected_path.slice() : [];
 		if (this.selected_widget_path)
 		{
-			this.selected_widget = this.parent_widget.component_processor
+			this.selected_widget = this.parent_widget.widget_manager
 				.getWidget(this.selected_widget_path)
 			;
 		}
 		else
 		{
-			this.selected_widget = this.parent_widget.component_processor.main_widget;
+			this.selected_widget = this.parent_widget.main_widget;
 		}
 		
 		/* Get widgets list */

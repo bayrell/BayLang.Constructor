@@ -1,0 +1,39 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Editor.Parameters;
+
+use BayLang.Constructor.Frontend.Editor.Parameters.Parameter;
+
+
+class ParameterTagName extends Parameter
+{
+	string name = "tag";
+	string label = "Tag";
+	string component = "Runtime.Widget.Select";
+	
+	
+	/**
+	 * Init parameter
+	 */
+	public void init()
+	{
+		this.value = this.widget.tag_name;
+	}
+	
+	
+	/**
+	 * Set value
+	 */
+	void setValue(var value)
+	{
+		if (value === "")
+		{
+			value = "div";
+		}
+		
+		this.widget.code.tag_name = value;
+		this.value = value;
+	}
+}

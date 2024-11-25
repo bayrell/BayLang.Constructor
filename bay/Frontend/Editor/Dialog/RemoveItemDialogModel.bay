@@ -15,7 +15,6 @@ class RemoveItemDialogModel extends ConfirmDialogModel
 {
 	string component = classof RemoveItemDialog;
 	string widget_name = "remove_item_dialog";
-	string remove_value = "model_and_component";
 	
 	
 	/**
@@ -30,16 +29,6 @@ class RemoveItemDialogModel extends ConfirmDialogModel
 		confirm_button.content = "Remove";
 		confirm_button.styles.add("danger");
 		confirm_button.styles.removeItem("primary");
-	}
-	
-	
-	/**
-	 * Show dialog
-	 */
-	void show()
-	{
-		parent();
-		this.remove_value = "model_and_component";
 	}
 	
 	
@@ -60,14 +49,7 @@ class RemoveItemDialogModel extends ConfirmDialogModel
 		Collection path = this.parent_widget.selected.path.slice();
 		if (path)
 		{
-			if (this.remove_value == "only_component")
-			{
-				this.parent_widget.removeWidget(path, false);
-			}
-			else
-			{
-				this.parent_widget.removeWidget(path, true);
-			}
+			this.parent_widget.removeWidget(path, true);
 		}
 		this.hide();
 	}

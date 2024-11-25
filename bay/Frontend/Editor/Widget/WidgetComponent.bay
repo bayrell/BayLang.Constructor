@@ -92,4 +92,17 @@ class WidgetComponent extends WidgetTag
 			)
 		);
 	}
+	
+	
+	/**
+	 * Init params
+	 */
+	void initParams()
+	{
+		/* Setup model */
+		this.page_model.model_processor.setupWidget(this);
+		
+		/* Init */
+		parent();
+	}
 }

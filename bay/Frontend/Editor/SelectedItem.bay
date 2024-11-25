@@ -48,7 +48,8 @@
 	text-decoration: underline;
 }
 .widget_param %(Select)widget_select{
-	padding: 4px;
+	padding: 7px;
+	min-height: 37px;
 }
 .widget_param %(Input)widget_input,
 .widget_param %(TextArea)widget_textarea{
@@ -417,7 +418,7 @@
 
 <template>
 	<div class="widget_param">
-		%if (this.model.selected.widget and this.model.selected.widget.is_component)
+		%if (this.model.selected.widget)
 		{
 			<!-- Render info -->
 			%render this.renderComponentName();

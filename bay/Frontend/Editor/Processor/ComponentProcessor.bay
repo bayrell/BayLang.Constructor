@@ -35,13 +35,7 @@ use BayLang.OpCodes.OpUse;
 
 
 class ComponentProcessor extends CodeProcessor
-{
-	HashMap<BaseOpCode, Widget> hash = new HashMap;
-	Widget main_widget = null;
-	string component_namespace = "";
-	string component_class_name = "";
-	
-	
+{	
 	/**
 	 * Setup op code
 	 */
@@ -62,7 +56,7 @@ class ComponentProcessor extends CodeProcessor
 		if (op_code_expression and op_code_expression instanceof OpHtmlItems)
 		{
 			BaseOpCode op_code = op_code_expression.items.get(0);
-			this.main_widget = this.page_model.widget_manager.addMain(op_code);
+			this.page_model.main_widget = this.page_model.widget_manager.addMain(op_code);
 		}
 	}
 	

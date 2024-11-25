@@ -22,6 +22,7 @@ use BayLang.OpCodes.OpString;
 class WidgetTag extends Widget
 {
 	/* Params */
+	string tag_name = "";
 	Parameter param_class_name = null;
 	Parameter param_widget_name = null;
 	
@@ -81,6 +82,9 @@ class WidgetTag extends Widget
 	{
 		parent(page_model, code);
 		
+		/* Tag name */
+		this.tag_name = code.tag_name;
+		
 		/* Create params */
 		this.param_class_name = new ParameterClassName
 		{
@@ -134,22 +138,6 @@ class WidgetTag extends Widget
 		this.params = [];
 		this.params.add(this.param_widget_name);
 		this.params.add(this.param_class_name);
-	}
-	
-	
-	/**
-	 * Init params
-	 */
-	void initParams()
-	{
-		/* Setup attrs */
-		this.setupAttrs();
-		
-		/* Setup model */
-		this.page_model.model_processor.setupWidget(this);
-		
-		/* Init */
-		parent();
 	}
 	
 	

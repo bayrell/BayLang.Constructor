@@ -4,6 +4,7 @@
 
 namespace BayLang.Constructor.Frontend.Editor.Widget;
 
+use Runtime.lib;
 use Runtime.BaseObject;
 use Runtime.Serializer;
 use Runtime.HashMap;
@@ -35,7 +36,7 @@ class WidgetManager extends BaseObject
 	/**
 	 * Returns widget by op_code
 	 */
-	Widget get(BaseOpCode op_code) => this.has.get(op_code);
+	Widget get(BaseOpCode op_code) => this.hash.has(op_code) ? this.hash.get(op_code) : null;
 	
 	
 	/**
@@ -134,7 +135,7 @@ class WidgetManager extends BaseObject
 			if (new_widget)
 			{
 				/* Set new parent code */
-				new_widget.parent_code = widget;
+				new_widget.parent_code = op_code;
 				
 				/* Add tree item */
 				widget.tree_item.items.push(new_widget.tree_item);
@@ -276,7 +277,19 @@ class WidgetManager extends BaseObject
 		
 		/* Duplicate op_code */
 		OpHtmlTag new_op_code = Serializer::copy(dest_op_code);
-		Widget new_widget = this.registerOpCode(new_op_code, parent_widget.code);
+		Widget new_widget = this.add(new_op_code);
+		
+		/* Remove key debug */
+		int attr_pos = new_op_code.attrs.find(
+			lib::equalAttr("key", "@key_debug")
+		);
+		if (attr_pos >= 0)
+		{
+			new_op_code.attrs.remove(attr_pos);
+		}
+		
+		/* Process op_code */
+		this.page_model.attribute_processor.processHtmlTag(new_op_code, "");
 		
 		/* Add new item */
 		int pos = parent_widget.code.items.items.addItem(new_op_code, dest_op_code, "after");

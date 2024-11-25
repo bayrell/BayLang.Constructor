@@ -74,6 +74,7 @@ class WidgetEditPageModel extends BasePageModel
 	
 	/* Models */
 	TreeModel tree = null;
+	Widget main_widget = null;
 	AttributeProcessor attribute_processor = new AttributeProcessor(this);
 	ComponentProcessor component_processor = new ComponentProcessor(this);
 	ModelProcessor model_processor = new ModelProcessor(this);
@@ -336,10 +337,10 @@ class WidgetEditPageModel extends BasePageModel
 		this.app_status = static::STATUS_LOAD_SUCCESS;
 		
 		/* Setup main widget */
-		this.component_processor.main_widget.setup();
+		this.main_widget.setup();
 		
 		/* Setup tree root */
-		this.tree.root = this.component_processor.main_widget.tree_item;
+		this.tree.root = this.main_widget.tree_item;
 	}
 	
 	

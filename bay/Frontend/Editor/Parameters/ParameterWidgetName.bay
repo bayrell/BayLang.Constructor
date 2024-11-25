@@ -69,6 +69,6 @@ class ParameterWidgetName extends ParameterComponent
 		parent(value);
 		
 		/* Update label */
-		this.widget.item.updateLabel();
+		this.widget.tree_item.updateLabel();
 	}
 }

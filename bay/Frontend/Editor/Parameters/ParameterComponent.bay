@@ -46,7 +46,7 @@ class ParameterComponent extends Parameter
 		{
 			"key": this.name,
 		};
-		this.widget.item.code.attrs.prepend(this.op_code);
+		this.widget.code.attrs.prepend(this.op_code);
 	}
 	
 	

@@ -142,9 +142,6 @@ class AttributeProcessor extends BaseObject
 			);
 			class_name_attr.value.value = rs::join(" ", attrs);
 		}
-		
-		/* Generate html items attrs */
-		this.processHtmlItems(op_code.items, widget_name);
 	}
 	
 	
@@ -153,7 +150,6 @@ class AttributeProcessor extends BaseObject
 	 */
 	void processHtmSlot(OpHtmlTag op_code, string widget_name)
 	{
-		this.processHtmlItems(op_code.items, widget_name);
 	}
 	
 	
@@ -177,6 +173,9 @@ class AttributeProcessor extends BaseObject
 			{
 				this.processHtmSlot(item, widget_name);
 			}
+			
+			/* Generate html items attrs */
+			this.processHtmlItems(item.items, widget_name);
 		}
 	}
 }

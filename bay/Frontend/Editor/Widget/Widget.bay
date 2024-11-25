@@ -7,6 +7,7 @@ namespace BayLang.Constructor.Frontend.Editor.Widget;
 use Runtime.BaseObject;
 use BayLang.Constructor.Frontend.Editor.Parameters.Parameter;
 use BayLang.Constructor.Frontend.Editor.Processor.CodeProcessor;
+use BayLang.Constructor.Frontend.Editor.Widget.Html.WidgetDiv;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetComponent;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetTag;
 use BayLang.Constructor.Frontend.Editor.WidgetEditPageModel;
@@ -98,6 +99,9 @@ class Widget extends BaseObject
 		/* Setup params */
 		this.setupParams();
 		
+		/* Setup attrs */
+		this.setupAttrs();
+		
 		/* Init params */
 		this.initParams();
 		
@@ -110,6 +114,14 @@ class Widget extends BaseObject
 	 * Setup settings
 	 */
 	void setupSettings()
+	{
+	}
+	
+	
+	/**
+	 * Setup attrs
+	 */
+	void setupAttrs()
 	{
 	}
 	
@@ -149,6 +161,8 @@ class Widget extends BaseObject
 			return new WidgetComponent(page_model, op_code);
 		}
 		
-		return new WidgetTag(page_model, op_code);
+		/* Lower tag name */
+		selected_tag_name = rs::lower(selected_tag_name);
+		return new WidgetDiv(page_model, op_code);
 	}
 }

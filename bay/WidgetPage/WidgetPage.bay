@@ -102,7 +102,7 @@
 						>@raw{{ "&#9662;" }}</div>
 						<div class="widget_box__item_control_button"
 							@event:click={{ this.onRemoveWidgetClick }}
-						>@raw{{ "&#128465;" }}</div>
+						>@raw{{ "x" }}</div>
 					</div>
 				</div>
 			}

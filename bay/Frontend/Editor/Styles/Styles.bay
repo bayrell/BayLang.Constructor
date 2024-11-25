@@ -176,7 +176,7 @@ void onAddStyle(DialogMessage message)
 {
 	string selector_name = message.value;
 	if (rs::charAt(selector_name, 0) != ".") selector_name = "." ~ selector_name;
-	if (this.model.items.has(selector_name))
+	if (this.model.selectors.has(selector_name))
 	{
 		throw new DialogModelException("selector " ~ selector_name ~ " allready exists");
 	}
@@ -191,7 +191,7 @@ void onRenameStyle(DialogMessage message)
 {
 	string new_selector_name = message.value;
 	if (rs::charAt(new_selector_name, 0) != ".") new_selector_name = "." ~ new_selector_name;
-	if (this.model.items.has(new_selector_name))
+	if (this.model.selectors.has(new_selector_name))
 	{
 		throw new DialogModelException(new_selector_name ~ " allready exists");
 		return;
@@ -199,7 +199,7 @@ void onRenameStyle(DialogMessage message)
 	
 	/* Rename style */
 	string css_content = this.model.getSelectorContent(this.old_selector_name)
-	this.model.items.remove(this.old_selector_name);
+	this.model.selectors.remove(this.old_selector_name);
 	this.model.changeSelectorContent(new_selector_name, css_content);
 }
 
@@ -210,7 +210,7 @@ void onRenameStyle(DialogMessage message)
 void onDeleteStyle()
 {
 	this.model.changeSelectorContent(this.old_selector_name, "");
-	this.model.items.remove(this.old_selector_name);
+	this.model.selectors.remove(this.old_selector_name);
 }
 
 
