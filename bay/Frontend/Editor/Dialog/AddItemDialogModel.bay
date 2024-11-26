@@ -6,8 +6,9 @@ namespace BayLang.Constructor.Frontend.Editor.Dialog;
 
 use Runtime.lib;
 use Runtime.Callback;
+use Runtime.Web.Messages.ClickMessage;
 use Runtime.Widget.ButtonModel;
-use Runtime.Widget.Dialog.ConfirmDialogModel;
+use Runtime.Widget.Dialog.DialogModel;
 use BayLang.Constructor.Frontend.Annotations.WidgetSettingsInterface;
 use BayLang.Constructor.Frontend.Editor.Dialog.AddItemDialog;
 use BayLang.Constructor.Frontend.Editor.CodeModel;
@@ -17,13 +18,15 @@ use BayLang.OpCodes.OpHtmlAttribute;
 use BayLang.OpCodes.OpHtmlTag;
 
 
-class AddItemDialogModel extends ConfirmDialogModel
+class AddItemDialogModel extends DialogModel
 {
 	string component = classof AddItemDialog;
 	string widget_name = "add_item_dialog";
 	string kind = "after";
-	int step = 1;
-	Collection<WidgetSettingsInterface> current_widgets = null;
+	string width = "700px";
+	string selected_group_name = "basic";
+	Collection<Dict> current_groups = [];
+	Collection<WidgetSettingsInterface> current_widgets = [];
 	
 	/* Selected item */
 	Widget selected_widget = null;
@@ -37,6 +40,18 @@ class AddItemDialogModel extends ConfirmDialogModel
 	void initWidget(Dict params)
 	{
 		parent(params);
+		
+		/* Setup close buttons */
+		this.buttons.addButton({
+			"content": "Cancel",
+			"widget_name": "cancel_button",
+			"styles": [
+				"gray"
+			],
+			"events": {
+				"click": new Callback(this, "onCloseButtonClick"),
+			},
+		});
 	}
 	
 	
@@ -65,6 +80,15 @@ class AddItemDialogModel extends ConfirmDialogModel
 			widget_name_class, widget_name_value
 		);
 		this.parent_widget.addOpCode(op_code, this.selected_widget_path, this.kind);
+		this.hide();
+	}
+	
+	
+	/**
+	 * Add close button click
+	 */
+	void onCloseButtonClick(ClickMessage message)
+	{
 		this.hide();
 	}
 	
@@ -102,10 +126,11 @@ class AddItemDialogModel extends ConfirmDialogModel
 	
 	
 	/**
-	 * Returns frame widgets
+	 * Update frame widgets
 	 */
-	Collection<WidgetSettingsInterface> getFrameWidgets()
+	void updateFrameWidgets()
 	{
+		/* Update selected widget */
 		Widget selected_widget = this.selected_widget;
 		if (this.kind == "before" or this.kind == "after")
 		{
@@ -113,19 +138,46 @@ class AddItemDialogModel extends ConfirmDialogModel
 			selected_widget = this.parent_widget.widget_manager
 				.getWidget(selected_widget_path);
 		}
+		
+		/* Get editor provider */
 		EditorProvider editor = this.parent_widget.getFrameEditor();
+		
+		/* Update widgets */
 		Collection<WidgetSettingsInterface> widgets = editor.getWidgets();
-		widgets = widgets.filter(
+		this.current_widgets = widgets.filter(
 			bool (WidgetSettingsInterface widget) use (selected_widget)
 			{
-				string name = widget.getComponentName();
-				if (name == null) return false;
-				if (rs::substr(name, -5) == "Model") return false;
+				if (not widget.getComponentName()) return false;
 				if (not selected_widget.canInsert(widget)) return false;
 				return true;
 			}
 		);
-		return widgets;
+		
+		/* Get groups used */
+		Dict groups = {};
+		this.selected_group_name = "";
+		for (int i=0; i<this.current_widgets.count(); i++)
+		{
+			string group_name = this.current_widgets.get(i).getGroupName();
+			groups.set(group_name, 1);
+			if (this.selected_group_name == "")
+			{
+				this.selected_group_name = group_name;
+			}
+		}
+		
+		/* Update groups */
+		this.current_groups = [];
+		Collection group_settings = editor.getGroups();
+		for (int i=0; i<group_settings.count(); i++)
+		{
+			Dict group = group_settings.get(i);
+			string group_name = group.get("name");
+			if (groups.has(group_name))
+			{
+				this.current_groups.push(group);
+			}
+		}
 	}
 	
 	
@@ -151,8 +203,8 @@ class AddItemDialogModel extends ConfirmDialogModel
 			this.selected_widget = this.parent_widget.main_widget;
 		}
 		
-		/* Get widgets list */
-		this.current_widgets = this.getFrameWidgets();
+		/* Update widgets list */
+		this.updateFrameWidgets();
 		parent();
 	}
 }

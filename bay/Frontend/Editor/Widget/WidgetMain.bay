@@ -15,7 +15,7 @@ class WidgetMain extends WidgetTag
 	void setupSettings()
 	{
 		/* Setup settings */
-		this.component_settings = this.page_model.getFrameEditor()
+		this.settings = this.page_model.getFrameEditor()
 			.findClassName("Runtime.Widget.WidgetSettings.Settings.TemplateSettings")
 		;
 	}

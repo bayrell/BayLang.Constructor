@@ -10,6 +10,12 @@ use BayLang.Constructor.WidgetPage.WidgetSettingsInterface;
 interface WidgetManagerInterface
 {
 	/**
+	 * Returns group settings
+	 */
+	Dict getGroupSettings();
+	
+	
+	/**
 	 * Returns list of widget settings
 	 */
 	Collection<WidgetSettingsInterface> getWidgetSettings();

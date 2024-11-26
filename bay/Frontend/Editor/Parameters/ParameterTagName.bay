@@ -28,12 +28,22 @@ class ParameterTagName extends Parameter
 	 */
 	void setValue(var value)
 	{
-		if (value === "")
+		if (value == "")
 		{
 			value = "div";
 		}
 		
+		/* Update tag name */
 		this.widget.code.tag_name = value;
+		
+		/* Update settings */
+		this.widget.settings = null;
+		this.widget.setupSettings();
+		
+		/* Update tree label */
+		this.widget.tree_item.updateLabel();
+		
+		/* Set new value */
 		this.value = value;
 	}
 }

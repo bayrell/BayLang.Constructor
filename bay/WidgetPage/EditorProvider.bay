@@ -4,6 +4,7 @@
 
 namespace BayLang.Constructor.WidgetPage;
 
+use Runtime.lib;
 use Runtime.BaseObject;
 use Runtime.BaseProvider;
 use Runtime.Web.BaseLayoutModel;
@@ -13,9 +14,22 @@ use BayLang.Constructor.WidgetPage.WidgetSettingsInterface;
 
 class EditorProvider extends BaseProvider
 {
+	Collection<Dict> groups = [];
 	Collection<WidgetManagerAnnotation> managers = [];
 	Collection<WidgetSettingsInterface> widgets = [];
 	Dict<WidgetSettingsInterface> settings = {};
+	
+	
+	/**
+	 * Add group
+	 */
+	void addGroup(Dict group)
+	{
+		string group_name = group.get("name");
+		Dict item = this.groups.findItem(lib::equalAttr("name", group_name));
+		if (item != null) return;
+		this.groups.push(group);
+	}
 	
 	
 	/**
@@ -31,23 +45,48 @@ class EditorProvider extends BaseProvider
 			this.managers.push(annotation.factory());
 		}
 		
-		/* Get widgets settings */
 		for (int i=0; i<this.managers.count(); i++)
 		{
 			WidgetManagerAnnotation manager = this.managers.get(i);
+			
+			/* Get groups settings */
+			Dict groups = manager.getGroupSettings();
+			Collection group_names = groups.keys();
+			for (int i=0; i<group_names.count(); i++)
+			{
+				string group_name = group_names.get(i);
+				Dict group = groups.get(group_name);
+				group.set("name", group_name);
+				this.addGroup(group);
+			}
+			
+			/* Get widgets settings */
 			Collection<string> widgets = manager.getWidgetSettings();
 			for (int j=0; j<widgets.count(); j++)
 			{
-				WidgetSettingsInterface widget = widgets.get(j);
+				WidgetSettingsInterface widget_settings = widgets.get(j);
 				
 				/* Add widget */
-				this.widgets.push(widget);
+				this.widgets.push(widget_settings);
 				
 				/* Add widget by name */
-				this.settings.set(widget.getComponentName(), widget);
+				var component_name = widget_settings.getComponentName();
+				if (component_name)
+				{
+					this.settings.set(component_name, widget_settings);
+				}
 			}
 		}
+		
+		/* Sort groups */
+		this.groups = this.groups.sort(lib::sortAttr("priority", "asc"));
 	}
+	
+	
+	/**
+	 * Returns groups list
+	 */
+	Collection getGroups() => this.groups.slice();
 	
 	
 	/**

@@ -256,7 +256,7 @@
 
 
 <template name="renderStyles">
-	%set WidgetSettingsInterface component_settings = this.model.selected.widget.component_settings;
+	%set WidgetSettingsInterface settings = this.model.selected.widget.settings;
 	%set Selector selector = this.model.selected.widget.getSelector();
 	<div class="widget_css__content">
 		<div class="widget_css__label">Common</div>
@@ -267,7 +267,9 @@
 			%render this.renderInput(selector, "min-height", "");
 		</div>
 	</div>
-	%if (component_settings and rtl::is_instanceof(component_settings, "Runtime.Widget.WidgetSettings.Settings.ContainerSettings"))
+	%if (settings and
+		rtl::is_instanceof(settings, "Runtime.Widget.WidgetSettings.Settings.ContainerSettings")
+	)
 	{
 		<div class="widget_css__content">
 			<div class="widget_css__label">Flex</div>

@@ -13,17 +13,16 @@
 
 
 <style>
+.widget_dialog__content{
+	display: flex;
+	min-height: 250px;
+}
 .list_title{
 	margin-bottom: 10px;
-}
-.list_items{
-	border-radius: 4px;
-	border: var(--widget-border-width) var(--widget-color-border) solid;
 }
 .list_item{
 	cursor: pointer;
 	padding: 10px;
-	border-bottom: var(--widget-border-width) var(--widget-color-border) solid;
 }
 .list_item:last-child{
 	border-bottom-width: 0px;
@@ -35,37 +34,66 @@
 	background-color: var(--widget-color-primary);
     color: var(--widget-color-primary-text);
 }
-.row{
-	margin-bottom: 20px;
+.widget_dialog__content .groups{
+	width: 30%;
+	padding-right: 10px;
+	.list_items{
+		border: var(--widget-border-width) var(--widget-color-border) solid;
+		border-radius: 4px;
+	}
+	.list_item{
+		border-bottom: var(--widget-border-width) var(--widget-color-border) solid;
+	}
 }
-.row_flex{
-	display: flex;
-	align-items: center;
-}
-.row:last-child{
-	margin-bottom: 0px;
-}
-.row_label{
-	margin-right: 10px;
-}
-.selected_widget_label{
-	padding-left: 10px;
+.widget_dialog__content .widgets{
+	width: 70%;
+	.list_items{
+		display: flex;
+		align-items: stretch;
+		justify-content: space-between;
+		flex-wrap: wrap;
+		gap: 15px;
+	}
+	.list_item{
+		border: var(--widget-border-width) var(--widget-color-border) solid;
+		border-radius: 4px;
+		text-align: center;
+		flex: 1 1 30%;
+	}
 }
 </style>
 
 
 <template name="renderContent">
 	<div class="widget_dialog__content">
-		%if (this.model.step == 1)
-		{
-			<div class="row" @key="select_component">
-				<div class="list_title">Select component</div>
-				<div class="list_items">
-				%if (this.model.current_widgets)
+		<div class="groups">
+			<div class="list_title">Groups</div>
+			<div class="list_items">
+			%for (int i=0; i<this.model.current_groups.count(); i++)
+			{
+				%set Dict group = this.model.current_groups.get(i);
+				<div class="list_item"
+					class={{ this.model.selected_group_name == group.get("name") ? "selected" : "" }}
+					@event:click={{
+						void () use (group)
+						{
+							this.model.selected_group_name = group.get("name");
+						}
+					}}
+				>{{ group.get("label") }}</div>
+			}
+			</div>
+		</div>
+		<div class="widgets">
+			<div class="list_title">Select component</div>
+			<div class="list_items">
+			%if (this.model.current_widgets)
+			{
+				%for (int i=0; i<this.model.current_widgets.count(); i++)
 				{
-					%for (int i=0; i<this.model.current_widgets.count(); i++)
+					%set WidgetSettingsInterface widget = this.model.current_widgets.get(i);
+					%if (this.model.selected_group_name == widget.getGroupName())
 					{
-						%set WidgetSettingsInterface widget = this.model.current_widgets.get(i);
 						%set string widget_name = widget.getComponentName();
 						<div class="list_item"
 							class={{ this.model.select_name == widget_name ? "selected" : "" }}
@@ -75,52 +103,12 @@
 									this.model.selectItem(widget_name);
 								}
 							}}
-						>{{ widget_name }}</div>
+						>{{ widget.getWidgetName() }}</div>
 					}
 				}
-				</div>
+			}
 			</div>
-		}
-		%else if (this.model.step == 2)
-		{
-			<!--
-			<div class="row row_flex" @key="kind">
-				<div class="row_item row_label">Kind</div>
-				<div class="row_item row_content">
-					<Select
-						value={{ this.model.kind }}
-						options=[
-							{"key": "after", "value": "Add after"},
-							{"key": "before", "value": "Add before"},
-							{"key": "first", "value": "Insert fisrt"},
-							{"key": "last", "value": "Insert last"},
-						]
-						@event:valueChange={{ void (var message){
-							this.model.kind = message.value;
-						} }}
-					/>
-				</div>
-				%if (this.model.selected_widget_info)
-				{
-					<div class="row_item selected_widget_label">
-						{{ this.model.selected_widget_info.get("label") }}
-					</div>
-				}
-			</div>
-			-->
-			<div class="row row_flex" @key="widget_name">
-				<div class="row_item row_label">Widget name</div>
-				<div class="row_item row_content">
-					<Input
-						value={{ this.model.widget_name_value }}
-						@event:valueChange={{ void (var message)
-						{
-							this.model.widget_name_value = message.value;
-						} }}
-					/>
-				</div>
-			</div>
-		}
+		</div>
 	</div>
 </template>
 

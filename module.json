@@ -37,7 +37,6 @@
 		"Frontend/Editor/Widget/WidgetMain.bay",
 		"Frontend/Editor/Widget/WidgetManager.bay",
 		"Frontend/Editor/Widget/WidgetRender.bay",
-		"Frontend/Editor/Widget/Html/WidgetDiv.bay",
 		"Frontend/Editor/Breadcrumbs.bay",
 		"Frontend/Editor/SelectedItem.bay",
 		"Frontend/Editor/SelectedItemModel.bay",

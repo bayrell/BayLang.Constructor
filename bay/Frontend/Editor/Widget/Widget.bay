@@ -12,6 +12,8 @@ use BayLang.Constructor.Frontend.Editor.Widget.WidgetComponent;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetTag;
 use BayLang.Constructor.Frontend.Editor.WidgetEditPageModel;
 use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
+use BayLang.Constructor.Frontend.WidgetPage.ParameterFactory;
+use BayLang.Constructor.Frontend.WidgetPage.WidgetSettingsInterface;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpHtmlItems;
 use BayLang.OpCodes.OpHtmlTag;
@@ -23,7 +25,10 @@ class Widget extends BaseObject
 	BaseOpCode parent_code = null;
 	WidgetEditPageModel page_model = null;
 	WidgetTreeItem tree_item = null;
+	
+	/* Widget settings */
 	Collection<Parameter> params = [];
+	WidgetSettingsInterface settings = null;
 	
 	
 	/**
@@ -119,6 +124,25 @@ class Widget extends BaseObject
 	
 	
 	/**
+	 * Setup params from settings
+	 */
+	void setupParamsFromSettings()
+	{
+		if (not this.settings) return;
+		this.params.appendItems(
+			this.settings.getParams().map(
+				Parameter (ParameterFactory factory)
+				{
+					Parameter param = factory.factory(new rtl());
+					param.widget = this;
+					return param;
+				}
+			)
+		);
+	}
+	
+	
+	/**
 	 * Setup attrs
 	 */
 	void setupAttrs()
@@ -163,6 +187,6 @@ class Widget extends BaseObject
 		
 		/* Lower tag name */
 		selected_tag_name = rs::lower(selected_tag_name);
-		return new WidgetDiv(page_model, op_code);
+		return new WidgetTag(page_model, op_code);
 	}
 }

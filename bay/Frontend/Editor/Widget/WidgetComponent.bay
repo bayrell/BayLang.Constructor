@@ -7,20 +7,15 @@ namespace BayLang.Constructor.Frontend.Editor.Widget;
 use BayLang.Constructor.Frontend.Editor.Parameters.Parameter;
 use BayLang.Constructor.Frontend.Editor.Widget.Widget;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetTag;
-use BayLang.Constructor.Frontend.WidgetPage.ParameterFactory;
-use BayLang.Constructor.Frontend.WidgetPage.WidgetSettingsInterface;
 use BayLang.OpCodes.BaseOpCode;
 
 
 class WidgetComponent extends WidgetTag
 {
-	/* Component settings */
-	string component_class_name = null;
-	WidgetSettingsInterface component_settings = null;
-	
 	/* Model params */
 	bool is_model = false;
 	string model_class_name = null;
+	string component_class_name = null;
 	BaseOpCode primary_model_code = null;
 	Collection<BaseOpCode> model_codes = null;
 	
@@ -42,8 +37,8 @@ class WidgetComponent extends WidgetTag
 	 */
 	bool canInsert(Widget widget)
 	{
-		if (not this.component_settings) return false;
-		return this.component_settings.canInsert(widget);
+		if (not this.settings) return false;
+		return this.settings.canInsert(widget);
 	}
 	
 	
@@ -52,7 +47,7 @@ class WidgetComponent extends WidgetTag
 	 */
 	void setupSettings()
 	{
-		if (this.component_settings != null) return;
+		if (this.settings != null) return;
 		BaseOpCode op_code = this.code;
 		
 		/* Setup widget name */
@@ -62,35 +57,8 @@ class WidgetComponent extends WidgetTag
 		this.component_class_name = this.page_model.component_processor
 			.getModuleClassName(selected_tag_name)
 		;
-		this.component_settings = this.page_model.getFrameEditor()
+		this.settings = this.page_model.getFrameEditor()
 			.getWidgetSettings(this.component_class_name);
-	}
-	
-	
-	/**
-	 * Setup params
-	 */
-	void setupParams()
-	{
-		/* Clear params */
-		this.params = [];
-		this.params.add(this.param_widget_name);
-		this.params.add(this.param_class_name);
-		
-		/* if component settings is exists */
-		if (not this.component_settings) return;
-		
-		/* Setup params */
-		this.params.appendItems(
-			this.component_settings.getParams().map(
-				Parameter (ParameterFactory factory)
-				{
-					Parameter param = factory.factory(new rtl());
-					param.widget = this;
-					return param;
-				}
-			)
-		);
 	}
 	
 	

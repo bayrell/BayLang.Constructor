@@ -70,8 +70,8 @@ class WidgetTag extends Widget
 	 */
 	bool canInsert(Widget widget)
 	{
-		if (not this.component_settings) return true;
-		return this.component_settings.canInsert(widget);
+		if (not this.settings) return false;
+		return this.settings.canInsert(widget);
 	}
 	
 	
@@ -108,24 +108,12 @@ class WidgetTag extends Widget
 	 */
 	void setupSettings()
 	{
-		this.html_content = "";
+		if (this.settings != null) return;
+		BaseOpCode op_code = this.code;
 		
-		/* Get code */
-		BaseOpCode text_item = this.code.items.items.get(0);
-		
-		/* Setup text */
-		if (text_item instanceof OpHtmlContent)
-		{
-			this.html_content = text_item.value;
-		}
-		else if (text_item instanceof OpHtmlValue)
-		{
-			this.is_raw = text_item.kind == "raw";
-			if (text_item.value instanceof OpString)
-			{
-				this.html_content = text_item.value.value;
-			}
-		}
+		/* Find component settings */
+		this.settings = this.page_model.getFrameEditor()
+			.getWidgetSettings(op_code.tag_name);
 	}
 	
 	
@@ -138,6 +126,39 @@ class WidgetTag extends Widget
 		this.params = [];
 		this.params.add(this.param_widget_name);
 		this.params.add(this.param_class_name);
+		
+		/* if settings is exists */
+		this.setupParamsFromSettings();
+		
+		/* Setup content */
+		this.setupContent();
+	}
+	
+	
+	/**
+	 * Setup HTML Content
+	 */
+	void setupContent()
+	{
+		if (not this.code.items) return;
+		
+		/* Get code */
+		BaseOpCode text_item = this.code.items.items.get(0);
+		
+		/* Setup text */
+		this.html_content = "";
+		if (text_item instanceof OpHtmlContent)
+		{
+			this.html_content = text_item.value;
+		}
+		else if (text_item instanceof OpHtmlValue)
+		{
+			this.is_raw = text_item.kind == "raw";
+			if (text_item.value instanceof OpString)
+			{
+				this.html_content = text_item.value.value;
+			}
+		}
 	}
 	
 	

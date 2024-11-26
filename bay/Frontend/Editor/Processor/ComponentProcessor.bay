@@ -168,8 +168,11 @@ class ComponentProcessor extends CodeProcessor
 	/**
 	 * Create widget
 	 */
-	OpHtmlTag createWidget(string class_name, string widget_name)
+	OpHtmlTag createWidget(string class_name, string widget_name = "widget")
 	{
+		/* Default widget name */
+		if (widget_name == "") widget_name = "widget";
+		
 		/* Add module */
 		string alias_name = this.addModule(class_name, "", true);
 		
@@ -212,7 +215,7 @@ class ComponentProcessor extends CodeProcessor
 		
 		/* Get template content */
 		Dict template_info = template_factory();
-		string template_content = "<class>" ~ template_info.get("template") ~ "</class>";
+		string template_content = "<class>" ~ template_info.get("content") ~ "</class>";
 		
 		/* Add default template */
 		this.addDefaultTemplate(op_code, widget_name, template_content);
