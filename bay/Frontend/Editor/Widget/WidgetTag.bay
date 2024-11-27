@@ -4,6 +4,7 @@
 
 namespace BayLang.Constructor.Frontend.Editor.Widget;
 
+use Runtime.lib;
 use BayLang.Constructor.Frontend.Editor.Parameters.Parameter;
 use BayLang.Constructor.Frontend.Editor.Parameters.ParameterClassName;
 use BayLang.Constructor.Frontend.Editor.Parameters.ParameterComponent;
@@ -157,6 +158,89 @@ class WidgetTag extends Widget
 			if (text_item.value instanceof OpString)
 			{
 				this.html_content = text_item.value.value;
+			}
+		}
+	}
+	
+	
+	/**
+	 * Change HTML Raw Flag
+	 */
+	void changeHtmlRaw(string is_raw)
+	{
+		/* Set value */
+		this.is_raw = is_raw == "1";
+		
+		/* Update key debug attr */
+		OpHtmlAttribute attr_item = this.code.attrs.findItem(
+			lib::equalAttr("key", "@key_debug")
+		);
+		if (attr_item)
+		{
+			if (this.is_raw)
+			{
+				if (rs::indexOf(attr_item.value.value, "_raw") == -1)
+				{
+					attr_item.value.value ~= "_raw";
+				}
+			}
+			else
+			{
+				if (rs::indexOf(attr_item.value.value, "_raw") != -1)
+				{
+					attr_item.value.value = rs::replace("_raw", "", attr_item.value.value);
+				}
+			}
+		}
+		
+		/* Set content */
+		BaseOpCode code = null;
+		if (this.is_raw)
+		{
+			code = new OpHtmlValue
+			{
+				"kind": "raw"
+				"value": new OpString
+				{
+					"value": this.html_content,
+				},
+			};
+		}
+		else
+		{
+			code = new OpHtmlContent
+			{
+				"value": this.html_content,
+			};
+		}
+		
+		/* Add content */
+		this.code.items.items = [];
+		this.code.items.items.push(code);
+	}
+	
+	
+	/**
+	 * Change HTML content
+	 */
+	void changeHtmlContent(string content)
+	{
+		/* Get code */
+		BaseOpCode text_item = this.code.items.items.get(0);
+		
+		/* Set value */
+		this.html_content = content;
+		
+		/* Set content */
+		if (text_item instanceof OpHtmlContent)
+		{
+			text_item.value = this.html_content;
+		}
+		else if (text_item instanceof OpHtmlValue)
+		{
+			if (text_item.value instanceof OpString)
+			{
+				text_item.value.value = this.html_content;
 			}
 		}
 	}

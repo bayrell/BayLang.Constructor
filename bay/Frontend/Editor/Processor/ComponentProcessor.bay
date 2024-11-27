@@ -15,7 +15,9 @@ use BayLang.Constructor.Frontend.Editor.Processor.CodeProcessor;
 use BayLang.Constructor.Frontend.Editor.Widget;
 use BayLang.Constructor.Frontend.Editor.WidgetTreeItem;
 use BayLang.Constructor.Frontend.Providers.EditorProvider;
+use BayLang.LangUtils;
 use BayLang.LangBay.ParserBay;
+use BayLang.LangBay.TranslatorBay;
 use BayLang.LangES6.TranslatorES6;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpCollection;
@@ -72,6 +74,17 @@ class ComponentProcessor extends CodeProcessor
 		if (not op_code_class) return null;
 		
 		return op_code_class.items.filter(lib::isInstance(classof OpHtmlStyle));
+	}
+	
+	
+	/**
+	 * Returns app content
+	 */
+	string buildAppContent()
+	{
+		TranslatorBay translator = LangUtils::createTranslator("bay");
+		string content = LangUtils::translate(translator, this.code);
+		return content;
 	}
 	
 	

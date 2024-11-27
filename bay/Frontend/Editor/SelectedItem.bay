@@ -16,6 +16,7 @@
 <use name="BayLang.Constructor.Frontend.Editor.Parameters.Parameter" />
 <use name="BayLang.Constructor.Frontend.Editor.Styles.Selector" />
 <use name="BayLang.Constructor.Frontend.Editor.Styles.StyleItem" />
+<use name="BayLang.Constructor.Frontend.Editor.Widget.WidgetTag" />
 <use name="BayLang.Constructor.Frontend.Editor.WidgetStyle" component="true" />
 <use name="BayLang.Constructor.Frontend.Providers.EditorProvider" />
 <use name="BayLang.Constructor.WidgetPage.WidgetSettingsInterface" />
@@ -216,42 +217,46 @@
 			</div>
 		}
 	}
+	%render this.renderHtmlParams();
 </template>
 
 
 <template name="renderHtmlParams">
-	<!--
-	<div class="widget_param__row">
-		<div class="widget_param__label">Is Raw HTML</div>
-		<div class="widget_param__content">
-			<Select
-				name="is_raw_html"
-				value={{ this.model.selected.widget.is_raw }}
-				show_select_value={{ false }}
-				options=[
-					{ "value": "0", "label": "No" },
-					{ "value": "1", "label": "Yes" },
-				]
-				@event:valueChange={{ void (var message) {
-					this.model.selected.changeHtmlRaw(message.value)
-				} }}
-			/>
+	%if (this.model.selected.widget::getClassName() == classof WidgetTag)
+	{
+		<div class="widget_param__row">
+			<div class="widget_param__label">Is Raw HTML</div>
+			<div class="widget_param__content">
+				<Select
+					name="is_raw_html"
+					value={{ this.model.selected.widget.is_raw }}
+					show_select_value={{ false }}
+					options=[
+						{ "key": "0", "value": "No" },
+						{ "key": "1", "value": "Yes" },
+					]
+					@event:valueChange={{ void (var message) {
+						this.model.selected.widget.changeHtmlRaw(message.value);
+						this.model.updateFrameRender();
+					} }}
+				/>
+			</div>
 		</div>
-	</div>
-	-->
-	<div class="widget_param__row">
-		<div class="widget_param__label">Content</div>
-		<div class="widget_param__content">
-			<TextEditable
-				name="content"
-				value={{ this.model.selected.widget.html_content }}
-				direct_update={{ true }}
-				@event:valueChange={{ void (var message) {
-					this.model.selected.changeHtmlContent(message.value)
-				} }}
-			/>
+		<div class="widget_param__row">
+			<div class="widget_param__label">Content</div>
+			<div class="widget_param__content">
+				<TextEditable
+					name="content"
+					value={{ this.model.selected.widget.html_content }}
+					direct_update={{ true }}
+					@event:valueChange={{ void (var message) {
+						this.model.selected.widget.changeHtmlContent(message.value);
+						this.model.updateFrameRender();
+					} }}
+				/>
+			</div>
 		</div>
-	</div>
+	}
 </template>
 
 

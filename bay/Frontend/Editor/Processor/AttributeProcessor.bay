@@ -12,6 +12,7 @@ use BayLang.OpCodes.OpHtmlAttribute;
 use BayLang.OpCodes.OpHtmlItems;
 use BayLang.OpCodes.OpHtmlSlot;
 use BayLang.OpCodes.OpHtmlTag;
+use BayLang.OpCodes.OpHtmlValue;
 use BayLang.OpCodes.OpString;
 
 
@@ -108,11 +109,19 @@ class AttributeProcessor extends BaseObject
 		);
 		if (key_attr == null and key_debug_attr == null)
 		{
+			/* Create key debug */
+			string key_debug_value = this.createKeyName("widget");
+			BaseOpCode item = op_code.items.items.get(0);
+			if (item instanceof OpHtmlValue and item.kind == "raw")
+			{
+				key_debug_value ~= "_raw";
+			}
+			
 			/* Add key debug */
 			op_code.attrs.push(new OpHtmlAttribute{
 				"key": "@key_debug",
 				"value": new OpString{
-					"value": this.createKeyName("widget"),
+					"value": key_debug_value,
 				},
 			});
 		}
