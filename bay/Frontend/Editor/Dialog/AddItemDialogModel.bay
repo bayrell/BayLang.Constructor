@@ -58,26 +58,18 @@ class AddItemDialogModel extends DialogModel
 	/**
 	 * Select item
 	 */
-	void selectItem(string widget_name)
+	void selectItem(WidgetSettingsInterface widget_settings)
 	{
-		string default_widget_name = "widget";
-		
-		/* Default template */
 		EditorProvider editor = this.parent_widget.getFrameEditor();
-		WidgetSettingsInterface widget_settings = editor.getWidgetSettings(widget_name);
-		if (widget_settings)
-		{
-			default_widget_name = widget_settings.getSelectorName();
-		}
 		
 		/* Create widget name */
-		string widget_name_class = widget_name;
+		string default_widget_name = widget_settings.getSelectorName();
 		string widget_name_value = this.parent_widget.attribute_processor
 			.createWidgetName(default_widget_name);
 		
 		/* Create widget */
 		OpHtmlTag op_code = this.parent_widget.component_processor.createWidget(
-			widget_name_class, widget_name_value
+			widget_settings, widget_name_value
 		);
 		this.parent_widget.addOpCode(op_code, this.selected_widget_path, this.kind);
 		this.hide();
@@ -139,16 +131,19 @@ class AddItemDialogModel extends DialogModel
 				.getWidget(selected_widget_path);
 		}
 		
+		/* Setup widget */
+		selected_widget.setup();
+		
 		/* Get editor provider */
 		EditorProvider editor = this.parent_widget.getFrameEditor();
 		
 		/* Update widgets */
 		Collection<WidgetSettingsInterface> widgets = editor.getWidgets();
 		this.current_widgets = widgets.filter(
-			bool (WidgetSettingsInterface widget) use (selected_widget)
+			bool (WidgetSettingsInterface widget_settings) use (selected_widget)
 			{
-				if (not widget.getComponentName()) return false;
-				if (not selected_widget.canInsert(widget)) return false;
+				if (not widget_settings.getComponentName()) return false;
+				if (not selected_widget.canInsert(widget_settings)) return false;
 				return true;
 			}
 		);
@@ -190,18 +185,17 @@ class AddItemDialogModel extends DialogModel
 		this.kind = kind;
 		this.title = "Add item";
 		
+		/* If selected_path is main widget */
+		if (not selected_path)
+		{
+			this.kind = "last";
+		}
+		
 		/* Setup selected widget */
 		this.selected_widget_path = selected_path ? selected_path.slice() : [];
-		if (this.selected_widget_path)
-		{
-			this.selected_widget = this.parent_widget.widget_manager
-				.getWidget(this.selected_widget_path)
-			;
-		}
-		else
-		{
-			this.selected_widget = this.parent_widget.main_widget;
-		}
+		this.selected_widget = this.parent_widget.widget_manager
+			.getWidget(this.selected_widget_path)
+		;
 		
 		/* Update widgets list */
 		this.updateFrameWidgets();

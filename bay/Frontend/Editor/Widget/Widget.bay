@@ -43,9 +43,21 @@ class Widget extends BaseObject
 	
 	
 	/**
+	 * Returns true if component
+	 */
+	bool isComponent() => false;
+	
+	
+	/**
+	 * Returns true if tag has model
+	 */
+	bool isModel() => false;
+	
+	
+	/**
 	 * Can insert widget
 	 */
-	bool canInsert(Widget widget)
+	bool canInsert(WidgetSettingsInterface widget_settings)
 	{
 		return false;
 	}

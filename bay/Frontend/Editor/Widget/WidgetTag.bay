@@ -12,6 +12,7 @@ use BayLang.Constructor.Frontend.Editor.Parameters.ParameterWidgetName;
 use BayLang.Constructor.Frontend.Editor.Styles.Selector;
 use BayLang.Constructor.Frontend.Editor.Widget.Widget;
 use BayLang.Constructor.Frontend.Editor.WidgetEditPageModel;
+use BayLang.Constructor.Frontend.WidgetPage.WidgetSettingsInterface;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpHtmlAttribute;
 use BayLang.OpCodes.OpHtmlContent;
@@ -30,18 +31,6 @@ class WidgetTag extends Widget
 	/* Widget content */
 	bool is_raw = false;
 	string html_content = "";
-	
-	
-	/**
-	 * Returns true if component
-	 */
-	bool isComponent() => false;
-	
-	
-	/**
-	 * Returns true if tag has model
-	 */
-	bool isModel() => false;
 	
 	
 	/**
@@ -69,10 +58,10 @@ class WidgetTag extends Widget
 	/**
 	 * Can insert widget
 	 */
-	bool canInsert(Widget widget)
+	bool canInsert(WidgetSettingsInterface widget_settings)
 	{
 		if (not this.settings) return false;
-		return this.settings.canInsert(widget);
+		return this.settings.canInsert(widget_settings);
 	}
 	
 	
@@ -114,7 +103,7 @@ class WidgetTag extends Widget
 		
 		/* Find component settings */
 		this.settings = this.page_model.getFrameEditor()
-			.getWidgetSettings(op_code.tag_name);
+			.getWidgetSettings(this);
 	}
 	
 	

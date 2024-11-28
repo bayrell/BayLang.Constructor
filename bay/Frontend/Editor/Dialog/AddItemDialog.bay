@@ -24,9 +24,6 @@
 	cursor: pointer;
 	padding: 10px;
 }
-.list_item:last-child{
-	border-bottom-width: 0px;
-}
 .list_item:hover{
 	background-color: var(--widget-color-hover);
 }
@@ -43,6 +40,9 @@
 	}
 	.list_item{
 		border-bottom: var(--widget-border-width) var(--widget-color-border) solid;
+	}
+	.list_item:last-child{
+		border-bottom-width: 0px;
 	}
 }
 .widget_dialog__content .widgets{
@@ -94,13 +94,11 @@
 					%set WidgetSettingsInterface widget = this.model.current_widgets.get(i);
 					%if (this.model.selected_group_name == widget.getGroupName())
 					{
-						%set string widget_name = widget.getComponentName();
 						<div class="list_item"
-							class={{ this.model.select_name == widget_name ? "selected" : "" }}
 							@event:click={{
-								void () use (widget_name)
+								void () use (widget)
 								{
-									this.model.selectItem(widget_name);
+									this.model.selectItem(widget);
 								}
 							}}
 						>{{ widget.getWidgetName() }}</div>

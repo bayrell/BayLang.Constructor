@@ -621,7 +621,7 @@ class WidgetEditPageModel extends BasePageModel
 		/* Check into drag */
 		if (
 			message.kind == "into" and
-			not dest_widget.canInsert(src_widget)
+			not dest_widget.canInsert(src_widget.settings)
 		)
 		{
 			message.result = false;

@@ -34,9 +34,15 @@ interface WidgetSettingsInterface
 	
 	
 	/**
+	 * Returns true if is widget settings
+	 */
+	bool checkWidget(var widget);
+	
+	
+	/**
 	 * Can insert widget
 	 */
-	bool canInsert(WidgetSettingsInterface widget);
+	bool canInsert(var widget);
 	
 	
 	/**

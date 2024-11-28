@@ -82,7 +82,7 @@
 	{
 		<div class="widget_box__item widget_box__item--top widget_box__item--current"
 			style={{ this.model.selected_box.get("top") }}>
-			%if (page_model.selected.widget != null)
+			%if (page_model.selected.widget != null and this.renderWidgetControl())
 			{
 				<div class="widget_box__item_control">
 					<div class="widget_box__item_control_wrap">
@@ -146,6 +146,12 @@
 <script>
 
 bool is_loaded = false;
+
+
+/**
+ * Render widget control
+ */
+bool renderWidgetControl() => false;
 
 
 /**

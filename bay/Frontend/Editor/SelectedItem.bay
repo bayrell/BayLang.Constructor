@@ -11,11 +11,13 @@
 <use name="Runtime.Widget.Tag" component="true" />
 <use name="Runtime.Widget.TextArea" component="true" />
 <use name="Runtime.Widget.TextEditable" component="true" />
+<use name="Runtime.Widget.WidgetSettings.Settings.ContainerSettings" />
 <use name="BayLang.Constructor.Frontend.Components.SelectImageButton" component="true" />
 <use name="BayLang.Constructor.Frontend.Components.SortableParams" component="true" />
 <use name="BayLang.Constructor.Frontend.Editor.Parameters.Parameter" />
 <use name="BayLang.Constructor.Frontend.Editor.Styles.Selector" />
 <use name="BayLang.Constructor.Frontend.Editor.Styles.StyleItem" />
+<use name="BayLang.Constructor.Frontend.Editor.Widget.Widget" />
 <use name="BayLang.Constructor.Frontend.Editor.Widget.WidgetTag" />
 <use name="BayLang.Constructor.Frontend.Editor.WidgetStyle" component="true" />
 <use name="BayLang.Constructor.Frontend.Providers.EditorProvider" />
@@ -222,7 +224,11 @@
 
 
 <template name="renderHtmlParams">
-	%if (this.model.selected.widget::getClassName() == classof WidgetTag)
+	%set Widget widget = this.model.selected.widget;
+	%if (
+		widget::getClassName() == classof WidgetTag and
+		widget.settings and widget.settings::getClassName() != classof ContainerSettings
+	)
 	{
 		<div class="widget_param__row">
 			<div class="widget_param__label">Is Raw HTML</div>
@@ -272,9 +278,7 @@
 			%render this.renderInput(selector, "min-height", "");
 		</div>
 	</div>
-	%if (settings and
-		rtl::is_instanceof(settings, "Runtime.Widget.WidgetSettings.Settings.ContainerSettings")
-	)
+	%if (settings and this.isContainer(settings))
 	{
 		<div class="widget_css__content">
 			<div class="widget_css__label">Flex</div>
@@ -473,6 +477,19 @@ bool isAllowClassName(string class_name)
 	if (class_name == "BayLang.Constructor.Frontend.Components.SelectImageButton") return true;
 	if (class_name == "BayLang.Constructor.Frontend.Components.SortableParams") return true;
 	return false;
+}
+
+
+/**
+ * Returns true if widget is container
+ */
+bool isContainer(WidgetSettingsInterface settings)
+{
+	if (not settings) return false;
+	var iframe_window = this.model.getFrameWindow();
+	return iframe_window.Runtime.rtl.is_instanceof(
+		settings, "Runtime.Widget.WidgetSettings.Settings.ContainerSettings"
+	);
 }
 
 

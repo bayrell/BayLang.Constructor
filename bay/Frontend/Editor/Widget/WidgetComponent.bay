@@ -7,6 +7,8 @@ namespace BayLang.Constructor.Frontend.Editor.Widget;
 use BayLang.Constructor.Frontend.Editor.Parameters.Parameter;
 use BayLang.Constructor.Frontend.Editor.Widget.Widget;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetTag;
+use BayLang.Constructor.Frontend.Editor.WidgetEditPageModel;
+use BayLang.Constructor.Frontend.WidgetPage.WidgetSettingsInterface;
 use BayLang.OpCodes.BaseOpCode;
 
 
@@ -33,32 +35,26 @@ class WidgetComponent extends WidgetTag
 	
 	
 	/**
-	 * Can insert widget
+	 * Constructor
 	 */
-	bool canInsert(Widget widget)
+	public void constructor(WidgetEditPageModel page_model, BaseOpCode code)
 	{
-		if (not this.settings) return false;
-		return this.settings.canInsert(widget);
+		parent(page_model, code);
+		
+		/* Setup component class name */
+		this.component_class_name = this.page_model.component_processor
+			.getModuleClassName(code.tag_name)
+		;
 	}
 	
 	
 	/**
-	 * Setup settings
+	 * Can insert widget
 	 */
-	void setupSettings()
+	bool canInsert(WidgetSettingsInterface widget_settings)
 	{
-		if (this.settings != null) return;
-		BaseOpCode op_code = this.code;
-		
-		/* Setup widget name */
-		string selected_tag_name = op_code.tag_name;
-		
-		/* Find component settings */
-		this.component_class_name = this.page_model.component_processor
-			.getModuleClassName(selected_tag_name)
-		;
-		this.settings = this.page_model.getFrameEditor()
-			.getWidgetSettings(this.component_class_name);
+		if (not this.settings) return false;
+		return this.settings.canInsert(widget_settings);
 	}
 	
 	

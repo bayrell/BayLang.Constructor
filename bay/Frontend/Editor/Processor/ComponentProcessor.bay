@@ -181,13 +181,20 @@ class ComponentProcessor extends CodeProcessor
 	/**
 	 * Create widget
 	 */
-	OpHtmlTag createWidget(string class_name, string widget_name = "widget")
+	OpHtmlTag createWidget(WidgetSettingsInterface widget_settings, string widget_name = "widget")
 	{
 		/* Default widget name */
 		if (widget_name == "") widget_name = "widget";
 		
+		/* Get component class name */
+		string class_name = widget_settings.getComponentName();
+		string alias_name = class_name;
+		
 		/* Add module */
-		string alias_name = this.addModule(class_name, "", true);
+		if (static::isComponent(class_name))
+		{
+			alias_name = this.addModule(class_name, "", true);
+		}
 		
 		/* Create op_code */
 		string key_debug = this.page_model.attribute_processor.createKeyName("widget");
@@ -215,11 +222,6 @@ class ComponentProcessor extends CodeProcessor
 			"items": new OpHtmlItems(),
 			"tag_name": alias_name,
 		};
-		
-		/* Default template */
-		EditorProvider editor = this.page_model.getFrameEditor();
-		WidgetSettingsInterface widget_settings = editor.getWidgetSettings(class_name);
-		if (not widget_settings) return op_code;
 		
 		/* Get default template */
 		Dict template_info = widget_settings.getDefaultTemplate();
