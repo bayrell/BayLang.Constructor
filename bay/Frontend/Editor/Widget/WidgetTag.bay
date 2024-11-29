@@ -25,7 +25,6 @@ use BayLang.OpCodes.OpString;
 class WidgetTag extends Widget
 {
 	/* Params */
-	string tag_name = "";
 	Parameter param_class_name = null;
 	Parameter param_widget_name = null;
 	
@@ -72,9 +71,6 @@ class WidgetTag extends Widget
 	public void constructor(WidgetEditPageModel page_model, BaseOpCode code)
 	{
 		parent(page_model, code);
-		
-		/* Tag name */
-		this.tag_name = code.tag_name;
 		
 		/* Create params */
 		this.param_class_name = new ParameterClassName

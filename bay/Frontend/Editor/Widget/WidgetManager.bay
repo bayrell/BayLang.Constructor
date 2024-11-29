@@ -295,6 +295,7 @@ class WidgetManager extends BaseObject
 		int pos = parent_widget.code.items.items.addItem(new_op_code, dest_op_code, "after");
 		
 		/* Update items */
+		this.updateItems(new_op_code, true);
 		this.updateItems(parent_widget.code, false);
 		
 		return pos;

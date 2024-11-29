@@ -19,7 +19,7 @@ class ParameterTagName extends Parameter
 	 */
 	public void init()
 	{
-		this.value = this.widget.tag_name;
+		this.value = rs::lower(this.widget.code.tag_name);
 	}
 	
 	
