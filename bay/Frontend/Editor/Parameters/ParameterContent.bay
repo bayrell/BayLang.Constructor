@@ -1,0 +1,74 @@
+/*!
+ *  BayLang Constructor
+ */
+
+namespace BayLang.Constructor.Frontend.Editor.Parameters;
+
+use Runtime.lib;
+use Runtime.Web.BaseModel;
+use BayLang.Constructor.Frontend.Editor.Parameters.Parameter;
+use BayLang.Constructor.Frontend.Editor.Processor.CodeProcessor;
+use BayLang.OpCodes.BaseOpCode;
+use BayLang.OpCodes.OpDictPair;
+use BayLang.OpCodes.OpHtmlAttribute;
+use BayLang.OpCodes.OpHtmlContent;
+use BayLang.OpCodes.OpHtmlValue;
+use BayLang.OpCodes.OpString;
+
+
+class ParameterContent extends Parameter
+{
+	string name = "html_content";
+	string label = "Content";
+	string component = "Runtime.Widget.TextEditable";
+	string value = "";
+	Dict props = {
+		"direct_update": true,
+	};
+	
+	
+	/**
+	 * Init parameter
+	 */
+	public void init()
+	{
+		BaseOpCode text_item = this.widget.code.items.items.get(0);
+		if (text_item instanceof OpHtmlContent)
+		{
+			this.value = text_item.value;
+		}
+		else if (text_item instanceof OpHtmlValue)
+		{
+			if (text_item.value instanceof OpString)
+			{
+				this.value = text_item.value.value;
+			}
+		}
+	}
+	
+	
+	/**
+	 * Set value
+	 */
+	void setValue(var value)
+	{
+		/* Get code */
+		BaseOpCode text_item = this.widget.code.items.items.get(0);
+		
+		/* Set value */
+		this.value = value;
+		
+		/* Set content */
+		if (text_item instanceof OpHtmlContent)
+		{
+			text_item.value = this.value;
+		}
+		else if (text_item instanceof OpHtmlValue)
+		{
+			if (text_item.value instanceof OpString)
+			{
+				text_item.value.value = this.value;
+			}
+		}
+	}
+}

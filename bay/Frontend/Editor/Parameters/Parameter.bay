@@ -21,6 +21,7 @@ class Parameter extends BaseObject
 	bool display = true;
 	var value = null;
 	var default = null;
+	Dict props = null;
 	BaseOpCode op_code = null;
 	Widget widget = null;
 	

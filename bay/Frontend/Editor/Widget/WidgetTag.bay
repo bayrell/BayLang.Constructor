@@ -12,6 +12,7 @@ use BayLang.Constructor.Frontend.Editor.Parameters.ParameterWidgetName;
 use BayLang.Constructor.Frontend.Editor.Styles.Selector;
 use BayLang.Constructor.Frontend.Editor.Widget.Widget;
 use BayLang.Constructor.Frontend.Editor.WidgetEditPageModel;
+use BayLang.Constructor.Frontend.WidgetPage.ParameterFactory;
 use BayLang.Constructor.Frontend.WidgetPage.WidgetSettingsInterface;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpHtmlAttribute;
@@ -117,121 +118,17 @@ class WidgetTag extends Widget
 		this.params.add(this.param_widget_name);
 		this.params.add(this.param_class_name);
 		
-		/* if settings is exists */
-		this.setupParamsFromSettings();
-		
-		/* Setup content */
-		this.setupContent();
-	}
-	
-	
-	/**
-	 * Setup HTML Content
-	 */
-	void setupContent()
-	{
-		if (not this.code.items) return;
-		
-		/* Get code */
-		BaseOpCode text_item = this.code.items.items.get(0);
-		
-		/* Setup text */
-		this.html_content = "";
-		if (text_item instanceof OpHtmlContent)
-		{
-			this.html_content = text_item.value;
-		}
-		else if (text_item instanceof OpHtmlValue)
-		{
-			this.is_raw = text_item.kind == "raw";
-			if (text_item.value instanceof OpString)
-			{
-				this.html_content = text_item.value.value;
-			}
-		}
-	}
-	
-	
-	/**
-	 * Change HTML Raw Flag
-	 */
-	void changeHtmlRaw(string is_raw)
-	{
-		/* Set value */
-		this.is_raw = is_raw == "1";
-		
-		/* Update key debug attr */
-		OpHtmlAttribute attr_item = this.code.attrs.findItem(
-			lib::equalAttr("key", "@key_debug")
+		/* Setup params from settings */
+		this.params.appendItems(
+			this.settings.getParams().map(
+				Parameter (ParameterFactory factory)
+				{
+					Parameter param = factory.factory(new rtl());
+					param.widget = this;
+					return param;
+				}
+			)
 		);
-		if (attr_item)
-		{
-			if (this.is_raw)
-			{
-				if (rs::indexOf(attr_item.value.value, "_raw") == -1)
-				{
-					attr_item.value.value ~= "_raw";
-				}
-			}
-			else
-			{
-				if (rs::indexOf(attr_item.value.value, "_raw") != -1)
-				{
-					attr_item.value.value = rs::replace("_raw", "", attr_item.value.value);
-				}
-			}
-		}
-		
-		/* Set content */
-		BaseOpCode code = null;
-		if (this.is_raw)
-		{
-			code = new OpHtmlValue
-			{
-				"kind": "raw"
-				"value": new OpString
-				{
-					"value": this.html_content,
-				},
-			};
-		}
-		else
-		{
-			code = new OpHtmlContent
-			{
-				"value": this.html_content,
-			};
-		}
-		
-		/* Add content */
-		this.code.items.items = [];
-		this.code.items.items.push(code);
-	}
-	
-	
-	/**
-	 * Change HTML content
-	 */
-	void changeHtmlContent(string content)
-	{
-		/* Get code */
-		BaseOpCode text_item = this.code.items.items.get(0);
-		
-		/* Set value */
-		this.html_content = content;
-		
-		/* Set content */
-		if (text_item instanceof OpHtmlContent)
-		{
-			text_item.value = this.html_content;
-		}
-		else if (text_item instanceof OpHtmlValue)
-		{
-			if (text_item.value instanceof OpString)
-			{
-				text_item.value.value = this.html_content;
-			}
-		}
 	}
 	
 	

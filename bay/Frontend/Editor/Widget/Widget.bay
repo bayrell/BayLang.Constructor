@@ -104,6 +104,16 @@ class Widget extends BaseObject
 	
 	
 	/**
+	 * Reset widget
+	 */
+	void reset()
+	{
+		this.is_initialized = false;
+		this.settings = null;
+	}
+	
+	
+	/**
 	 * Setup
 	 */
 	void setup()
@@ -132,25 +142,6 @@ class Widget extends BaseObject
 	 */
 	void setupSettings()
 	{
-	}
-	
-	
-	/**
-	 * Setup params from settings
-	 */
-	void setupParamsFromSettings()
-	{
-		if (not this.settings) return;
-		this.params.appendItems(
-			this.settings.getParams().map(
-				Parameter (ParameterFactory factory)
-				{
-					Parameter param = factory.factory(new rtl());
-					param.widget = this;
-					return param;
-				}
-			)
-		);
 	}
 	
 	

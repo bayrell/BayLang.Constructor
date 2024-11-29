@@ -13,7 +13,6 @@ use BayLang.OpCodes.OpHtmlAttribute;
 
 class ParameterComponent extends Parameter
 {
-	Dict props = null;
 	OpHtmlAttribute op_code = null;
 	
     

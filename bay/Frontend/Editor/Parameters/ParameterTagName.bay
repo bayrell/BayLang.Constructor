@@ -36,9 +36,9 @@ class ParameterTagName extends Parameter
 		/* Update tag name */
 		this.widget.code.tag_name = value;
 		
-		/* Update settings */
-		this.widget.settings = null;
-		this.widget.setupSettings();
+		/* Setup widget */
+		this.widget.reset();
+		this.widget.setup();
 		
 		/* Update tree label */
 		this.widget.tree_item.updateLabel();
