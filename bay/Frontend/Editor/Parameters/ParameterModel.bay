@@ -40,7 +40,6 @@ class ParameterModel extends Parameter
 	 */
 	void setValue(var value)
 	{
-		log(value);
 		this.value = value;
 		this.op_code.value = CodeProcessor::getOpCodeByValue(value);
 	}
@@ -62,14 +61,14 @@ class ParameterModel extends Parameter
 		if (not widget) return;
 		
 		/* Update model value */
-		if (this.onChange)
+		bool is_updated = false;
+		if (rtl::exists(this.widget.model_settings.onChange))
 		{
-			this.onChange(iframe_window, widget, this);
-			return;
+			is_updated = this.widget.model_settings.onChange(iframe_window, widget, this);
 		}
-		else
+		if (not is_updated)
 		{
-			this.updateModelValue(iframe_window, widget);
+			this.updateModelValue(widget);
 		}
 	}
 	
@@ -77,7 +76,7 @@ class ParameterModel extends Parameter
 	/**
 	 * Update model value
 	 */
-	void updateModelValue(var iframeWindow, BaseModel widget)
+	void updateModelValue(BaseModel widget)
 	{
 		/* Get key value */
 		string key = this.name;

@@ -181,7 +181,11 @@ class ComponentProcessor extends CodeProcessor
 	/**
 	 * Create widget
 	 */
-	OpHtmlTag createWidget(WidgetSettingsInterface widget_settings, string widget_name = "widget")
+	OpHtmlTag createWidget
+	(
+		WidgetSettingsInterface widget_settings,
+		string widget_name = "widget"
+	)
 	{
 		/* Default widget name */
 		if (widget_name == "") widget_name = "widget";
@@ -193,7 +197,7 @@ class ComponentProcessor extends CodeProcessor
 		/* Add module */
 		if (static::isComponent(class_name))
 		{
-			alias_name = this.addModule(class_name, "", true);
+			alias_name = this.addModule(class_name, widget_settings.getAliasName(), true);
 		}
 		
 		/* Create op_code */

@@ -172,6 +172,12 @@ class Widget extends BaseObject
 				param.init();
 			}
 		);
+		
+		/* Setup widget settings */
+		if (this.settings and rtl::exists(this.settings.setup))
+		{
+			this.settings.setup(this);
+		}
 	}
 	
 	

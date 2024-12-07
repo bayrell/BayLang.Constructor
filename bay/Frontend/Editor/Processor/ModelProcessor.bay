@@ -238,7 +238,7 @@ class ModelProcessor extends CodeProcessor
 		
 		/* Get model settings */
 		EditorProvider editor = this.page_model.getFrameEditor();
-		widget.model_settings = editor.getWidgetSettings(widget.model_class_name);
+		widget.model_settings = editor.getModelSettings(widget);
 		if (not widget.model_settings) return;
 		
 		/* Add params */
@@ -383,6 +383,7 @@ class ModelProcessor extends CodeProcessor
 		/* Get primary model content */
 		Dict template_info = template_factory();
 		string primary_model_content = template_info.get("model");
+		if (primary_model_content == null) return;
 		
 		/* Add modules */
 		if (template_info.has("modules"))
@@ -445,7 +446,7 @@ class ModelProcessor extends CodeProcessor
 		if (not model_class_op_code) return null;
 		
 		/* Add module */
-		string alias_name = this.addModule(widget.model_class_name);
+		string alias_name = this.code.findModule(widget.model_class_name);
 		string widget_name = widget.getName();
 		
 		/* Assign code */
@@ -523,17 +524,17 @@ class ModelProcessor extends CodeProcessor
 	 */
 	void createModel(Widget widget)
 	{
-		Callback getModelName = new Callback(widget.component_settings, "getModelName");
-		if (not getModelName.exists()) return;
-		
 		/* Get editor */
 		EditorProvider editor = this.page_model.getFrameEditor();
 		
 		/* Set model settings */
-		widget.model_class_name = getModelName.apply();
-		widget.model_settings = editor.getWidgetSettings(widget.model_class_name);
+		widget.model_class_name = widget.settings.getModelName();
+		widget.model_settings = editor.getModelSettings(widget);
 		if (not widget.model_settings) return;
 		if (not widget.getName()) return;
+		
+		/* Add module */
+		this.addModule(widget.model_class_name, widget.model_settings.getAliasName());
 		
 		/* Add assign model code */
 		this.addAssignCode(widget);

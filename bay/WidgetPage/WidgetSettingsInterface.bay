@@ -5,6 +5,7 @@
 namespace BayLang.Constructor.WidgetPage;
 
 use Runtime.Entity.Factory;
+use Runtime.Web.RenderContainer;
 
 
 interface WidgetSettingsInterface
@@ -16,9 +17,21 @@ interface WidgetSettingsInterface
 	
 	
 	/**
+	 * Returns alias name
+	 */
+	string getAliasName();
+	
+	
+	/**
 	 * Returns component name
 	 */
 	string getComponentName();
+	
+	
+	/**
+	 * Returns model name
+	 */
+	string getModelName();
 	
 	
 	/**
@@ -31,6 +44,12 @@ interface WidgetSettingsInterface
 	 * Returns group name
 	 */
 	string getGroupName();
+	
+	
+	/**
+	 * Returns true if model
+	 */
+	bool isModel();
 	
 	
 	/**

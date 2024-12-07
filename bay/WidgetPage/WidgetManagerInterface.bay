@@ -4,11 +4,18 @@
 
 namespace BayLang.Constructor.WidgetPage;
 
+use BayLang.Constructor.WidgetPage.EditorProvider;
 use BayLang.Constructor.WidgetPage.WidgetSettingsInterface;
 
 
 interface WidgetManagerInterface
 {
+	/**
+	 * Init widgets
+	 */
+	void init(EditorProvider provider);
+	
+	
 	/**
 	 * Returns group settings
 	 */

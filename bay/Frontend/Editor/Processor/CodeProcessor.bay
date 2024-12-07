@@ -84,7 +84,10 @@ class CodeProcessor extends BaseObject
 	{
 		if (not static::isComponent(widget_name)) return null;
 		if (not this.code) return null;
-		if (not this.code.uses.has(widget_name)) return null;
+		if (not this.code.uses.has(widget_name))
+		{
+			return widget_name;
+		}
 		return this.code.uses.get(widget_name);
 	}
 	
@@ -105,13 +108,9 @@ class CodeProcessor extends BaseObject
 			string widget_name_arr = rs::split(".", widget_name);
 			alias_name = widget_name_arr.last();
 		}
-		if (not this.code.hasModule(alias_name))
+		if (not this.code.hasModule(alias_name) or alias_name == "")
 		{
 			this.code.addModule(widget_name, alias_name, is_component);
-		}
-		else if (this.code.uses.get(alias_name) != widget_name)
-		{
-			alias_name = widget_name;
 		}
 		return alias_name;
 	}

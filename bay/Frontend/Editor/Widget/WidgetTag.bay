@@ -115,16 +115,19 @@ class WidgetTag extends Widget
 		this.params.add(this.param_class_name);
 		
 		/* Setup params from settings */
-		this.params.appendItems(
-			this.settings.getParams().map(
-				Parameter (ParameterFactory factory)
-				{
-					Parameter param = factory.factory(new rtl());
-					param.widget = this;
-					return param;
-				}
-			)
-		);
+		if (this.settings)
+		{
+			this.params.appendItems(
+				this.settings.getParams().map(
+					Parameter (ParameterFactory factory)
+					{
+						Parameter param = factory.factory(new rtl());
+						param.widget = this;
+						return param;
+					}
+				)
+			);
+		}
 	}
 	
 	
