@@ -68,13 +68,13 @@ class ParameterFactoryModel extends ParameterModel
 	/**
 	 * Update model value
 	 */
-	void updateModelValue(var iframeWindow, BaseModel widget)
+	void updateModelValue(BaseModel model)
 	{
 		var name = this.name;
 		var path = this.path;
 		var value = this.value;
 		#ifcode JAVASCRIPT then
-		widget[name][path] = value;
+		model[name][path] = value;
 		#endif
 	}
 }

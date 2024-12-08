@@ -12,14 +12,35 @@ use Runtime.Entity.Factory;
 class ParameterFactory extends Factory
 {
 	/**
+	 * Copy object to runtime
+	 */
+	static var copy(var runtime, var data)
+	{
+		SerializerNative encoder = new SerializerNative();
+		SerializerNative decoder = runtime::newInstance(classof SerializerNative);
+		var object = encoder.encode(data);
+		return decoder.decode(object);
+	}
+	
+	
+	/**
+	 * Restore object from runtime
+	 */
+	static var restore(var runtime, var data)
+	{
+		SerializerNative decoder = new SerializerNative();
+		SerializerNative encoder = runtime::newInstance(classof SerializerNative);
+		var object = encoder.encode(data);
+		return decoder.decode(object);
+	}
+	
+	
+	/**
 	 * Factory
 	 */
 	BaseObject factory(var runtime)
 	{
-		SerializerNative encoder = new SerializerNative();
-		SerializerNative decoder = runtime::newInstance(classof SerializerNative);
-		var object = encoder.encode(this.params);
-		Dict params = decoder.decode(object);
+		Dict params = static::copy(runtime, this.params);
 		return runtime::newInstance(this.name, [params]);
 	}
 }

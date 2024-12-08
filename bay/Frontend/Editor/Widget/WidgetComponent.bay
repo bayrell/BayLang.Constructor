@@ -36,6 +36,17 @@ class WidgetComponent extends WidgetTag
 	
 	
 	/**
+	 * Return widget model
+	 */
+	var getModel()
+	{
+		var iframe_page_model = this.page_model.getFramePageModel();
+		string widget_name = this.getName();
+		return iframe_page_model.widget_model.getWidget(widget_name);
+	}
+	
+	
+	/**
 	 * Constructor
 	 */
 	public void constructor(WidgetEditPageModel page_model, BaseOpCode code)
@@ -64,16 +75,9 @@ class WidgetComponent extends WidgetTag
 	 */
 	void initParams()
 	{
-		/* Setup model */
-		this.page_model.model_processor.setupWidget(this);
-		
-		/* Init */
 		parent();
 		
-		/* Setup model settings */
-		if (this.model_settings and rtl::exists(this.model_settings.setup))
-		{
-			this.model_settings.setup(this);
-		}
+		/* Setup widget */
+		this.page_model.model_processor.setupWidget(this);
 	}
 }

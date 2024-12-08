@@ -52,31 +52,39 @@ class ParameterModel extends Parameter
 	{
 		parent(value);
 		
-		var iframe_window = this.widget.page_model.getFrameWindow();
-		var iframe_page_model = this.widget.page_model.getFramePageModel();
-		
-		/* Get page widget */
-		string widget_name = this.widget.getName();
-		BaseModel widget = iframe_page_model.widget_model.getWidget(widget_name);
-		if (not widget) return;
-		
 		/* Update model value */
-		bool is_updated = false;
+		this.changeModelValue();
+	}
+	
+	
+	/**
+	 * Change model value
+	 */
+	void changeModelValue()
+	{
+		/* Get widget model */
+		BaseModel model = this.widget.getModel();
+		if (not model) return;
+		
+		/* Model settings onChange event */
 		if (rtl::exists(this.widget.model_settings.onChange))
 		{
-			is_updated = this.widget.model_settings.onChange(iframe_window, widget, this);
+			bool is_updated = this.widget.model_settings.onChange(model, this);
+			if (is_updated)
+			{
+				return;
+			}
 		}
-		if (not is_updated)
-		{
-			this.updateModelValue(widget);
-		}
+		
+		/* Update model value */
+		this.updateModelValue(model);
 	}
 	
 	
 	/**
 	 * Update model value
 	 */
-	void updateModelValue(BaseModel widget)
+	void updateModelValue(BaseModel model)
 	{
 		/* Get key value */
 		string key = this.name;
@@ -85,6 +93,6 @@ class ParameterModel extends Parameter
 		/* Set params */
 		Dict params = {};
 		params.set(key, value);
-		widget.initParams(params);
+		model.initParams(params);
 	}
 }
