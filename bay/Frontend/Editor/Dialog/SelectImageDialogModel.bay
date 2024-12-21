@@ -50,6 +50,28 @@ class SelectImageDialogModel extends ConfirmDialogModel
 	
 	
 	/**
+	 * Upload file
+	 */
+	async void uploadFile(var file)
+	{
+		ApiResult result = await this.layout.callApi({
+			"api_name": "baylang.constructor.assets",
+			"method_name": "uploadFile",
+			"data": {
+				"project_id": this.parent_widget.project_id,
+				"path": "images",
+				"file": file,
+			}
+		});
+		log(result);
+		if (result.isSuccess())
+		{
+			await this.loadItems();
+		}
+	}
+	
+	
+	/**
 	 * Load items
 	 */
 	async void loadItems()
