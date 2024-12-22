@@ -57,9 +57,9 @@ class AssetsApi extends BaseApi
 		}
 		
 		/* Get path */
-		string project_path = ApiHook::getAssetsPath(this.project);
+		string assets_path = ApiHook::getAssetsPath(this.project);
 		string folder_name = this.post_data.get("path");
-		string folder_path = fs::join([project_path, folder_name]);
+		string folder_path = fs::join([assets_path, folder_name]);
 		string file_upload_path = fs::join([folder_path, file.getName()]);
 		
 		/* Create folder */
@@ -83,15 +83,44 @@ class AssetsApi extends BaseApi
 	
 	
 	/**
+	 * Remove file
+	 */
+	@ApiMethod
+	async void removeFile()
+	{
+		string assets_path = ApiHook::getAssetsPath(this.project);
+		string file_name = this.post_data.get("file_name");
+		string file_path = fs::join([assets_path, "images", file_name]);
+		
+		/* Check file path */
+		if (not await fs::exists(file_path))
+		{
+			throw new ApiError(new ItemNotFound(file_name, "File"));
+		}
+		
+		/* Remove file */
+		await fs::unlink(file_path);
+		
+		/* Result */
+		this.success({
+			"data":
+			{
+				"file_name": file_name,
+			}
+		});
+	}
+	
+	
+	/**
 	 * Returns files
 	 */
 	@ApiMethod
 	async void getFiles()
 	{
+		string assets_path = ApiHook::getAssetsPath(this.project);
+		string assets_url_path = ApiHook::getAssetsUrlPath(this.project);
 		string folder_name = this.post_data.get("path");
-		string project_path = ApiHook::getAssetsPath(this.project);
-		string project_url_path = ApiHook::getAssetsUrlPath(this.project);
-		string folder_path = fs::join([project_path, folder_name]);
+		string folder_path = fs::join([assets_path, folder_name]);
 		
 		/* Check file path */
 		if (rs::indexOf(folder_path, "/..") != -1)
@@ -121,7 +150,7 @@ class AssetsApi extends BaseApi
 				"kind": item_kind,
 				"file_name": item_name,
 				"file_path": fs::join([folder_name, item_name]),
-				"url": fs::join([project_url_path, folder_name, item_name]),
+				"url": fs::join([assets_url_path, folder_name, item_name]),
 			});
 		}
 		

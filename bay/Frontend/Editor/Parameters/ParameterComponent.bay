@@ -36,6 +36,18 @@ class ParameterComponent extends Parameter
 	
 	
 	/**
+	 * Find code
+	 */
+	void findOpCode()
+	{
+		if (this.op_code != null) return;
+		
+		/* Find code */
+		this.op_code = this.widget.code.attrs.findItem(lib::equalAttr("key", this.name));
+	}
+	
+	
+	/**
 	 * Create attribute
 	 */
 	void createHtmlAttribute()
@@ -55,9 +67,16 @@ class ParameterComponent extends Parameter
 	void removeHtmlAttribute()
 	{
 		if (this.op_code == null) return;
-		int pos = this.widget.item.code.attrs.findItem(lib::equalAttr("key", this.name));
-		this.widget.item.code.attrs.remove(pos);
+		
+		/* Clear code */
 		this.op_code = null;
+		
+		/* Remove attribute */
+		int pos = this.widget.code.attrs.find(lib::equalAttr("key", this.name));
+		if (pos >= 0)
+		{
+			this.widget.code.attrs.remove(pos);
+		}
 	}
 	
 	
@@ -72,6 +91,9 @@ class ParameterComponent extends Parameter
 			this.value = "";
 			return;
 		}
+		
+		/* Find item */
+		this.findOpCode();
 		
 		/* Create html attribute */
 		if (this.op_code == null)

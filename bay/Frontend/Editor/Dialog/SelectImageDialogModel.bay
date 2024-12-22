@@ -10,6 +10,8 @@ use Runtime.Web.ApiResult;
 use Runtime.Web.RenderContainer;
 use Runtime.Web.Messages.ClickMessage;
 use Runtime.Widget.ButtonModel;
+use Runtime.Widget.ContextMenu.ContextMenuMessage;
+use Runtime.Widget.ContextMenu.ContextMenuModel;
 use Runtime.Widget.Dialog.ConfirmDialogModel;
 use BayLang.Constructor.Frontend.Editor.Dialog.SelectImageDialog;
 
@@ -20,8 +22,9 @@ class SelectImageDialogModel extends ConfirmDialogModel
 	string title = "Select image";
 	string width = "90%";
 	string path = "";
-	Collection<Dict> items = [];
 	int selected = -1;
+	Collection<Dict> items = [];
+	ContextMenuModel context_menu = null;
 	
 	
 	/**
@@ -43,6 +46,14 @@ class SelectImageDialogModel extends ConfirmDialogModel
 			},
 		});
 		
+		/* Create ContextMenu */
+		this.context_menu = this.addWidget(classof ContextMenuModel);
+		this.context_menu.addItem({
+			"label": "Delete",
+			"key": "delete"
+		});
+		this.context_menu.addListener("clickItem", new Callback(this, "onContextClickItem"));
+		
 		/* Select button */
 		ButtonModel confirm_button = this.buttons.getWidget("confirm_button");
 		confirm_button.content = "Select";
@@ -63,7 +74,6 @@ class SelectImageDialogModel extends ConfirmDialogModel
 				"file": file,
 			}
 		});
-		log(result);
 		if (result.isSuccess())
 		{
 			await this.loadItems();
@@ -114,6 +124,23 @@ class SelectImageDialogModel extends ConfirmDialogModel
 	
 	
 	/**
+	 * Context menu click
+	 */
+	void onContextClickItem(ContextMenuMessage message)
+	{
+		Dict item = message.item;
+		string item_key = item.get("key");
+		this.context_menu.hide();
+		
+		/* Delete item */
+		if (item_key == "delete")
+		{
+			this.removeSelectedItem();
+		}
+	}
+	
+	
+	/**
 	 * Clear button click
 	 */
 	void onConfirmButtonClick(ClickMessage message)
@@ -144,9 +171,41 @@ class SelectImageDialogModel extends ConfirmDialogModel
 	
 	
 	/**
+	 * Context menu
+	 */
+	void contextMenu(int x, int y)
+	{
+		this.context_menu.show(x, y);
+	}
+	
+	
+	/**
 	 * Returns selected item
 	 */
 	Dict getSelectedItem() => this.items.get(this.selected);
+	
+	
+	/**
+	 * Remove selected item
+	 */
+	async void removeSelectedItem()
+	{
+		Dict item = this.getSelectedItem();
+		ApiResult result = await this.layout.callApi({
+			"api_name": "baylang.constructor.assets",
+			"method_name": "removeFile",
+			"data": {
+				"project_id": this.parent_widget.project_id,
+				"path": "images",
+				"file_name": item.get("file_name"),
+			}
+		});
+		if (result.isSuccess())
+		{
+			this.items.remove(this.selected);
+			this.selectItem(-1);
+		}
+	}
 	
 	
 	/**

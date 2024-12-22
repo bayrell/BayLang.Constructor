@@ -9,6 +9,7 @@
 
 <style>
 .select_image_items{
+	position: relative;
 	display: flex;
 	flex-wrap: wrap;
 	.item{
@@ -74,7 +75,15 @@
 
 
 <template name="renderContent">
-	<div class="select_image_items">
+	<div class="select_image_items" ref="items"
+		@event:click={{
+			void ()
+			{
+				this.model.context_menu.hide();
+			}
+		}}
+	>
+		%render this.renderWidget(this.model.context_menu);
 		%render this.renderUploadImage();
 		%for (int i=0; i<this.model.items.count(); i++)
 		{
@@ -84,6 +93,14 @@
 				<div class="item"
 					class={{ this.model.selected == i ? "active" : "" }}
 					@event:click={{ void () use (i){ this.model.selectItem(i) } }}
+					@event:contextmenu={{ void (var event) use (i){
+						var rect = this.getRef("items").getBoundingClientRect();
+						int x = event.clientX - rect.left;
+						int y = event.clientY - rect.top;
+						this.model.selectItem(i);
+						this.model.contextMenu(x, y);
+						event.preventDefault();
+					} }}
 				>
 					<div class="item_image_wrap">
 						<img class="item_image" src={{ item.get("url") }} />
