@@ -124,6 +124,7 @@ class WidgetApi extends BaseApi
 		
 		/* Update assets */
 		widget.module.updateAssets();
+		ApiHook::updateAssets();
 		
 		/* Success */
 		api.success();

@@ -80,26 +80,6 @@ class SettingsModel extends BasePageModel
 						},
 					},
 					{
-						"name": "domains",
-						"label": "Domains",
-						"component": "Runtime.Widget.SortableList",
-						"buttons":
-						[
-							{
-								"event": "onAddItemClick",
-								"props":
-								{
-									"content": "Add",
-									"styles": ["small"],
-								},
-							}
-						],
-						"props":
-						{
-							"show_buttons": false,
-						},
-					},
-					{
 						"name": "reload_cache",
 						"label": "Reload cache",
 						"component": "BayLang.Constructor.Frontend.Settings.ReloadCache",

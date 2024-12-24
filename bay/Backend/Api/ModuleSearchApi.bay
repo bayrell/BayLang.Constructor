@@ -40,7 +40,7 @@ class ModuleSearchApi extends SearchApi
 		}
 		
 		/* Load modules */
-		await this.project.readModules();
+		await this.project.load();
 		
 		/* Get modules */
 		Collection items = this.project.modules.transition( Module (Module item) => item );

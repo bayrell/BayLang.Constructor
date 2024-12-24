@@ -132,6 +132,7 @@ class WidgetSaveApi extends SaveApi
 		}
 		
 		/* Set widget name */
+		this.item.kind = "widget";
 		this.item.name = widget_name;
 		this.item.component_name = rs::substr(widget_name, 0, -5);
 		
@@ -225,11 +226,23 @@ class WidgetSaveApi extends SaveApi
 		Collection<string> content = [];
 		content.push('<class name="' ~ component_name ~ '">');
 		content.push('');
-		content.push('<use name="Runtime.Widget.Text" />');
+		content.push('<use name="Runtime.Widget.Section" component="true" />');
+		content.push('');
+		content.push('<style>');
+		content.push('.main_section{');
+		content.push('\tpadding-top: 20px;');
+		content.push('\tpadding-bottom: 20px;');
+		content.push('\tbackground-position: center top;');
+		content.push('\tbackground-repeat: no-repeat;');
+		content.push('\tbackground-size: cover;');
+		content.push('}');
+		content.push('</style>');
 		content.push('');
 		content.push('<template>');
 		content.push('\t<div class="page">');
-		content.push('\t\t<Text content="Content" class="page_text" />');
+		content.push('\t\t<Section class="main_section">');
+		content.push('\t\t\t<div class="page_text" >Content</div>');
+		content.push('\t\t</Section>');
 		content.push('\t</div>');
 		content.push('</template>');
 		content.push('');

@@ -60,7 +60,7 @@ class WidgetSearchApi extends SearchApi
 			}
 		);
 		
-		/* Filter items */
+		/* Convert items */
 		items = items.map(
 			Dict (Widget widget) => {
 				"id": widget.name,

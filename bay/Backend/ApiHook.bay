@@ -15,6 +15,7 @@ class ApiHook extends BaseHook
 	static const string GET_ASSETS_URL_PATH = "baylang.constructor::get_assets_url_path";
 	static const string GET_PROJECT_LIST = "baylang.constructor::get_project_list";
 	static const string GET_PROJECT = "baylang.constructor::get_project";
+	static const string UPDATE_ASSETS = "baylang.constructor::update_assets";
 	
 	
 	/**
@@ -38,6 +39,7 @@ class ApiHook extends BaseHook
 		if (hook_name == static::GET_ASSETS_URL_PATH) return "get_assets_url_path";
 		if (hook_name == static::GET_PROJECT_LIST) return "get_project_list";
 		if (hook_name == static::GET_PROJECT) return "get_project";
+		if (hook_name == static::UPDATE_ASSETS) return "update_assets";
 		return "";
 	}
 	
@@ -67,7 +69,7 @@ class ApiHook extends BaseHook
 	/**
 	 * Returns assets path
 	 */
-	static string getAssetsPath(Project project)
+	async static string getAssetsPath(Project project)
 	{
 		Dict result = await @.callHookAsync(static::GET_ASSETS_PATH, {
 			"project": project,
@@ -80,13 +82,22 @@ class ApiHook extends BaseHook
 	/**
 	 * Returns project assets url path
 	 */
-	static string getAssetsUrlPath(Project project)
+	async static string getAssetsUrlPath(Project project)
 	{
 		Dict result = await @.callHookAsync(static::GET_ASSETS_URL_PATH, {
 			"project": project,
 			"path": "/assets",
 		});
 		return result.get("path");
+	}
+	
+	
+	/**
+	 * Update assets
+	 */
+	async static void updateAssets()
+	{
+		await @.callHookAsync(static::UPDATE_ASSETS);
 	}
 	
 	

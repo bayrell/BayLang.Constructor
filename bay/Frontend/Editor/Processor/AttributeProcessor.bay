@@ -125,10 +125,13 @@ class AttributeProcessor extends BaseObject
 		{
 			/* Create key debug */
 			string key_debug_value = this.createKeyName("widget");
-			BaseOpCode item = op_code.items.items.get(0);
-			if (item instanceof OpHtmlValue and item.kind == "raw")
+			if (op_code.items)
 			{
-				key_debug_value ~= "_raw";
+				BaseOpCode item = op_code.items.items.get(0);
+				if (item instanceof OpHtmlValue and item.kind == "raw")
+				{
+					key_debug_value ~= "_raw";
+				}
 			}
 			
 			/* Add key debug */
