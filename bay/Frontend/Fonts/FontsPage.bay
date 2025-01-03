@@ -16,7 +16,7 @@
  *  limitations under the License.
 -->
 
-<class name="BayLang.Constructor.Frontend.Widget.WidgetList">
+<class name="BayLang.Constructor.Frontend.Fonts.FontsPage">
 
 <use name="Runtime.Widget.RowButtons" component="true" />
 <use name="Runtime.Widget.Table.Table" component="true" />

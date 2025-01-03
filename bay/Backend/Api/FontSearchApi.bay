@@ -21,23 +21,24 @@ namespace BayLang.Constructor.Backend.Api;
 use Runtime.fs;
 use Runtime.Exceptions.ApiError;
 use Runtime.Exceptions.ItemNotFound;
+use Runtime.Exceptions.RuntimeException;
+use Runtime.Web.BaseApi;
 use Runtime.Web.Annotations.ApiMethod;
-use Runtime.Widget.Crud.SearchApi;
 use BayLang.Constructor.Backend.ApiHook;
+use BayLang.Exceptions.ParserUnknownError;
 use BayLang.Helper.Module;
 use BayLang.Helper.Project;
-use BayLang.Helper.Widget;
 
 
-class WidgetSearchApi extends SearchApi
+class FontSearchApi extends BaseApi
 {
-	Project project = null;
+    Project project;
 	
 	
 	/**
 	 * Returns api name
 	 */
-	static string getApiName() => "baylang.constructor.widget::search";
+	static string getApiName() => "baylang.constructor.fonts.search";
 	
 	
 	/**
@@ -57,30 +58,19 @@ class WidgetSearchApi extends SearchApi
 		/* Load project */
 		await this.project.load();
 		
-		/* Get widgets */
-		Collection items = this.project.modules
-			.transition(Module (Module module) => module)
-			.map(
-				Collection (Module module) => module.getWidgets()
-			)
-			.flatten()
-		;
+		/* Get fonts path */
+		string assets_path = ApiHook::getAssetsPath(this.project);
+		string fonts_path = fs::join([assets_path, "fonts"]);
 		
-		/* Sort widgets */
-		items = items.sort(
-			int (Widget a, Widget b)
-			{
-				return rs::compare(a.name, b.name);
-			}
-		);
-		
-		/* Convert items */
-		items = items.map(
-			Dict (Widget widget) => {
-				"id": widget.name,
-				"module_id": widget.module.getName(),
-			}
-		);
+		/* Get items */
+		Collection items = [];
+		if (await fs::isDir(fonts_path))
+		{
+			items = await fs::listDir(fonts_path);
+			items = items.map(void (string name) => {
+				"name": name,
+			});
+		}
 		
 		/* Set result */
 		this.success({

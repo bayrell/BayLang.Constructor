@@ -47,6 +47,8 @@
 		"Frontend/Editor/WidgetEditPageModel.bay",
 		"Frontend/Editor/WidgetMenu.bay",
 		"Frontend/Editor/WidgetTreeItem.bay",
+		"Frontend/Fonts/FontsPage.bay",
+		"Frontend/Fonts/FontsPageModel.bay",
 		"Frontend/Layout/ProjectLayout.bay",
 		"Frontend/Layout/ProjectLayoutModel.bay",
 		"Frontend/Module/ModuleList.bay",
