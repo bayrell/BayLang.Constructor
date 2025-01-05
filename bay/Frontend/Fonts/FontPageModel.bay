@@ -34,12 +34,12 @@ use Runtime.Widget.ButtonModel;
 use Runtime.Widget.Label;
 use Runtime.Widget.RowButtonsModel;
 use Runtime.Widget.SelectModel;
-use BayLang.Constructor.Frontend.Fonts.FontsPage;
+use BayLang.Constructor.Frontend.Fonts.FontPage;
 
 
-class FontsPageModel extends BasePageModel
+class FontPageModel extends BasePageModel
 {
-	string component = classof FontsPage;
+	string component = classof FontPage;
 	string project_id = "";
 	TableDialogModel table = null;
 	RowButtonsModel top_buttons = null;
@@ -54,6 +54,24 @@ class FontsPageModel extends BasePageModel
 		
 		/* Set route matches */
 		this.project_id = this.layout.route.matches.get("project_id");
+		
+		/* Add top buttons */
+		this.top_buttons = this.addWidget(
+			classof RowButtonsModel,
+			{
+				"widget_name": "top_buttons",
+				"buttons":
+				[
+					new ModelFactory
+					(
+						"Runtime.Widget.Table.AddButtonModel",
+						{
+							"table": this.table,
+						}
+					)
+				],
+			}
+		);
 		
 		/* Add table */
 		this.table = this.addWidget(
@@ -185,24 +203,6 @@ class FontsPageModel extends BasePageModel
 							}
 						),
 					},
-				],
-			}
-		);
-		
-		/* Add top buttons */
-		this.top_buttons = this.addWidget(
-			classof RowButtonsModel,
-			{
-				"widget_name": "top_buttons",
-				"buttons":
-				[
-					new ModelFactory
-					(
-						"Runtime.Widget.Table.AddButtonModel",
-						{
-							"table": this.table,
-						}
-					)
 				],
 			}
 		);

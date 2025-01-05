@@ -27,6 +27,7 @@ use Runtime.Web.BaseApi;
 use Runtime.Web.Annotations.ApiMethod;
 use Runtime.Widget.Crud.SaveApi;
 use Runtime.Widget.Crud.Rules.CrudRule;
+use Runtime.Widget.Crud.Rules.ReadOnlyRule;
 use Runtime.Widget.Crud.Rules.Required;
 use BayLang.Constructor.Backend.ApiHook;
 use BayLang.Exceptions.ParserUnknownError;
@@ -53,6 +54,7 @@ class FontSaveApi extends SaveApi
 	Vector<CrudRule> getRules() =>
 	[
 		new Required{"name": "name"},
+		new ReadOnlyRule{"name": "name", "can_create": true},
 	];
 	
 	
@@ -62,6 +64,7 @@ class FontSaveApi extends SaveApi
 	Collection getItemFields() =>
 	[
 		"name",
+		"files",
 	];
 	
 	
@@ -101,6 +104,7 @@ class FontSaveApi extends SaveApi
 	 */
 	async void newItem() => {
 		"exists": false,
+		"files": [],
 	};
 	
 	
@@ -116,8 +120,9 @@ class FontSaveApi extends SaveApi
 			return null;
 		}
 		return {
-			"name": font_name,
 			"exists": true,
+			"name": font_name,
+			"files": [],
 		};
 	}
 	
@@ -134,6 +139,16 @@ class FontSaveApi extends SaveApi
 			string font_path = fs::join([this.fonts_path, font_name]);
 			await fs::mkDir(font_path);
 		}
+	}
+	
+	
+	/**
+	 * Action item
+	 */
+	@ApiMethod
+	async void actionItem()
+	{
+		await parent();
 	}
 	
 	

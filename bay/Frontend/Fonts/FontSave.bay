@@ -16,15 +16,15 @@
  *  limitations under the License.
 -->
 
-<class name="BayLang.Constructor.Frontend.Fonts.FontsPage">
+<class name="BayLang.Constructor.Frontend.Fonts.FontSave">
 
 <use name="Runtime.Widget.RowButtons" component="true" />
 <use name="Runtime.Widget.Table.Table" component="true" />
 
 <template>
 	<div class="widgets_list">
-		<RowButtons class="top_buttons" @model={{ this.model.top_buttons }} />
-		<Table class="widgets_table" @model={{ this.model.table }} />
+		%render this.renderWidget(this.model.top_buttons, {"class": "top_buttons"});
+		%render this.renderWidget(this.model.form);
 	</div>
 </template>
 
