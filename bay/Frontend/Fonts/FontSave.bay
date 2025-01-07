@@ -23,7 +23,7 @@
 
 <template>
 	<div class="widgets_list">
-		%render this.renderWidget(this.model.top_buttons, {"class": "top_buttons"});
+		%render this.renderWidget(this.model.top_buttons);
 		%render this.renderWidget(this.model.form);
 	</div>
 </template>

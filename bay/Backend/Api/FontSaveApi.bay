@@ -20,6 +20,7 @@ namespace BayLang.Constructor.Backend.Api;
 
 
 use Runtime.fs;
+use Runtime.File;
 use Runtime.Exceptions.ApiError;
 use Runtime.Exceptions.ItemNotFound;
 use Runtime.Exceptions.RuntimeException;
@@ -122,8 +123,24 @@ class FontSaveApi extends SaveApi
 		return {
 			"exists": true,
 			"name": font_name,
+			"path": font_path,
 			"files": [],
 		};
+	}
+	
+	
+	/**
+	 * Load item
+	 */
+	async void loadItem(bool create_instance = true)
+	{
+		await parent(create_instance);
+		
+		/* Load files */
+		string folder_path = this.item.get("path");
+		Collection files = await fs::listDir(folder_path);
+		files = files.map(Dict (string name) => {"name": name});
+		this.item.set("files", files);
 	}
 	
 	
@@ -159,6 +176,69 @@ class FontSaveApi extends SaveApi
 	async void actionSave()
 	{
 		await parent();
+	}
+	
+	
+	/**
+	 * Upload file
+	 */
+	@ApiMethod
+	async void uploadFile()
+	{
+		/* Load data */
+		Dict pk = this.post_data.get("pk");
+		this.item = await this.findItem(pk);
+		
+		/* Check if item is exists */
+		if (this.item == null)
+		{
+			throw new ApiError(new ItemNotFound());
+		}
+		
+		/* Upload file */
+		string folder_path = this.item.get("path");
+		File file = this.post_data.get("file");
+		
+		/* Create file */
+		string file_upload_path = fs::join([folder_path, file.getName()]);
+		string content = await fs::readFile(file.getPath());
+		await fs::saveFile(file_upload_path, content);
+		
+		/* Success */
+		this.success();
+	}
+	
+	
+	/**
+	 * Delete file
+	 */
+	@ApiMethod
+	async void deleteFile()
+	{
+		/* Load data */
+		Dict foreign_key = this.post_data.get("foreign_key");
+		this.item = await this.findItem(foreign_key);
+		
+		/* Check if item is exists */
+		if (this.item == null)
+		{
+			throw new ApiError(new ItemNotFound("Project"));
+		}
+		
+		/* Upload file */
+		Dict pk = this.post_data.get("pk");
+		string folder_path = this.item.get("path");
+		string file_name = pk.get("name");
+		string file_path = fs::join([folder_path, file_name]);
+		
+		/* Remove file */
+		if (await fs::exists(file_path))
+		{
+			await fs::unlink(file_path);
+		}
+		
+		/* Success */
+		this.success();
 	}
 	
 	

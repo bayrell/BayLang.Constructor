@@ -47,7 +47,6 @@
 		"Frontend/Editor/WidgetEditPageModel.bay",
 		"Frontend/Editor/WidgetMenu.bay",
 		"Frontend/Editor/WidgetTreeItem.bay",
-		"Frontend/Fonts/Files.bay",
 		"Frontend/Fonts/FontPage.bay",
 		"Frontend/Fonts/FontPageModel.bay",
 		"Frontend/Fonts/FontSave.bay",
