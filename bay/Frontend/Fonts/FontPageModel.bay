@@ -55,24 +55,6 @@ class FontPageModel extends BasePageModel
 		/* Set route matches */
 		this.project_id = this.layout.route.matches.get("project_id");
 		
-		/* Add top buttons */
-		this.top_buttons = this.addWidget(
-			classof RowButtonsModel,
-			{
-				"widget_name": "top_buttons",
-				"buttons":
-				[
-					new ModelFactory
-					(
-						"Runtime.Widget.Table.AddButtonModel",
-						{
-							"table": this.table,
-						}
-					)
-				],
-			}
-		);
-		
 		/* Add table */
 		this.table = this.addWidget(
 			classof TableDialogModel,
@@ -203,6 +185,24 @@ class FontPageModel extends BasePageModel
 							}
 						),
 					},
+				],
+			}
+		);
+		
+		/* Add top buttons */
+		this.top_buttons = this.addWidget(
+			classof RowButtonsModel,
+			{
+				"widget_name": "top_buttons",
+				"buttons":
+				[
+					new ModelFactory
+					(
+						"Runtime.Widget.Table.AddButtonModel",
+						{
+							"table": this.table,
+						}
+					)
 				],
 			}
 		);

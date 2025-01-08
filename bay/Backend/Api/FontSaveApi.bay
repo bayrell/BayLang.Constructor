@@ -65,6 +65,7 @@ class FontSaveApi extends SaveApi
 	Collection getItemFields() =>
 	[
 		"name",
+		"css",
 		"files",
 	];
 	
@@ -75,6 +76,7 @@ class FontSaveApi extends SaveApi
 	Collection getSaveFields() =>
 	[
 		"name",
+		"css",
 	];
 	
 	
@@ -136,8 +138,16 @@ class FontSaveApi extends SaveApi
 	{
 		await parent(create_instance);
 		
-		/* Load files */
+		/* Load css */
 		string folder_path = this.item.get("path");
+		string file_css_path = fs::join([folder_path, "style.scss"]);
+		if (await fs::exists(file_css_path))
+		{
+			string css_content = await fs::readFile(file_css_path);
+			this.item.set("css", css_content);
+		}
+		
+		/* Load files */
 		Collection files = await fs::listDir(folder_path);
 		files = files.map(Dict (string name) => {"name": name});
 		this.item.set("files", files);
@@ -149,13 +159,20 @@ class FontSaveApi extends SaveApi
 	 */
 	async void save()
 	{
+		string font_name = this.item.get("name")
+		string font_path = fs::join([this.fonts_path, font_name]);
+		
+		/* Create folder */
 		bool exists = this.item.get("exists");
 		if (not exists)
 		{
-			string font_name = this.item.get("name")
-			string font_path = fs::join([this.fonts_path, font_name]);
 			await fs::mkDir(font_path);
 		}
+		
+		/* Save css */
+		string css_content = this.item.get("css");
+		string file_css_path = fs::join([font_path, "style.scss"]);
+		await fs::saveFile(file_css_path, css_content);
 	}
 	
 	

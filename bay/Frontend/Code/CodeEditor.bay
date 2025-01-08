@@ -18,7 +18,7 @@
 
 <class name="BayLang.Constructor.Frontend.Code.CodeEditor">
 
-<use name="BayLang.Constructor.Frontend.Code.TextEditable" component="true" />
+<use name="Runtime.Widget.TextEditable" component="true" />
 <use name="BayLang.Constructor.Frontend.Code.TreeItem" />
 
 

@@ -4,7 +4,6 @@
 	[
 		"Frontend/Code/CodeEditor.bay",
 		"Frontend/Code/CodeEditorModel.bay",
-		"Frontend/Code/TextEditable.bay",
 		"Frontend/Code/TreeItem.bay",
 		"Frontend/Code/TreeWidget.bay",
 		"Frontend/Components/SelectImageButton.bay",
