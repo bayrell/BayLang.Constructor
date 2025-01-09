@@ -155,6 +155,73 @@ class FontSaveApi extends SaveApi
 	
 	
 	/**
+	 * Rebuild assets
+	 */
+	async void rebuild()
+	{
+		if (not await fs::isDir(this.fonts_path)) return;
+		
+		/* Get items */
+		Collection items = [];
+		items = await fs::listDir(this.fonts_path);
+		
+		/* Read styles */
+		Collection<string> content = [
+			"<!--",
+			" *  Fonts",
+			"-->",
+			"",
+			"<class name=\"App.Components.Blocks.Fonts\">",
+			"<style>",
+		];
+		for (int i=0; i<items.count(); i++)
+		{
+			string font_name = items.get(i);
+			string file_css_path = fs::join([this.fonts_path, font_name, "style.scss"]);
+			if (await fs::exists(file_css_path))
+			{
+				string css_content = await fs::readFile(file_css_path);
+				content.push(css_content);
+			}
+		}
+		content.push("</style>");
+		content.push("</class>");
+		
+		/* Find module */
+		string file_path = fs::join([
+			this.project.path,
+			"src", "App", "bay", "Components", "Blocks", "Fonts.bay"
+		]);
+		Module module = this.project.findModuleByFileName(file_path);
+		if (not module) return;
+		
+		/* Save styles */
+		await fs::saveFile(file_path, rs::join("\n", content));
+		
+		/* Compile file */
+		try
+		{
+			string relative_file_path = module.getRelativeSourcePath(file_path);
+			await module.compile(relative_file_path);
+		}
+		catch (ParserUnknownError e)
+		{
+			string error_str = e.getErrorMessage();
+			string line = e.getErrorLine();
+			string pos = e.getErrorPos();
+			if (line != -1)
+			{
+				error_str ~= " at Ln:" ~ line ~ ( (pos != "") ? ", Pos:" ~ pos : "" );
+			}
+			throw new ApiError(new RuntimeException(error_str));
+		}
+		
+		/* Update assets */
+		await module.updateAssets();
+	}
+	
+	
+	/**
 	 * Save
 	 */
 	async void save()
@@ -173,6 +240,9 @@ class FontSaveApi extends SaveApi
 		string css_content = this.item.get("css");
 		string file_css_path = fs::join([font_path, "style.scss"]);
 		await fs::saveFile(file_css_path, css_content);
+		
+		/* Rebuild assets */
+		await this.rebuild();
 	}
 	
 	
