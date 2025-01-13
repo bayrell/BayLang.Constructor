@@ -55,7 +55,6 @@ class FontSaveApi extends SaveApi
 	Vector<CrudRule> getRules() =>
 	[
 		new Required{"name": "name"},
-		new ReadOnlyRule{"name": "name", "can_create": true},
 	];
 	
 	
@@ -100,6 +99,14 @@ class FontSaveApi extends SaveApi
 		this.assets_path = ApiHook::getAssetsPath(this.project);
 		this.fonts_path = fs::join([this.assets_path, "fonts"]);
 	}
+	
+	
+	/**
+	 * Returns primary key
+	 */
+	Dict getPrimaryKey(Dict item) => {
+		"name": item.get("name"),
+	};
 	
 	
 	/**
@@ -148,9 +155,12 @@ class FontSaveApi extends SaveApi
 		}
 		
 		/* Load files */
-		Collection files = await fs::listDir(folder_path);
-		files = files.map(Dict (string name) => {"name": name});
-		this.item.set("files", files);
+		if (await fs::exists(folder_path))
+		{
+			Collection files = await fs::listDir(folder_path);
+			files = files.map(Dict (string name) => {"name": name});
+			this.item.set("files", files);
+		}
 	}
 	
 	
@@ -226,18 +236,40 @@ class FontSaveApi extends SaveApi
 	 */
 	async void save()
 	{
-		string font_name = this.item.get("name")
+		string font_key = this.pk ? this.pk.get("name") : "";
+		string font_name = this.item.get("name");
 		string font_path = fs::join([this.fonts_path, font_name]);
 		
-		/* Create folder */
+		/* Check folder is exists */
 		bool exists = this.item.get("exists");
-		if (not exists)
+		if (exists)
 		{
+			/* Rename folder */
+			if (font_key != font_name)
+			{
+				string font_path_old = fs::join([this.fonts_path, font_key]);
+				await fs::rename(font_path_old, font_path);
+			}
+		}
+		else
+		{
+			/* Create folder */
 			await fs::mkDir(font_path);
 		}
 		
 		/* Save css */
 		string css_content = this.item.get("css");
+		if (css_content == "")
+		{
+			css_content = rs::join("\n", [
+				"@font-face {",
+				"  font-family: '" ~ font_name ~ "';",
+				"  font-weight: normal;",
+				"  font-style: normal;",
+				"  src: ${ static::assets('" ~ font_name ~ "/" ~ font_name ~ ".ttf') };",
+				"}"
+			]);
+		}
 		string file_css_path = fs::join([font_path, "style.scss"]);
 		await fs::saveFile(file_css_path, css_content);
 		

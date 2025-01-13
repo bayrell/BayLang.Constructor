@@ -112,9 +112,15 @@
 .code_editor__file{
 	overflow-y: auto;
 	height: 100%;
-	%(TextEditable)widget_text_editable{
+	%(TextEditable)widget_text{
+		height: 100%;
 		border-width: 0px;
-		padding: 5px;
+	}
+	%(TextEditable)widget_text__lines{
+		width: 30px;
+	}
+	%(TextEditable)widget_text__editable{
+		width: calc(100% - 30px);
 	}
 }
 .code_editor__file.hide{
