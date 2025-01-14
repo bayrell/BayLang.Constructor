@@ -127,7 +127,7 @@ class FontSaveModel extends BasePageModel
 							classof FormDeleteStorage,
 							{
 								"api_name": "baylang.constructor.fonts.save"
-								"action": "deleteFile",
+								"method_name": "deleteFile",
 							}
 						),
 						"events":

@@ -28,6 +28,7 @@ use Runtime.Web.BaseApi;
 use Runtime.Web.Annotations.ApiMethod;
 use Runtime.Widget.Crud.SaveApi;
 use Runtime.Widget.Crud.Rules.CrudRule;
+use Runtime.Widget.Crud.Rules.MatchRule;
 use Runtime.Widget.Crud.Rules.ReadOnlyRule;
 use Runtime.Widget.Crud.Rules.Required;
 use BayLang.Constructor.Backend.ApiHook;
@@ -54,6 +55,7 @@ class FontSaveApi extends SaveApi
 	 */
 	Vector<CrudRule> getRules() =>
 	[
+		new MatchRule{"name": "api_name", "regular": MatchRule::ALPHA_NUMERIC_DASH},
 		new Required{"name": "name"},
 	];
 	
@@ -266,7 +268,7 @@ class FontSaveApi extends SaveApi
 				"  font-family: '" ~ font_name ~ "';",
 				"  font-weight: normal;",
 				"  font-style: normal;",
-				"  src: ${ static::assets('" ~ font_name ~ "/" ~ font_name ~ ".ttf') };",
+				"  src: ${ Component::assets('" ~ font_name ~ "/" ~ font_name ~ ".ttf') };",
 				"}"
 			]);
 		}
