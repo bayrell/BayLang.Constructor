@@ -218,7 +218,7 @@ class FontSaveModel extends BasePageModel
 					{
 						"name": "css",
 						"label": "CSS",
-						"component": "Runtime.Widget.TextEditable",
+						"component": "Runtime.Widget.Editor.Editor",
 					},
 				],
 			}
