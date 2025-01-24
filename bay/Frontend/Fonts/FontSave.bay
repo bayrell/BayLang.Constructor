@@ -24,7 +24,16 @@
 <template>
 	<div class="widgets_list">
 		%render this.renderWidget(this.model.top_buttons);
-		%render this.renderWidget(this.model.form);
+		%if (this.model.form.load.isSuccess())
+		{
+			%render this.renderWidget(this.model.form);
+		}
+		%else
+		{
+			<div class="center">
+				{{ this.model.form.load.message }}
+			</div>
+		}
 	</div>
 </template>
 

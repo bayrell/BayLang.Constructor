@@ -18,32 +18,14 @@
 
 namespace BayLang.Constructor.Backend.Api;
 
-
-use Runtime.fs;
-use Runtime.File;
-use Runtime.Exceptions.ApiError;
-use Runtime.Exceptions.ItemNotFound;
-use Runtime.Exceptions.RuntimeException;
-use Runtime.Web.BaseApi;
 use Runtime.Web.Annotations.ApiMethod;
-use Runtime.Widget.Crud.SaveApi;
-use Runtime.Widget.Crud.Rules.CrudRule;
-use Runtime.Widget.Crud.Rules.MatchRule;
-use Runtime.Widget.Crud.Rules.ReadOnlyRule;
-use Runtime.Widget.Crud.Rules.Required;
-use BayLang.Constructor.Backend.ApiHook;
-use BayLang.Exceptions.ParserUnknownError;
-use BayLang.Helper.Module;
-use BayLang.Helper.Project;
+use Runtime.Web.Crud.CrudService;
+use Runtime.Web.Crud.SaveApi;
+use BayLang.Constructor.Backend.Service.FontService;
 
 
 class FontSaveApi extends SaveApi
 {
-	Project project = null;
-	string assets_path = "";
-	string fonts_path = "";
-	
-	
 	/**
 	 * Returns api name
 	 */
@@ -51,13 +33,9 @@ class FontSaveApi extends SaveApi
 	
 	
 	/**
-	 * Returns rules
+	 * Returns service
 	 */
-	Vector<CrudRule> getRules() =>
-	[
-		new MatchRule{"name": "api_name", "regular": MatchRule::ALPHA_NUMERIC_DASH},
-		new Required{"name": "name"},
-	];
+	CrudService createService() => new FontService();
 	
 	
 	/**
@@ -72,221 +50,23 @@ class FontSaveApi extends SaveApi
 	
 	
 	/**
-	 * Returns save fields
-	 */
-	Collection getSaveFields() =>
-	[
-		"name",
-		"css",
-	];
-	
-	
-	/**
-	 * Action before
-	 */
-	async void onActionBefore()
-	{
-		/* Get project */
-		string project_id = this.post_data["foreign_key", "project_id"];
-		this.project = await ApiHook::getProject(project_id);
-		if (not this.project)
-		{
-			throw new ApiError(new ItemNotFound(project_id, "Project"));
-		}
-		
-		/* Load project */
-		await this.project.load();
-		
-		/* Get fonts path */
-		this.assets_path = ApiHook::getAssetsPath(this.project);
-		this.fonts_path = fs::join([this.assets_path, "fonts"]);
-	}
-	
-	
-	/**
-	 * Returns primary key
-	 */
-	Dict getPrimaryKey(Dict item) => {
-		"name": item.get("name"),
-	};
-	
-	
-	/**
-	 * New item
-	 */
-	async void newItem() => {
-		"exists": false,
-		"files": [],
-	};
-	
-	
-	/**
-	 * Find item
-	 */
-	async void findItem(Dict pk)
-	{
-		string font_name = pk.get("name")
-		string font_path = fs::join([this.fonts_path, font_name]);
-		if (not await fs::isDir(font_path))
-		{
-			return null;
-		}
-		return {
-			"exists": true,
-			"name": font_name,
-			"path": font_path,
-			"files": [],
-		};
-	}
-	
-	
-	/**
-	 * Load item
-	 */
-	async void loadItem(bool create_instance = true)
-	{
-		await parent(create_instance);
-		
-		/* Load css */
-		string folder_path = this.item.get("path");
-		string file_css_path = fs::join([folder_path, "style.scss"]);
-		if (await fs::exists(file_css_path))
-		{
-			string css_content = await fs::readFile(file_css_path);
-			this.item.set("css", css_content);
-		}
-		
-		/* Load files */
-		if (await fs::exists(folder_path))
-		{
-			Collection files = await fs::listDir(folder_path);
-			files = files.map(Dict (string name) => {"name": name});
-			this.item.set("files", files);
-		}
-	}
-	
-	
-	/**
-	 * Rebuild assets
-	 */
-	async void rebuild()
-	{
-		if (not await fs::isDir(this.fonts_path)) return;
-		
-		/* Get items */
-		Collection items = [];
-		items = await fs::listDir(this.fonts_path);
-		
-		/* Read styles */
-		Collection<string> content = [
-			"<!--",
-			" *  Fonts",
-			"-->",
-			"",
-			"<class name=\"App.Components.Blocks.Fonts\">",
-			"<style>",
-		];
-		for (int i=0; i<items.count(); i++)
-		{
-			string font_name = items.get(i);
-			string file_css_path = fs::join([this.fonts_path, font_name, "style.scss"]);
-			if (await fs::exists(file_css_path))
-			{
-				string css_content = await fs::readFile(file_css_path);
-				content.push(css_content);
-			}
-		}
-		content.push("</style>");
-		content.push("</class>");
-		
-		/* Find module */
-		string file_path = fs::join([
-			this.project.path,
-			"src", "App", "bay", "Components", "Blocks", "Fonts.bay"
-		]);
-		Module module = this.project.findModuleByFileName(file_path);
-		if (not module) return;
-		
-		/* Save styles */
-		await fs::saveFile(file_path, rs::join("\n", content));
-		
-		/* Compile file */
-		try
-		{
-			string relative_file_path = module.getRelativeSourcePath(file_path);
-			await module.compile(relative_file_path);
-		}
-		catch (ParserUnknownError e)
-		{
-			string error_str = e.getErrorMessage();
-			string line = e.getErrorLine();
-			string pos = e.getErrorPos();
-			if (line != -1)
-			{
-				error_str ~= " at Ln:" ~ line ~ ( (pos != "") ? ", Pos:" ~ pos : "" );
-			}
-			throw new ApiError(new RuntimeException(error_str));
-		}
-		
-		/* Update assets */
-		await module.updateAssets();
-	}
-	
-	
-	/**
-	 * Save
-	 */
-	async void save()
-	{
-		string font_key = this.pk ? this.pk.get("name") : "";
-		string font_name = this.item.get("name");
-		string font_path = fs::join([this.fonts_path, font_name]);
-		
-		/* Check folder is exists */
-		bool exists = this.item.get("exists");
-		if (exists)
-		{
-			/* Rename folder */
-			if (font_key != font_name)
-			{
-				string font_path_old = fs::join([this.fonts_path, font_key]);
-				await fs::rename(font_path_old, font_path);
-			}
-		}
-		else
-		{
-			/* Create folder */
-			await fs::mkDir(font_path);
-		}
-		
-		/* Save css */
-		string css_content = this.item.get("css");
-		if (css_content == "")
-		{
-			css_content = rs::join("\n", [
-				"@font-face {",
-				"  font-family: '" ~ font_name ~ "';",
-				"  font-weight: normal;",
-				"  font-style: normal;",
-				"  src: ${ Component::assets('" ~ font_name ~ "/" ~ font_name ~ ".ttf') };",
-				"}"
-			]);
-		}
-		string file_css_path = fs::join([font_path, "style.scss"]);
-		await fs::saveFile(file_css_path, css_content);
-		
-		/* Rebuild assets */
-		await this.rebuild();
-	}
-	
-	
-	/**
 	 * Action item
 	 */
 	@ApiMethod
 	async void actionItem()
 	{
-		await parent();
+		/* Create service */
+		CrudService service = this.createService();
+		
+		/* Load project */
+		await service.loadProject(this.post_data.get("project_id"));
+		
+		/* Load item */
+		Dict pk = this.post_data.get("pk");
+		await service.searchItem(pk);
+		
+		/* Build result */
+		this.buildResult(service);
 	}
 	
 	
@@ -296,7 +76,20 @@ class FontSaveApi extends SaveApi
 	@ApiMethod
 	async void actionSave()
 	{
-		await parent();
+		/* Create service */
+		CrudService service = this.createService();
+		
+		/* Load project */
+		await service.loadProject(this.post_data.get("project_id"));
+		
+		/* Load item */
+		await service.loadItem(this.post_data.get("pk"));
+		
+		/* Save item */
+		await service.save(this.post_data.get("item"));
+		
+		/* Build result */
+		this.buildResult(service);
 	}
 	
 	
@@ -306,26 +99,19 @@ class FontSaveApi extends SaveApi
 	@ApiMethod
 	async void uploadFile()
 	{
-		/* Load data */
-		Dict pk = this.post_data.get("pk");
-		this.item = await this.findItem(pk);
+		/* Create service */
+		CrudService service = this.createService();
 		
-		/* Check if item is exists */
-		if (this.item == null)
-		{
-			throw new ApiError(new ItemNotFound());
-		}
+		/* Load project */
+		await service.loadProject(this.post_data.get("project_id"));
+		
+		/* Load item */
+		await service.loadItem(this.post_data.get("foreign_key"));
 		
 		/* Upload file */
-		string folder_path = this.item.get("path");
-		File file = this.post_data.get("file");
+		await service.uploadFile(this.post_data.get("file"));
 		
-		/* Create file */
-		string file_upload_path = fs::join([folder_path, file.getName()]);
-		string content = await fs::readFile(file.getPath());
-		await fs::saveFile(file_upload_path, content);
-		
-		/* Success */
+		/* Build result */
 		this.success();
 	}
 	
@@ -336,44 +122,30 @@ class FontSaveApi extends SaveApi
 	@ApiMethod
 	async void deleteFile()
 	{
-		/* Load data */
-		Dict foreign_key = this.post_data.get("foreign_key");
-		this.item = await this.findItem(foreign_key);
+		/* Create service */
+		CrudService service = this.createService();
 		
-		/* Check if item is exists */
-		if (this.item == null)
-		{
-			throw new ApiError(new ItemNotFound("Project"));
-		}
+		/* Load project */
+		await service.loadProject(this.post_data.get("project_id"));
 		
-		/* Upload file */
+		/* Load item */
+		await service.loadItem(this.post_data.get("foreign_key"));
+		
+		/* Check item */
 		Dict pk = this.post_data.get("pk");
-		string folder_path = this.item.get("path");
-		string file_name = pk.get("name");
-		string file_path = fs::join([folder_path, file_name]);
-		
-		/* Remove file */
-		if (await fs::exists(file_path))
+		if (pk == null or not(pk instanceof Dict))
 		{
-			await fs::unlink(file_path);
+			return this.fail({
+				"message": "Item not found",
+			});
 		}
 		
-		/* Success */
-		this.success();
-	}
-	
-	
-	/**
-	 * Remove
-	 */
-	async void remove()
-	{
-		string font_name = this.item.get("name");
-		string font_path = fs::join([this.fonts_path, font_name]);
+		/* Delete file */
+		string file_name = this.post_data.get("pk").get("name");
+		await service.deleteFile(file_name);
 		
-		#ifcode PHP then
-		shell_exec("rm -rf $font_path");
-		#endif
+		/* Build result */
+		this.success();
 	}
 	
 	
@@ -383,6 +155,19 @@ class FontSaveApi extends SaveApi
 	@ApiMethod
 	async void actionDelete()
 	{
-		await parent();
+		/* Create service */
+		CrudService service = this.createService();
+		
+		/* Load project */
+		await service.loadProject(this.post_data.get("project_id"));
+		
+		/* Load item */
+		await service.loadItem(this.post_data.get("pk"));
+		
+		/* Delete item */
+		await service.delete();
+		
+		/* Build result */
+		this.buildResult(service);
 	}
 }

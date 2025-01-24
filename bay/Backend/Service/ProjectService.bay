@@ -122,15 +122,8 @@ class ProjectService extends CrudService
 	/**
 	 * Reload
 	 */
-	async bool reload(Dict post_data)
+	async bool reload()
 	{
-		this.setAction("reload");
-		this.setPostData(post_data);
-		
-		/* Load data */
-		await this.loadItem(false);
-		if (this.item == null) return false;
-		
 		/* Project path */
 		string project_path = this.item.getPath();
 		string cache_path = fs::join([project_path, ".cache"]);

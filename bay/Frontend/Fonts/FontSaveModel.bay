@@ -232,12 +232,13 @@ class FontSaveModel extends BasePageModel
 	async void onUploadFile(var e)
 	{
 		var file = e.value;
+		Dict foreign_key = this.form.pk.copy();
+		foreign_key.set("project_id", this.project_id);
 		ApiResult result = await this.layout.callApi({
 			"api_name": "baylang.constructor.fonts.save",
 			"method_name": "uploadFile",
 			"data": {
-				"project_id": this.project_id,
-				"pk": this.form.pk,
+				"foreign_key": foreign_key,
 				"file": file,
 			}
 		});
