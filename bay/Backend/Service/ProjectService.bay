@@ -23,6 +23,7 @@ use Runtime.Web.Crud.CrudService;
 use Runtime.Web.Crud.Rules.MatchRule;
 use Runtime.Web.Crud.Rules.Required;
 use BayLang.Constructor.Backend.ApiHook;
+use BayLang.Helper.Module;
 use BayLang.Helper.Project;
 
 
@@ -116,6 +117,34 @@ class ProjectService extends CrudService
 	{
 		/* Save project */
 		await this.item.saveInfo();
+	}
+	
+	
+	/**
+	 * Returns modules
+	 */
+	async Collection getModules()
+	{
+		/* Load project */
+		await this.item.load();
+		
+		/* Get modules */
+		Collection items = this.item.modules.transition( Module (Module item) => item );
+		
+		/* Sort modules */
+		items = items.sort(
+			int (Module a, Module b)
+			{
+				return rs::compare(a.getName(), b.getName());
+			}
+		);
+		
+		/* Filter items */
+		return items.map(
+			Dict (Module module) => {
+				"id": module.getName(),
+			}
+		);
 	}
 	
 	

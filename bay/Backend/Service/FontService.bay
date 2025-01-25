@@ -270,7 +270,7 @@ class FontService extends CrudService
 				"  font-family: '" ~ font_name ~ "';",
 				"  font-weight: normal;",
 				"  font-style: normal;",
-				"  src: ${ Component::assets('" ~ font_name ~ "/" ~ font_name ~ ".ttf') };",
+				"  src: url(${ Component::assets('" ~ font_name ~ "/" ~ font_name ~ ".ttf') });",
 				"}"
 			]);
 		}
