@@ -19,9 +19,9 @@
 namespace BayLang.Constructor.Backend.Service;
 
 use Runtime.fs;
-use Runtime.Web.Crud.CrudService;
-use Runtime.Web.Crud.Rules.MatchRule;
-use Runtime.Web.Crud.Rules.Required;
+use Runtime.Widget.Crud.CrudService;
+use Runtime.Widget.Crud.Rules.MatchRule;
+use Runtime.Widget.Crud.Rules.Required;
 use BayLang.Constructor.Backend.ApiHook;
 use BayLang.Helper.Module;
 use BayLang.Helper.Project;
