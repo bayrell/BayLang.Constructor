@@ -60,7 +60,7 @@ class ParameterModel extends Parameter
 		
 		/* Find code */
 		OpDict op_dict = this.getModelCodes();
-		this.op_code = op_dict.values.findItem(lib::equalAttr("key", this.name));
+		this.op_code = op_dict.values.findItem(method this.isOpCode);
 	}
 	
 	
@@ -86,7 +86,7 @@ class ParameterModel extends Parameter
 		if (this.op_code != null) return;
 		this.op_code = new OpDictPair
 		{
-			"key": this.name,
+			"key": this.getAttributeName(),
 		};
 		OpDict op_dict = this.getModelCodes();
 		op_dict.values.append(this.op_code);
@@ -105,7 +105,7 @@ class ParameterModel extends Parameter
 		
 		/* Remove attribute */
 		OpDict op_dict = this.getModelCodes();
-		int pos = op_dict.values.find(lib::equalAttr("key", this.name));
+		int pos = op_dict.values.find(lib::equalAttr("key", this.getAttributeName()));
 		if (pos >= 0)
 		{
 			op_dict.values.remove(pos);
@@ -164,7 +164,7 @@ class ParameterModel extends Parameter
 		/* Model settings onChange event */
 		if (rtl::exists(this.widget.model_settings.onChange))
 		{
-			bool is_updated = this.widget.model_settings.onChange(model, this);
+			bool is_updated = this.widget.model_settings.onChange(new rtl(), model, this);
 			if (is_updated)
 			{
 				return;
