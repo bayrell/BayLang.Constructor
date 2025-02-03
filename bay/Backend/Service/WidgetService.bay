@@ -239,7 +239,8 @@ class WidgetService extends CrudService
 		this.module.compile(this.module.getRelativeSourcePath(component_path));
 		
 		/* Update assets */
-		this.module.updateAssets();
+		await this.module.updateAssets();
+		await ApiHook::updateAssets();
 		
 		/* Save cache */
 		await this.project.saveCache();
@@ -371,7 +372,8 @@ class WidgetService extends CrudService
 		await this.module.removeWidget(this.item);
 		
 		/* Update assets */
-		this.module.updateAssets();
+		await this.module.updateAssets();
+		await ApiHook::updateAssets();
 		
 		/* Save cache */
 		await this.project.saveCache();

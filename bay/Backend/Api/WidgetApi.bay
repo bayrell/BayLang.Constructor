@@ -109,8 +109,8 @@ class WidgetApi extends BaseApi
 		await service.saveFile(service.item.getModelPath(), this.post_data.get("model"));
 		
 		/* Update assets */
-		service.item.module.updateAssets();
-		ApiHook::updateAssets();
+		await service.item.module.updateAssets();
+		await ApiHook::updateAssets();
 		
 		/* Success */
 		this.success();
