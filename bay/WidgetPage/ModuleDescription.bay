@@ -24,7 +24,7 @@ use Runtime.Entity.Provider;
 use Runtime.Web.Annotations.Route;
 
 
-static class ModuleDescription
+class ModuleDescription
 {
 	/**
 	 * Returns module name

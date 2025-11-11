@@ -126,7 +126,7 @@ class FontSaveModel extends BasePageModel
 						"storage": new Factory(
 							classof FormDeleteStorage,
 							{
-								"api_name": "baylang.constructor.fonts.save"
+								"api_name": "baylang.constructor.fonts.save",
 								"method_name": "deleteFile",
 							}
 						),
@@ -252,7 +252,7 @@ class FontSaveModel extends BasePageModel
 					"name": file.name,
 				});
 			}
-			files = files.sort(lib::comparator(method lib::sortAsc, lib::attr("name")));
+			files = files.sort(rtl::compare("asc", string (Map item) => item.get("name")));
 			this.form.item.set("files", files);
 		}
 	}

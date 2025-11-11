@@ -23,7 +23,7 @@ use Runtime.Web.Annotations.Route;
 use Runtime.Web.Annotations.SetupLayout;
 
 
-static class ModuleDescription
+class ModuleDescription
 {
 	/**
 	 * Returns module name

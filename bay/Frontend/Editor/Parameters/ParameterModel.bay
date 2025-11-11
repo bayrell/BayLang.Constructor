@@ -18,7 +18,9 @@
 
 namespace BayLang.Constructor.Frontend.Editor.Parameters;
 
+use Runtime.rtl;
 use Runtime.lib;
+use Runtime.Callback;
 use Runtime.Web.BaseModel;
 use BayLang.Constructor.Frontend.Editor.Parameters.Parameter;
 use BayLang.Constructor.Frontend.Editor.Processor.CodeProcessor;
@@ -60,7 +62,7 @@ class ParameterModel extends Parameter
 		
 		/* Find code */
 		OpDict op_dict = this.getModelCodes();
-		this.op_code = op_dict.values.findItem(method this.isOpCode);
+		this.op_code = op_dict.values.findItem(new Callback(this, "isOpCode"));
 	}
 	
 	

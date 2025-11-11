@@ -117,7 +117,7 @@ class ParameterRawHtml extends Parameter
 		{
 			code = new OpHtmlValue
 			{
-				"kind": "raw"
+				"kind": "raw",
 				"value": new OpString
 				{
 					"value": this.getHtmlContent(),
