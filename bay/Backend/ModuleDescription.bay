@@ -22,7 +22,7 @@ use Runtime.Web.Annotations.Api;
 use Runtime.Web.Annotations.Hook;
 
 
-static class ModuleDescription
+class ModuleDescription
 {
 	/**
 	 * Returns module name

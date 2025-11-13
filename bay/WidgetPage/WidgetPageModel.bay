@@ -19,6 +19,7 @@
 namespace BayLang.Constructor.WidgetPage;
 
 use Runtime.lib;
+use Runtime.Callback;
 use Runtime.Web.ApiResult;
 use Runtime.Web.BaseLayoutModel;
 use Runtime.Web.BaseModel;
@@ -90,9 +91,9 @@ class WidgetPageModel extends BasePageModel
 		
 		/* Add event listeners */
 		RenderProvider provider = @.provider(classof RenderProvider);
-		provider.events.add("onBeforeUpdate", method this.updateComponent);
-		provider.events.add("onMounted", method this.addComponent);
-		provider.events.add("onUnmount", method this.removeComponent);
+		provider.events.add("onBeforeUpdate", new Callback(this, "updateComponent"));
+		provider.events.add("onMounted", new Callback(this, "addComponent"));
+		provider.events.add("onUnmount", new Callback(this, "removeComponent"));
 		
 		#ifcode JAVASCRIPT then
 		window.addEventListener("message", (event) => { Vue.reactive(this).onPostMessage(event); });
@@ -303,7 +304,7 @@ class WidgetPageModel extends BasePageModel
 		else if (name == "select_item")
 		{
 			Collection<int> path = rs::split(".", event.data.path);
-			path = path.map(int (string item) => (int)item);
+			path = path.map(int (string item) => rtl::toInt(item));
 			this.selectItem(path);
 		}
 	}

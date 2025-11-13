@@ -160,13 +160,12 @@ class CodeProcessor extends BaseObject
 		
 		/* Create new instance */
 		ParserBay parser = new ParserBay();
-		parser = parser::reset(parser);
 		if (params.has("current_namespace_name"))
-			parser <= current_namespace_name <= params.get("current_namespace_name");
+			parser.current_namespace_name = params.get("current_namespace_name");
 		if (params.has("current_class_name"))
-			parser <= current_class_name <= params.get("current_class_name");
+			parser.current_class_name = params.get("current_class_name");
 		if (params.has("uses"))
-			parser <= uses <= params.get("uses");
+			parser.uses = params.get("uses");
 		
 		return parser;
 	}
@@ -181,14 +180,13 @@ class CodeProcessor extends BaseObject
 		TranslatorES6 t = new TranslatorES6();
 		
 		/* Reset translator */
-		TranslatorES6 t = TranslatorES6::reset(t);
 		if (this.code.uses != null)
 		{
-			t <= modules <= this.code.uses;
+			t.modules = this.code.uses;
 		}
 		
 		/* Enable debug */
-		t = t.setFlag("DEBUG_COMPONENT", true);
+		t.setFlag("DEBUG_COMPONENT", true);
 		
 		/* Return */
 		return t;

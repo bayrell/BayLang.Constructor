@@ -21,7 +21,7 @@ namespace BayLang.Constructor.Console;
 use Runtime.Console.Annotations.ConsoleCommand;
 
 
-static class ModuleDescription
+class ModuleDescription
 {
 	/**
 	 * Returns module name

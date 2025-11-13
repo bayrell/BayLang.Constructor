@@ -63,8 +63,8 @@ class Selector extends BaseObject
 		/* Translate source */
 		if (not op_code) return "";
 		
-		translator <= is_static_function <= true;
-		list res = translator.expression::Expression(translator, op_code);
+		translator.is_static_function = true;
+		list res = translator.expression.Expression(op_code);
 		return res.get(1);
 	}
 	
@@ -110,7 +110,7 @@ class Selector extends BaseObject
 			{
 				/* Save caret */
 				caret.matchString("${");
-				parser <= caret <= caret;
+				parser.caret = caret;
 				
 				/* Read expression */
 				try

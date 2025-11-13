@@ -18,6 +18,7 @@
 
 namespace BayLang.Constructor.Frontend.Editor.Processor;
 
+use Runtime.rtl;
 use Runtime.Callback;
 use BayLang.SaveOpCode;
 use BayLang.Constructor.Frontend.Editor.Processor.CodeProcessor;
