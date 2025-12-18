@@ -19,16 +19,18 @@
 namespace BayLang.Constructor.Frontend.Code;
 
 use Runtime.lib;
-use Runtime.Callback;
+use Runtime.ApiResult;
+use Runtime.BaseModel;
+use Runtime.Method;
 use Runtime.Serializer;
-use Runtime.Web.ApiResult;
-use Runtime.Web.BasePageModel;
+use Runtime.Serializer.ObjectType;
 use Runtime.Web.RenderContainer;
-use Runtime.Widget.WidgetResultModel;
+use Runtime.Widget.ResultModel;
 use Runtime.Widget.Button.ButtonModel;
 use Runtime.Widget.ContextMenu.ContextMenuMessage;
 use Runtime.Widget.ContextMenu.ContextMenuModel;
 use Runtime.Widget.Dialog.ConfirmDialogModel;
+use Runtime.Widget.Dialog.DialogModel;
 use Runtime.Widget.Dialog.DialogMessage;
 use Runtime.Widget.Dialog.PromptDialogModel;
 use Runtime.Widget.Tree.TreeMessage;
@@ -36,23 +38,40 @@ use Runtime.Widget.Tree.TreeModel;
 use BayLang.Constructor.Frontend.Code.CodeEditor;
 use BayLang.Constructor.Frontend.Code.TreeItem;
 use BayLang.Constructor.Frontend.Code.TreeWidget;
+use BayLang.Constructor.Frontend.Code.Commands.CommandInterface;
+use BayLang.Constructor.Frontend.Code.Commands.Copy;
+use BayLang.Constructor.Frontend.Code.Commands.CreateFile;
+use BayLang.Constructor.Frontend.Code.Commands.CreateFolder;
+use BayLang.Constructor.Frontend.Code.Commands.Paste;
+use BayLang.Constructor.Frontend.Code.Commands.Remove;
+use BayLang.Constructor.Frontend.Code.Commands.Rename;
 
 
-class CodeEditorModel extends BasePageModel
+class CodeEditorModel extends BaseModel
 {
 	string component = classof CodeEditor;
-	string project_id = "";
 	string copy_past_kind = "";
 	string copy_past_path = "";
 	ConfirmDialogModel confirm_dialog = null;
 	PromptDialogModel prompt_dialog = null;
 	TreeModel tree = null;
-	TreeItem selected_item = null;
 	TreeItem selected_tab = null;
-	Collection<string> selected_path = null;
 	Collection<TreeItem> tabs = [];
-	WidgetResultModel save_result = null;
+	ResultModel save_result = null;
 	ContextMenuModel context_menu = null;
+	Map<CommandInterface> commands = null;
+	
+	
+	/**
+	 * Serialize object
+	 */
+	void serialize(Serializer serializer)
+	{
+		parent(serializer);
+		serializer.addType("tree", new ObjectType{
+			"class_name": classof TreeModel,
+		});
+	}
 	
 	
 	/**
@@ -62,93 +81,77 @@ class CodeEditorModel extends BasePageModel
 	{
 		parent(params);
 		
-		/* Setup settings */
-		this.project_id = this.layout.route.matches.get("project_id");
+		/* Init commands */
+		this.commands = {
+			"create_file": new CreateFile(this, "file"),
+			"create_folder": new CreateFolder(this, "folder"),
+			"remove": new Remove(this),
+			"rename": new Rename(this),
+			"copy": new Copy(this, "copy"),
+			"cut": new Copy(this, "cut"),
+			"paste": new Paste(this),
+		};
+		this.commands.set("delete", this.commands.get("remove"));
 		
 		/* Save result */
-		this.save_result = this.addWidget(
-			classof WidgetResultModel,
-			{
-				"widget_name": "save_result"
-			}
-		);
+		this.save_result = this.createWidget(classof ResultModel);
 		
 		/* Confirm dialog */
-		this.confirm_dialog = this.addWidget(
-			classof ConfirmDialogModel,
-			{
-				"widget_name": "confirm_dialog",
-				"events":
-				{
-					"confirm": new Callback(this, "onDialogConfirm"),
-				},
-			}
-		);
+		this.confirm_dialog = this.createWidget(classof ConfirmDialogModel);
+		this.confirm_dialog.addEventListener("confirm", new Method(this, "onDialogConfirm"));
 		
 		/* Prompt dialog */
-		this.prompt_dialog = this.addWidget(
-			classof PromptDialogModel,
-			{
-				"widget_name": "prompt_dialog",
-				"events":
+		this.prompt_dialog = this.createWidget(classof PromptDialogModel);
+		this.prompt_dialog.addEventListener("confirm", new Method(this, "onDialogConfirm"));
+		
+		/* Context menu */
+		this.context_menu = this.createWidget(classof ContextMenuModel, {
+			"items":
+			[
 				{
-					"confirm": new Callback(this, "onDialogConfirm"),
+					"label": "Create file",
+					"key": "create_file",
 				},
-			}
-		);
+				{
+					"label": "Create folder",
+					"key": "create_folder",
+				},
+				{
+					"label": "Rename",
+					"key": "rename",
+				},
+				{
+					"label": "Cut",
+					"key": "cut",
+				},
+				{
+					"label": "Copy",
+					"key": "copy",
+				},
+				{
+					"label": "Paste",
+					"key": "paste",
+				},
+				{
+					"label": "Delete",
+					"key": "delete",
+				},
+			],
+		});
+		this.context_menu.addEventListener("clickItem", new Method(this, "onContextMenuItemClick"));
 		
 		/* Create Tree */
-		this.tree = this.addWidget(classof TreeModel, {
+		this.tree = this.createWidget(classof TreeModel, {
 			"component": classof TreeWidget,
 			"dnd": false,
 			"icons": true,
-			"events":
-			{
-				"selectItem": new Callback(this, "onTreeSelectItem"),
-				"contextMenu": new Callback(this, "onTreeContextMenu"),
-			},
-			"context_menu":
-			{
-				"items":
-				[
-					{
-						"label": "Create file",
-						"key": "create_file",
-					},
-					{
-						"label": "Create folder",
-						"key": "create_folder",
-					},
-					{
-						"label": "Rename",
-						"key": "rename",
-					},
-					{
-						"label": "Cut",
-						"key": "cut",
-					},
-					{
-						"label": "Copy",
-						"key": "copy",
-					},
-					{
-						"label": "Paste",
-						"key": "paste",
-					},
-					{
-						"label": "Delete",
-						"key": "delete",
-					},
-				],
-				"events":
-				{
-					"clickItem": new Callback(this, "onContextMenuItemClick"),
-				}
-			},
+			"context_menu": this.context_menu,
+			"context_menu_render": true,
 		});
+		this.tree.addEventListener("selectItem", new Method(this, "onTreeSelectItem"));
+		this.tree.addEventListener("contextMenu", new Method(this, "onTreeContextMenu"));
 		this.tree.root = new TreeItem
 		{
-			"project_id": this.project_id,
 			"open": true,
 		};
 	}
@@ -189,7 +192,7 @@ class CodeEditorModel extends BasePageModel
 	 */
 	void addTab(TreeItem item)
 	{
-		this.tabs.push(this.selected_item);
+		this.tabs.push(this.tree.selected_item);
 	}
 	
 	
@@ -214,6 +217,13 @@ class CodeEditorModel extends BasePageModel
 			void (Dict params) use (item)
 			{
 				string key = params.get("key");
+				
+				/* Create */
+				if (key == "create_folder" or key == "create_file")
+				{
+					if (item == null) params.set("hidden", false);
+					else params.set("hidden", item.kind == "file");
+				}
 				
 				/* Copy */
 				if (key == "copy" or key == "cut" or key == "rename" or key == "delete")
@@ -257,97 +267,13 @@ class CodeEditorModel extends BasePageModel
 		string item_key = message.item.get("key");
 	
 		/* Hide context menu */
-		message.widget.hide();
+		message.model.hide();
 		
-		/* Create file */
-		if (item_key == "create_file")
+		/* Run command */
+		if (this.commands.has(item_key))
 		{
-			ButtonModel confirm_button = this.prompt_dialog
-				.buttons.getWidget("confirm_button")
-			;
-			confirm_button.content = "Create";
-			this.prompt_dialog.action = "create_file";
-			this.prompt_dialog.title = "Create file";
-			this.prompt_dialog.value = "";
-			this.prompt_dialog.show();
-		}
-		
-		/* Create folder */
-		else if (item_key == "create_folder")
-		{
-			ButtonModel confirm_button = this.prompt_dialog
-				.buttons.getWidget("confirm_button")
-			;
-			confirm_button.content = "Create";
-			this.prompt_dialog.action = "create_folder";
-			this.prompt_dialog.title = "Create folder";
-			this.prompt_dialog.value = "";
-			this.prompt_dialog.show();
-		}
-		
-		/* Rename */
-		else if (item_key == "rename")
-		{
-			ButtonModel confirm_button = this.prompt_dialog
-				.buttons.getWidget("confirm_button")
-			;
-			confirm_button.content = "Rename";
-			this.prompt_dialog.action = "rename";
-			this.prompt_dialog.title = "Rename item " ~ this.selected_item.label;
-			this.prompt_dialog.value = this.selected_item.label;
-			this.prompt_dialog.show();
-		}
-		
-		/* Remove */
-		else if (item_key == "remove" or item_key == "delete")
-		{
-			ButtonModel confirm_button = this.confirm_dialog
-				.buttons.getWidget("confirm_button")
-			;
-			confirm_button.content = "Remove";
-			confirm_button.styles = ["danger"];
-			this.confirm_dialog.action = "remove";
-			this.confirm_dialog.title = "Remove item " ~ this.selected_item.label;
-			this.confirm_dialog.show();
-		}
-		
-		/* Copy and cut */
-		else if (item_key == "copy" or item_key == "cut")
-		{
-			this.copy_past_path = this.selected_item.file_path;
-			this.copy_past_kind = item_key;
-		}
-		
-		/* Paste */
-		else if (item_key == "paste")
-		{
-			if (this.copy_past_path == "") return;
-			Collection<int> parent_path = this.selected_path
-				? this.selected_path.slice() : [];
-			TreeItem parent_item = this.tree.root.get(parent_path);
-			
-			/* Paste item */
-			ApiResult res = await this.layout.callApi({
-				"api_name": "baylang.constructor.code",
-				"method_name": "move",
-				"data": {
-					"project_id": this.project_id,
-					"file_path": this.copy_past_path,
-					"dest_path": parent_item.file_path,
-					"kind": this.copy_past_kind == "copy" ? "copy" : "",
-				}
-			});
-			
-			/* Success */
-			if (res.isSuccess())
-			{
-				/* Clear path */
-				this.copy_past_path = "";
-				
-				/* Reload items */
-				parent_item.is_loaded = false;
-				await this.loadItems(parent_item);
-			}
+			CommandInterface command = this.commands.get(item_key);
+			await command.onContextMenuItemClick(message);
 		}
 	}
 	
@@ -357,84 +283,11 @@ class CodeEditorModel extends BasePageModel
 	 */
 	async void onDialogConfirm(DialogMessage message)
 	{
-		/* Create file */
-		if (
-			message.widget.action == "create_file" or
-			message.widget.action == "create_folder"
-		)
+		/* Run command */
+		if (this.commands.has(message.model.action))
 		{
-			Collection<int> parent_path = this.selected_path
-				? this.selected_path.slice() : [];
-			TreeItem parent_item = this.tree.root.get(parent_path);
-			
-			/* Create item */
-			ApiResult res = await this.layout.callApi({
-				"api_name": "baylang.constructor.code",
-				"method_name": "create",
-				"data": {
-					"project_id": this.project_id,
-					"file_path": this.selected_item ? this.selected_item.file_path : "",
-					"file_name": message.value,
-					"kind": message.widget.action == "create_file" ? "file" : "folder"
-				}
-			});
-			
-			/* Reload items */
-			if (res.isSuccess())
-			{
-				parent_item.is_loaded = false;
-				await this.loadItems(parent_item);
-			}
-		}
-		
-		/* Rename file */
-		else if (message.widget.action == "rename")
-		{
-			Collection<int> parent_path = this.selected_path.slice(0, -1);
-			TreeItem parent_item = this.tree.root.get(parent_path);
-			this.selected_item.label = message.value;
-			
-			/* Rename item */
-			ApiResult res = await this.layout.callApi({
-				"api_name": "baylang.constructor.code",
-				"method_name": "rename",
-				"data": {
-					"project_id": this.project_id,
-					"file_path": this.selected_item.file_path,
-					"file_new_name": message.value,
-				}
-			});
-			
-			/* Reload items */
-			if (res.isSuccess())
-			{
-				parent_item.is_loaded = false;
-				await this.loadItems(parent_item);
-			}
-		}
-		
-		/* Remove */
-		else if (message.widget.action == "remove")
-		{
-			Collection<int> parent_path = this.selected_path.slice(0, -1);
-			TreeItem parent_item = this.tree.root.get(parent_path);
-			
-			/* Rename item */
-			ApiResult res = await this.layout.callApi({
-				"api_name": "baylang.constructor.code",
-				"method_name": "remove",
-				"data": {
-					"project_id": this.project_id,
-					"file_path": this.selected_item.file_path,
-				}
-			});
-			
-			/* Reload items */
-			if (res.isSuccess())
-			{
-				parent_item.is_loaded = false;
-				await this.loadItems(parent_item);
-			}
+			CommandInterface command = this.commands.get(message.model.action);
+			await command.onDialogConfirm(message);
 		}
 	}
 	
@@ -444,25 +297,25 @@ class CodeEditorModel extends BasePageModel
 	 */
 	async void onTreeSelectItem(TreeMessage message)
 	{
-		this.selected_item = message.item;
-		this.selected_path = message.path ? message.path.slice() : null;
-		if (not this.selected_item) return;
+		TreeItem selected_item = this.tree.selected_item;
+		if (not selected_item) return;
 		if (message.kind != "click") return;
-		if (this.selected_item.kind == "dir")
+		if (selected_item.kind == "dir")
 		{
-			await this.loadItems(this.selected_item);
+			await this.loadItems(selected_item);
+			selected_item.open = not selected_item.open;
 		}
-		else if (this.selected_item.kind == "file")
+		else if (selected_item.kind == "file")
 		{
-			if (this.tabs.indexOf(this.selected_item) == -1)
+			if (this.tabs.indexOf(selected_item) == -1)
 			{
-				this.addTab(this.selected_item);
-				this.selectTab(this.selected_item);
-				await this.loadFileContent(this.selected_item);
+				this.addTab(selected_item);
+				this.selectTab(selected_item);
+				await this.loadFileContent(selected_item);
 			}
 			else
 			{
-				this.selectTab(this.selected_item);
+				this.selectTab(selected_item);
 			}
 		}
 	}
@@ -477,12 +330,11 @@ class CodeEditorModel extends BasePageModel
 		
 		this.save_result.setWaitMessage();
 		
-		string content = this.selected_tab.code_editor.value().getValue();
-		ApiResult res = await this.layout.callApi({
+		string content = this.selected_tab.code_editor.ref.getValue();
+		ApiResult res = await this.layout.sendApi({
 			"api_name": "baylang.constructor.code",
-			"method_name": "saveContent",
+			"method_name": "save",
 			"data": {
-				"project_id": this.project_id,
 				"file_path": this.selected_tab.file_path,
 				"content": content,
 			}
@@ -502,11 +354,10 @@ class CodeEditorModel extends BasePageModel
 		item.is_loaded = true;
 		
 		/* Send request */
-		ApiResult res = await this.layout.callApi({
+		ApiResult res = await this.layout.sendApi({
 			"api_name": "baylang.constructor.code",
 			"method_name": "getContent",
 			"data": {
-				"project_id": item.project_id,
 				"module_id": item.module_id,
 				"file_path": item.file_path,
 			}
@@ -527,11 +378,10 @@ class CodeEditorModel extends BasePageModel
 	{
 		if (item.isLoaded()) return;
 		
-		ApiResult res = await this.layout.callApi({
+		ApiResult res = await this.layout.sendApi({
 			"api_name": "baylang.constructor.code",
 			"method_name": "getFiles",
 			"data": {
-				"project_id": item.project_id,
 				"module_id": item.module_id,
 				"file_path": item.file_path,
 			}
@@ -540,20 +390,21 @@ class CodeEditorModel extends BasePageModel
 		item.is_loaded = true;
 		if (not res.isSuccess()) return;
 		
-		Collection items = res.data.get("items");
+		Collection result_items = res.data.get("items");
 		
 		/* Add items */
-		for (int i=0; i<items.count(); i++)
+		for (int i=0; i<result_items.count(); i++)
 		{
-			Dict file = items.get(i);
+			Dict file = result_items.get(i);
 			
 			string label = file.get("file_name");
-			int pos = item.items.find(lib::equalAttr("label", label));
+			TreeItem find_item = item.items.find(
+				bool (TreeItem item) use (label) => item.label == label
+			);
 			
 			/* Change item */
-			if (pos >= 0)
+			if (find_item)
 			{
-				TreeItem find_item = item.items.get(pos);
 				find_item.label = file.get("file_name")
 				find_item.file_path = file.get("file_path")
 			}
@@ -566,7 +417,6 @@ class CodeEditorModel extends BasePageModel
 					"label": file.get("file_name"),
 					"file_path": file.get("file_path"),
 					"module_id": item.module_id,
-					"project_id": item.project_id,
 				});
 			}
 		}
@@ -575,8 +425,10 @@ class CodeEditorModel extends BasePageModel
 		for (int i=item.items.count() - 1; i >= 0; i--)
 		{
 			TreeItem find_item = item.items.get(i);
-			int pos = items.find(lib::equalAttr("file_name", find_item.label));
-			if (pos == -1)
+			TreeItem result_item = result_items.find(
+				bool (Map item) use (find_item) => item.get("file_name") == find_item.label
+			);
+			if (not result_item)
 			{
 				item.items.remove(i);
 			}

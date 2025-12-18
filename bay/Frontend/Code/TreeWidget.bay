@@ -36,13 +36,13 @@
 	<span class="tree_widget__item_icon">
 		%if (item.kind == "dir")
 		{
-			%if (not item.is_loaded) <span @raw="&#128448;"></span>
-			%else if (item.open) <span @raw="&#128449;"></span>
-			%else <span @raw="&#128448;"></span>
+			%if (not item.is_loaded) <span>&#128448;</span>
+			%else if (item.open) <span>&#128449;</span>
+			%else <span>&#128448;</span>
 		}
 		%else
 		{
-			<span @raw="&#128462;"></span>
+			<span>&#128462;</span>
 		}
 	</span>
 	%render this.renderItemLabel(item, path);

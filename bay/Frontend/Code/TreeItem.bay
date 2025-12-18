@@ -20,6 +20,8 @@ namespace BayLang.Constructor.Frontend.Code;
 
 use Runtime.Reference;
 use Runtime.Serializer;
+use Runtime.Serializer.BooleanType;
+use Runtime.Serializer.StringType;
 use Runtime.Web.ApiResult;
 use Runtime.Widget.Tree.TreeItem as BaseTreeItem;
 use Runtime.Widget.Tree.TreeModel;
@@ -30,7 +32,6 @@ class TreeItem extends BaseTreeItem
 	string kind = "";
 	string file_path = "";
 	string module_id = "";
-	string project_id = "";
 	string content = "";
 	Reference code_editor = new Reference();
 	bool is_loaded = false;
@@ -39,14 +40,13 @@ class TreeItem extends BaseTreeItem
 	/**
 	 * Serialize object
 	 */
-	void serialize(Serializer serializer, Map data)
+	void serialize(Serializer serializer)
 	{
-		serializer.process(this, "kind", data);
-		serializer.process(this, "file_path", data);
-		serializer.process(this, "module_id", data);
-		serializer.process(this, "project_id", data);
-		serializer.process(this, "is_loaded", data);
-		parent(serializer, data);
+		parent(serializer);
+		serializer.addType("kind", new StringType());
+		serializer.addType("file_path", new StringType());
+		serializer.addType("module_id", new StringType());
+		serializer.addType("is_loaded", new BooleanType());
 	}
 	
 	
