@@ -56,8 +56,8 @@ class ModuleDescription
 	 */
 	pure Collection<Dict> entities() =>
 	[
-		new SetupLayout({
+		/*new SetupLayout({
 			"project": "BayLang.Constructor.Frontend.Layout.ProjectLayoutModel",
-		}),
+		}),*/
 	];
 }

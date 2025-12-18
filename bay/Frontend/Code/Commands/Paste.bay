@@ -1,0 +1,92 @@
+/*!
+ *  BayLang Technology
+ *
+ *  (c) Copyright 2016-2024 "Ildar Bikmamatov" <support@bayrell.org>
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
+namespace BayLang.Constructor.Frontend.Code.Commands;
+
+use Runtime.ApiResult;
+use Runtime.BaseLayout;
+use Runtime.BaseObject;
+use Runtime.Widget.ContextMenu.ContextMenuMessage;
+use Runtime.Widget.Dialog.DialogMessage;
+use BayLang.Constructor.Frontend.Code.CodeEditorModel;
+use BayLang.Constructor.Frontend.Code.TreeItem;
+use BayLang.Constructor.Frontend.Code.Commands.CommandInterface;
+
+
+class Paste extends BaseObject implements CommandInterface
+{
+	BaseLayout layout = null;
+	CodeEditorModel model = null;
+	
+	
+	/**
+	 * Create object
+	 */
+	void constructor(CodeEditorModel model)
+	{
+		parent();
+		this.layout = model.layout;
+		this.model = model;
+	}
+	
+	
+	/**
+	 * Context menu click
+	 */
+	async void onContextMenuItemClick(ContextMenuMessage message)
+	{
+		if (this.model.copy_past_path == "") return;
+		TreeItem parent_item = this.model.tree.root.get(this.model.tree.selected_path);
+		
+		/* Paste item */
+		ApiResult res = await this.layout.sendApi({
+			"api_name": "baylang.constructor.code",
+			"method_name": "move",
+			"data": {
+				"file_path": this.model.copy_past_path,
+				"dest_path": parent_item.file_path,
+				"kind": this.model.copy_past_kind == "copy" ? "copy" : "",
+			}
+		});
+		
+		/* Success */
+		if (res.isSuccess())
+		{
+			/* Clear path */
+			this.model.copy_past_path = "";
+			
+			/* Reload items */
+			parent_item.is_loaded = false;
+			this.model.loadItems(parent_item);
+			
+			/* Reload source item */
+			Vector parent_path = this.model.copy_item_path.slice(0, -1);
+			parent_item = this.model.tree.root.get(parent_path);
+			parent_item.is_loaded = false;
+			this.model.loadItems(parent_item);
+		}
+	}
+	
+	
+	/**
+	 * Dialog confirm
+	 */
+	async void onDialogConfirm(DialogMessage message)
+	{
+	}
+}

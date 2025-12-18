@@ -18,12 +18,14 @@
 
 <class name="BayLang.Constructor.Frontend.Code.CodeEditor">
 
+<use name="Runtime.Web.RouteInfo" />
 <use name="Runtime.Widget.Editor.Editor" component="true" />
 <use name="BayLang.Constructor.Frontend.Code.TreeItem" />
 
 
 <style>
 .code_editor{
+	--color-border: #e0e1e6;
 	display: flex;
 	position: relative;
 	flex-direction: column;
@@ -32,12 +34,12 @@
 }
 .code_editor__menu{
 	display: flex;
-	border-bottom: 1px var(--widget-color-border) solid;
+	border-bottom: 1px var(--color-border) solid;
 }
 .code_editor__menu_item{
     cursor: pointer;
     user-select: none;
-    padding: 10px;
+    padding: calc(var(--space) * 0.75) var(--space);
 }
 .code_editor_menu_item_file_name{
 	display: flex;
@@ -52,12 +54,13 @@
 }
 .code_editor__file_manager{
 	position: relative;
-	border-right: 1px var(--widget-color-border) solid;
+	border-right: 1px var(--color-border) solid;
 	overflow-x: auto;
 	padding-left: 5px;
 	width: 300px;
-	overflow-x: auto;
-	padding-left: 5px;
+	.context_menu{
+		--color-border: #e0e1e6;
+	}
 }
 .code_editor__content{
 	display: flex;
@@ -68,20 +71,23 @@
 .code_editor__tabs{
 	display: flex;
 	height: 32px;
-	border-bottom: 1px var(--widget-color-border) solid;
+	border-bottom: 1px var(--color-border) solid;
 	overflow-x: auto;
 	scrollbar-width: none;
+	&::-webkit-scrollbar{
+		width: 0;
+	}
 }
 .code_editor__tab{
 	display: flex;
-	border-right: 1px var(--widget-color-border) solid;
+	border-right: 1px var(--color-border) solid;
 	padding: 5px;
 	cursor: pointer;
 	user-select: none;
 }
 .code_editor__tab.selected{
-	background-color: var(--widget-color-primary);
-    color: var(--widget-color-primary-text)
+	background-color: var(--color-primary);
+    color: var(--color-primary-text)
 }
 .code_editor__label{
 	display: flex;
@@ -103,7 +109,7 @@
 	background-color: #f0f0f0;
 }
 .code_editor__tab.selected .code_editor__icon:hover span{
-	background-color: var(--widget-color-primary);
+	background-color: var(--color-primary);
 }
 .code_editor__file_edit{
 	position: relative;
@@ -112,14 +118,14 @@
 .code_editor__file{
 	overflow-y: auto;
 	height: 100%;
-	%(Editor)widget_text{
+	.widget_text{
 		height: 100%;
 		border-width: 0px;
 	}
-	%(Editor)widget_text__lines{
+	.widget_text__lines{
 		width: 30px;
 	}
-	%(Editor)widget_text__editable{
+	.widget_text__editable{
 		width: calc(100% - 30px);
 	}
 }
@@ -131,23 +137,16 @@
 	align-items: center;
 	padding: 2px;
 	padding-left: 5px;
-	border-top: 1px var(--widget-color-border) solid;
+	border-top: 1px var(--color-border) solid;
 	height: 24px;
-}
-</style>
-
-<style global="true">
-.code_editor__tabs.h-fd5f::-webkit-scrollbar{
-	width: 0;
 }
 </style>
 
 <template name="renderMenu">
 	<div class="code_editor__menu">
 		<a class="code_editor__menu_item nolink"
-			href={{ this.layout.route.data
-				? this.layout.route.data.get("back_url")
-				: this.layout.url(
+			href={{ this.route.data ? this.route.data.get("back_url") :
+				this.layout.url(
 					"baylang:project:modules",
 					{
 						"project_id": this.model.project_id,
@@ -212,7 +211,7 @@
 							e.stopPropagation();
 						}
 					}}
-				><span>@raw{{ "&#10005;" }}</span></div>
+				><span>&#10005;</span></div>
 			</div>
 		}
 	</div>
@@ -272,10 +271,17 @@
 
 <script>
 
+
+/**
+ * Returns route
+ */
+computed RouteInfo route() => this.layout.get("route");
+
+
 /**
  * Mounted
  */
-void onMounted()
+void mounted()
 {
 	document.addEventListener("keydown", this.onKeyDown);
 }
