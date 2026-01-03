@@ -65,10 +65,10 @@ class CodeEditorModel extends BaseModel
 	/**
 	 * Serialize object
 	 */
-	void serialize(Serializer serializer)
+	static void serialize(ObjectType rules)
 	{
-		parent(serializer);
-		serializer.addType("tree", new ObjectType{
+		parent(rules);
+		rules.addType("tree", new ObjectType{
 			"class_name": classof TreeModel,
 		});
 	}

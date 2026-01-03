@@ -44,7 +44,7 @@ class CodeApi extends BaseApi
 	 * Returns files
 	 */
 	@ApiMethod{ "name": "getFiles" }
-	static async ApiResult getFiles(ApiRequest request)
+	async void getFiles()
 	{
 		Project project = ApiHook::getProject();
 		if (not project)
@@ -53,7 +53,7 @@ class CodeApi extends BaseApi
 		}
 		
 		string project_path = project.getPath();
-		string file_path = request.get("file_path");
+		string file_path = rtl::toStr(this.request.get("file_path"));
 		string folder_path = fs::join([project_path, file_path]);
 		
 		/* Check file path */
@@ -88,7 +88,7 @@ class CodeApi extends BaseApi
 		}
 		
 		/* Result */
-		return new ApiResult().success({
+		this.success({
 			"data":
 			{
 				"items": items,
@@ -101,7 +101,7 @@ class CodeApi extends BaseApi
 	 * Returns file content
 	 */
 	@ApiMethod{ "name": "getContent" }
-	static async ApiResult getContent(ApiRequest request)
+	async void getContent()
 	{
 		Project project = ApiHook::getProject();
 		if (not project)
@@ -110,7 +110,7 @@ class CodeApi extends BaseApi
 		}
 		
 		string project_path = project.getPath();
-		string file_path = request.get("file_path");
+		string file_path = rtl::toStr(this.request.get("file_path"));
 		string file_full_path = fs::join([project_path, file_path]);
 		
 		/* Check file path */
@@ -129,7 +129,7 @@ class CodeApi extends BaseApi
 		string content = await fs::readFile(file_full_path);
 		
 		/* Result */
-		return new ApiResult().success({
+		this.success({
 			"data":
 			{
 				"file_path": file_path,
@@ -143,7 +143,7 @@ class CodeApi extends BaseApi
 	 * Create
 	 */
 	@ApiMethod{ "name": "create" }
-	static async ApiResult create(ApiRequest request)
+	async void create()
 	{
 		Project project = ApiHook::getProject();
 		if (not project)
@@ -152,10 +152,10 @@ class CodeApi extends BaseApi
 		}
 		
 		string project_path = project.getPath();
-		string parent_dir = request.get("file_path");
-		string file_name = request.get("file_name");
+		string parent_dir = rtl::toStr(this.request.get("file_path"));
+		string file_name = rtl::toStr(this.request.get("file_name"));
 		string file_full_path = fs::join([project_path, parent_dir, file_name]);
-		string kind = request.get("kind");
+		string kind = rtl::toStr(this.request.get("kind"));
 		
 		/* Check file path */
 		if (rs::indexOf(file_full_path, "/..") != -1)
@@ -175,7 +175,7 @@ class CodeApi extends BaseApi
 			await fs::saveFile(file_full_path, "");
 		}
 		
-		return new ApiResult().success();
+		this.success();
 	}
 	
 	
@@ -183,7 +183,7 @@ class CodeApi extends BaseApi
 	 * Rename
 	 */
 	@ApiMethod{ "name": "rename" }
-	static async ApiResult rename(ApiRequest request)
+	async void rename()
 	{
 		Project project = ApiHook::getProject();
 		if (not project)
@@ -192,8 +192,8 @@ class CodeApi extends BaseApi
 		}
 		
 		string project_path = project.getPath();
-		string file_path = request.get("file_path");
-		string file_new_name = request.get("file_new_name");
+		string file_path = rtl::toStr(this.request.get("file_path"));
+		string file_new_name = rtl::toStr(this.request.get("file_new_name"));
 		string parent_dir = rs::dirname(file_path);
 		string file_full_path = fs::join([project_path, file_path]);
 		string file_new_path = fs::join([project_path, parent_dir, file_new_name]);
@@ -211,7 +211,7 @@ class CodeApi extends BaseApi
 		}
 		
 		await fs::rename(file_full_path, file_new_path);
-		return new ApiResult().success();
+		this.success();
 	}
 	
 	
@@ -219,7 +219,7 @@ class CodeApi extends BaseApi
 	 * Remove file
 	 */
 	@ApiMethod{ "name": "remove" }
-	static async ApiResult remove(ApiRequest request)
+	async void remove()
 	{
 		Project project = ApiHook::getProject();
 		if (not project)
@@ -228,7 +228,7 @@ class CodeApi extends BaseApi
 		}
 		
 		string project_path = project.getPath();
-		string file_path = request.get("file_path");
+		string file_path = rtl::toStr(this.request.get("file_path"));
 		string file_full_path = fs::join([project_path, file_path]);
 		
 		/* Check file path */
@@ -251,7 +251,7 @@ class CodeApi extends BaseApi
 			#endif
 		}
 		
-		return new ApiResult().success();
+		this.success();
 	}
 	
 	
@@ -259,7 +259,7 @@ class CodeApi extends BaseApi
 	 * Move file
 	 */
 	@ApiMethod{ "name": "move" }
-	static async ApiResult move(ApiRequest request)
+	async void move()
 	{
 		Project project = ApiHook::getProject();
 		if (not project)
@@ -268,9 +268,9 @@ class CodeApi extends BaseApi
 		}
 		
 		string project_path = project.getPath();
-		string file_path = request.get("file_path");
-		string dest_path = request.get("dest_path");
-		string kind = request.get("kind");
+		string file_path = rtl::toStr(this.request.get("file_path"));
+		string dest_path = rtl::toStr(this.request.get("dest_path"));
+		string kind = rtl::toStr(this.request.get("kind"));
 		
 		/* Get file name */
 		string file_name = rs::basename(file_path);
@@ -315,7 +315,7 @@ class CodeApi extends BaseApi
 			await fs::rename(file_full_path, dest_full_path);
 		}
 		
-		return new ApiResult().success();
+		this.success();
 	}
 	
 	
@@ -323,7 +323,7 @@ class CodeApi extends BaseApi
 	 * Save file
 	 */
 	@ApiMethod{ "name": "save" }
-	static async ApiResult save(ApiRequest request)
+	async void save()
 	{
 		Project project = ApiHook::getProject();
 		if (not project)
@@ -332,7 +332,7 @@ class CodeApi extends BaseApi
 		}
 		
 		string project_path = project.getPath();
-		string file_path = request.get("file_path");
+		string file_path = rtl::toStr(this.request.get("file_path"));
 		string file_full_path = fs::join([project_path, file_path]);
 		
 		/* Check file path */
@@ -342,7 +342,7 @@ class CodeApi extends BaseApi
 		}
 		
 		/* Read file */
-		string content = request.get("content");
+		string content = rtl::toStr(this.request.get("content"));
 		await fs::saveFile(file_full_path, content);
 		
 		/* Compile file */
@@ -379,7 +379,7 @@ class CodeApi extends BaseApi
 		}
 		
 		/* Result */
-		return new ApiResult().success({
+		this.success({
 			"data":
 			{
 				"file_path": file_path,
