@@ -21,6 +21,7 @@ namespace BayLang.Constructor.Frontend.Code;
 use Runtime.Reference;
 use Runtime.Serializer;
 use Runtime.Serializer.BooleanType;
+use Runtime.Serializer.ObjectType;
 use Runtime.Serializer.StringType;
 use Runtime.Web.ApiResult;
 use Runtime.Widget.Tree.TreeItem as BaseTreeItem;
@@ -40,13 +41,13 @@ class TreeItem extends BaseTreeItem
 	/**
 	 * Serialize object
 	 */
-	void serialize(Serializer serializer)
+	static void serialize(ObjectType rules)
 	{
-		parent(serializer);
-		serializer.addType("kind", new StringType());
-		serializer.addType("file_path", new StringType());
-		serializer.addType("module_id", new StringType());
-		serializer.addType("is_loaded", new BooleanType());
+		parent(rules);
+		rules.addType("kind", new StringType());
+		rules.addType("file_path", new StringType());
+		rules.addType("module_id", new StringType());
+		rules.addType("is_loaded", new BooleanType());
 	}
 	
 	
