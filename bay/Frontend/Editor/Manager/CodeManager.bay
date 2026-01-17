@@ -1,0 +1,117 @@
+/*!
+ *  BayLang Technology
+ *
+ *  (c) Copyright 2016-2024 "Ildar Bikmamatov" <support@bayrell.org>
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
+namespace BayLang.Constructor.Frontend.Editor.Manager;
+
+use Runtime.BaseObject;
+use BayLang.OpCodes.BaseOpCode;
+use BayLang.OpCodes.OpCodeType;
+use BayLang.OpCodes.OpDeclareClass;
+use BayLang.OpCodes.OpDeclareFunction;
+use BayLang.OpCodes.OpModule;
+use BayLang.OpCodes.OpNamespace;
+use BayLang.OpCodes.OpUse;
+
+
+class CodeManager extends BaseObject
+{
+	BaseOpCode code = null;
+	Vector code_errors = null;
+	Map modules = {};
+	OpDeclareClass op_class = null;
+	OpDeclareFunction op_render = null;
+	OpNamespace op_space = null;
+	string space_name = "";
+	string class_hash = "";
+	string class_name = "";
+	
+	
+	/**
+	 * Assign code
+	 */
+	void assign(Map data)
+	{
+		Vector errors = [];
+		OpCodeType rules = new OpCodeType();
+		BaseOpCode code = rules.filter(data, errors);
+		if (not (code instanceof OpModule)) return;
+		this.code = code;
+		this.code_errors = errors;
+		this.init();
+	}
+	
+	
+	/**
+	 * Returns true if loaded
+	 */
+	bool isLoaded() => this.code != null;
+	
+	
+	/**
+	 * Add module
+	 */
+	void addUse(OpUse item)
+	{
+		if (item.alias != "") this.modules.set(item.alias, item.name);
+		else
+		{
+			Vector arr = rs::split(".", item.name);
+			this.modules.set(arr.last(), item.name);
+		}
+	}
+	
+	
+	/**
+	 * Find module
+	 */
+	string findModule(string name) => this.modules.has(name) ? this.modules.get(name) : "";
+	
+	
+	/**
+	 * Init code
+	 */
+	void init()
+	{
+		this.op_space = this.code.items.find(
+			bool (BaseOpCode item) => item instanceof OpNamespace
+		);
+		if (this.op_space) this.space_name = this.op_space.name;
+		
+		/* Init opcodes */
+		for (int i=0; i<this.code.items.count(); i++)
+		{
+			BaseOpCode item = this.code.items.get(i);
+			if (item instanceof OpUse)
+			{
+				this.addUse(item);
+			}
+			else if (item instanceof OpDeclareClass)
+			{
+				this.op_class = item;
+				this.class_name = this.space_name ~ "." ~ item.name.entity_name.getName();
+			}
+		}
+		
+		/* Init component */
+		if (this.op_class and this.op_class.is_component)
+		{
+			this.op_render = this.op_class.findFunction("render");
+			this.class_hash = rs::getComponentHash(this.class_name);
+		}
+	}
+}

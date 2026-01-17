@@ -20,14 +20,20 @@ namespace BayLang.Constructor.Frontend.Editor;
 
 use Runtime.ApiResult;
 use Runtime.BaseModel;
+use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpCodeType;
+use BayLang.Constructor.Frontend.Editor.Manager.CodeManager;
 use BayLang.Constructor.WidgetPage.WidgetPageModel;
+use BayLang.Constructor.WidgetPage.Widget.Widget;
 
 
 class EditorPageModel extends BaseModel
 {
 	string page_model = "";
 	WidgetPageModel page_widget = null;
+	Widget root = null;
+	BaseOpCode code_model = new CodeManager();
+	BaseOpCode code_component = new CodeManager();
 	
 	
 	/**
@@ -56,12 +62,8 @@ class EditorPageModel extends BaseModel
 		});
 		if (result.isSuccess())
 		{
-			Vector errors = [];
-			OpCodeType rules = new OpCodeType();
-			
-			/* Get op code */
-			this.model = rules.filter(result.data.get("model"), errors);
-			this.component = rules.filter(result.data.get("component"), errors);
+			this.code_model.assign(result.data.get("model"));
+			this.code_component.assign(result.data.get("component"));
 		}
 	}
 }

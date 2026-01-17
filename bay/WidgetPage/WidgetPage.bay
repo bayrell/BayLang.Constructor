@@ -20,17 +20,45 @@
 
 <use name="Runtime.BaseModel" />
 <use name="Runtime.Method" />
+<use name="Runtime.VirtualDom" />
+<use name="BayLang.OpCodes.BaseOpCode" />
+<use name="BayLang.OpCodes.OpItems" />
+<use name="BayLang.OpCodes.OpHtmlAttribute" />
+<use name="BayLang.OpCodes.OpHtmlTag" />
+<use name="BayLang.OpCodes.OpHtmlContent" />
+<use name="BayLang.OpCodes.OpString" />
+
+<template name="renderComponent">
+	%set BaseOpCode op_render = this.model.editor.code_component.op_render;
+	%if (op_render)
+	{
+		%render this.renderItems(op_render.content);
+	}
+</template>
 
 <template>
-	%set BaseModel page_model = this.model.getPageModel();
-	%set string component = page_model.component;
-	%if (component)
+	%if (not this.isLoaded)
 	{
-		<{component} model={{ page_model }} />
+		%set BaseModel page_model = this.model.getPageModel();
+		%set string component = page_model.component;
+		%if (component)
+		{
+			<{component} model={{ page_model }} ref="component" />
+		}
+	}
+	%else
+	{
+		%render this.renderComponent();
 	}
 </template>
 
 <script>
+
+/**
+ * Returns true if is loaded
+ */
+computed bool isLoaded() => this.model.editor.code_component.isLoaded();
+
 
 /**
  * Component mounted
@@ -46,6 +74,84 @@ async void mounted()
 	
 	/* Load component code */
 	await this.model.editor.loadCode();
+}
+
+
+/**
+ * Create virtual DOM by html tag
+ */
+VirtualDom createTag(OpHtmlTag item)
+{
+	/* Create vdom */
+	VirtualDom vdom = new VirtualDom(this.getRef("component"));
+	vdom.setName(item.tag_name);
+	
+	/* If component */
+	if (item.is_component)
+	{
+		vdom.setName(this.model.editor.code_component.findModule(item.tag_name));
+	}
+	
+	/* Make attrs */
+	vdom.attrs = {};
+	for (int i=0; i<item.attrs.count(); i++)
+	{
+		OpHtmlAttribute op_attr = item.attrs.get(i);
+		string value = "";
+		if (op_attr.expression instanceof OpString) value = op_attr.expression.value;
+		if (op_attr.key == "class")
+		{
+			vdom.attrs.set(op_attr.key, rs::className([
+				value, this.model.editor.code_component.class_hash
+			]));
+		}
+		else
+		{
+			vdom.attrs.set(op_attr.key, value);
+		}
+	}
+	
+	/* Render items */
+	if (item.is_component)
+	{
+		vdom.slot("default", VirtualDom (){
+			var component = this.getRef("component");
+			VirtualDom slot = new VirtualDom(component);
+			slot.items = this.renderItems(item.content);
+			return slot;
+		});
+	}
+	else
+	{
+		vdom.items = this.renderItems(item.content);
+	}
+	
+	return vdom;
+}
+
+
+/**
+ * Returns text node
+ */
+string createText(OpHtmlTag item)
+{
+	return item.value;
+}
+
+
+/**
+ * Render items
+ */
+Vector<VirtualDom> renderItems(OpItems content)
+{
+	Vector result = [];
+	for (int i=0; i<content.count(); i++)
+	{
+		BaseOpCode item = content.items.get(i);
+		if (item instanceof OpHtmlTag) result.push(this.createTag(item));
+		else if (item instanceof OpHtmlContent) result.push(this.createText(item));
+	}
+	return result;
 }
 
 </script>
