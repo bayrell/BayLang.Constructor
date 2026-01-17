@@ -21,6 +21,7 @@ namespace BayLang.Constructor.WidgetPage;
 use Runtime.BaseModel;
 use Runtime.Serializer.ObjectType;
 use Runtime.Serializer.StringType;
+use BayLang.Constructor.Frontend.Editor.EditorPageModel;
 use BayLang.Constructor.WidgetPage.WidgetPage;
 
 
@@ -28,6 +29,7 @@ class WidgetPageModel extends BaseModel
 {
 	string component = classof WidgetPage;
 	string page_model = "";
+	EditorPageModel editor = null;
 	
 	
 	/**
@@ -52,18 +54,24 @@ class WidgetPageModel extends BaseModel
 	
 	
 	/**
+	 * Init widget
+	 */
+	void initWidget(Map params)
+	{
+		parent(params);
+		
+		this.editor = this.createWidget(classof EditorPageModel, {
+			"page_model": this.page_model,
+			"page_widget": this,
+		});
+	}
+	
+	
+	/**
 	 * Returns page model
 	 */
 	BaseModel getPageModel()
 	{
 		return this.layout.pages.get(this.page_model);
-	}
-	
-	
-	/**
-	 * Load code
-	 */
-	async void loadCode()
-	{
 	}
 }

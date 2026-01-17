@@ -13,6 +13,8 @@
 		"Frontend/Code/CodeEditorModel.bay",
 		"Frontend/Code/TreeItem.bay",
 		"Frontend/Code/TreeWidget.bay",
+		"Frontend/Editor/EditorPage.bay",
+		"Frontend/Editor/EditorPageModel.bay",
 		"Frontend/ModuleDescription.bay"
 	],
 	"groups": [

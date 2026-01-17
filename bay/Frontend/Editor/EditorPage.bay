@@ -16,38 +16,19 @@
  *  limitations under the License.
 -->
 
-<class name="BayLang.Constructor.WidgetPage.WidgetPage">
+<class name="BayLang.Constructor.Frontend.Editor.EditorPage">
 
-<use name="Runtime.BaseModel" />
-<use name="Runtime.Method" />
+<style>
+.editor_page{
+}
+</style>
 
 <template>
-	%set BaseModel page_model = this.model.getPageModel();
-	%set string component = page_model.component;
-	%if (component)
-	{
-		<{component} model={{ page_model }} />
-	}
+    <div class="editor_page">
+    </div>
 </template>
 
 <script>
-
-/**
- * Component mounted
- */
-async void mounted()
-{
-	BaseModel page_model = this.model.getPageModel();
-	string component = page_model.component;
-	
-	/* Detect constructor */
-	Method is_constructor = new Method(component, "is_constructor");
-	if (not is_constructor.exists() and not is_constructor.apply()) return;
-	
-	/* Load component code */
-	await this.model.editor.loadCode();
-}
-
 </script>
 
 </class>
