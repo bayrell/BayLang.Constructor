@@ -18,13 +18,20 @@
 
 namespace BayLang.Constructor.Backend.Api;
 
+use Runtime.fs;
 use Runtime.Exceptions.ApiError;
+use Runtime.Exceptions.ItemNotFound;
 use Runtime.Exceptions.RuntimeException;
+use Runtime.Serializer.MapType;
+use Runtime.Serializer.StringType;
 use Runtime.Web.BaseApi;
 use Runtime.Web.Annotations.ApiMethod;
 use BayLang.Constructor.Backend.ApiHook;
+use BayLang.Constructor.Backend.Api.Widget;
 use BayLang.Constructor.Backend.Service.WidgetService;
 use BayLang.OpCodes.BaseOpCode;
+use BayLang.Helper.Module;
+use BayLang.Helper.Project;
 
 
 class WidgetApi extends BaseApi
@@ -36,41 +43,54 @@ class WidgetApi extends BaseApi
 	
 	
 	/**
+	 * Returns data rules
+	 */
+	void getDataRules(MapType rules)
+	{
+		rules.addType("widget_name", new StringType());
+	}
+	
+	
+	/**
 	 * Load widget
 	 */
-	@ApiMethod
+	@ApiMethod{ "name": "load" }
 	async void getOpCode()
 	{
-		WidgetService service = new WidgetService();
-		string project_id = this.post_data.get("project_id");
-		string current_widget = this.post_data.get("current_widget");
+		/* Filter data */
+		this.filterData();
 		
-		/* Load project */
-		await service.loadProject(project_id);
+		/* Get widget name */
+		string widget_name = this.data.get("widget_name");
 		
-		/* Load modules */
-		await service.loadItem({ "id": current_widget });
-		
-		/* Load widget */
-		await service.item.load();
-		
-		/* Get widget op code */
-		BaseOpCode component = await service.item.getComponentOpCode();
-		BaseOpCode model = await service.item.getModelOpCode();
-		
-		/* Get component path */
-		if (not component)
+		/* Get project */
+		Project project = ApiHook::getProject();
+		if (not project)
 		{
-			throw new ApiError(
-				new RuntimeException("Failed to load widget '" ~ current_widget ~ "'")
-			);
+			throw new ApiError(new ItemNotFound("project"))
 		}
+		
+		/* Find widget */
+		Widget widget = await Widget::findWidget(project, widget_name);
+		if (widget == null)
+		{
+			throw new ApiError(new ItemNotFound(widget_name, "widget"));
+		}
+		
+		/* Load opcode */
+		await widget.loadModel();
+		await widget.loadComponent();
 		
 		/* Success */
 		this.success({
 			"data": {
-				"component": component,
-				"model": model,
+				"widget_name": widget_name,
+				"model_file_name": widget.model_file_name,
+				"model_name": widget.model_name,
+				"model": widget.model,
+				"component_file_name": widget.component_file_name,
+				"component_name": widget.component_name,
+				"component": widget.component,
 			},
 		});
 	}

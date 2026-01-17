@@ -20,6 +20,7 @@ namespace BayLang.Constructor.Frontend.Editor;
 
 use Runtime.ApiResult;
 use Runtime.BaseModel;
+use BayLang.OpCodes.OpCodeType;
 use BayLang.Constructor.WidgetPage.WidgetPageModel;
 
 
@@ -46,5 +47,21 @@ class EditorPageModel extends BaseModel
 	 */
 	async void loadCode()
 	{
+		ApiResult result = await this.layout.sendApi({
+			"api_name": "baylang.constructor.widget",
+			"method_name": "load",
+			"data": {
+				"widget_name": this.page_model,
+			}
+		});
+		if (result.isSuccess())
+		{
+			Vector errors = [];
+			OpCodeType rules = new OpCodeType();
+			
+			/* Get op code */
+			this.model = rules.filter(result.data.get("model"), errors);
+			this.component = rules.filter(result.data.get("component"), errors);
+		}
 	}
 }

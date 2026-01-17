@@ -1,0 +1,158 @@
+/*!
+ *  BayLang Technology
+ *
+ *  (c) Copyright 2016-2024 "Ildar Bikmamatov" <support@bayrell.org>
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
+namespace BayLang.Constructor.Backend.Api;
+
+use Runtime.fs;
+use Runtime.BaseObject;
+use Runtime.Exceptions.RuntimeException;
+use BayLang.Compiler.Module;
+use BayLang.Compiler.Project;
+use BayLang.LangBay.ParserBay;
+use BayLang.OpCodes.BaseOpCode;
+use BayLang.OpCodes.OpAssignValue;
+use BayLang.OpCodes.OpClassOf;
+use BayLang.OpCodes.OpModule;
+use BayLang.OpCodes.OpString;
+use BayLang.OpCodes.OpUse;
+
+
+class Widget extends BaseObject
+{
+	Project project = null;
+	Module module = null;
+	string widget_name = null;
+	string model_name = null;
+	string model_file_name = "";
+	string component_name = null;
+	string component_file_name = "";
+	BaseOpCode model = null;
+	BaseOpCode component = null;
+	
+	
+	/**
+	 * Find widget in project
+	 */
+	static async Widget findWidget(Project project, string widget_name)
+	{
+		Map<Module> modules = project.getModules();
+		for (string module_name in modules.keys())
+		{
+			Module module = modules.get(module_name);
+			string file_path = module.resolveClassName(widget_name);
+			if (await fs::exists(file_path))
+			{
+				Widget widget = new Widget();
+				widget.project = project;
+				widget.module = module;
+				widget.widget_name = widget_name;
+				widget.model_name = widget_name;
+				widget.model_file_name = file_path;
+				return widget;
+			}
+		}
+		return null;
+	}
+	
+	
+	/**
+	 * Returns component name
+	 */
+	static string getStringValue(OpModule module, OpAssignValue item)
+	{
+		BaseOpCode expression = item.expression;
+		if (expression instanceof OpClassOf)
+		{
+			string class_name = expression.entity_name.getName();
+			for (int i=0; i<module.items.count(); i++)
+			{
+				BaseOpCode item = module.items.get(i);
+				if (item instanceof OpUse)
+				{
+					Vector arr = rs::split(".", item.name);
+					if (class_name == item.alias_name and item.alias_name != null or 
+						class_name == arr.last()
+					)
+					{
+						return item.alias_name ? item.alias_name : item.name;
+					}
+				}
+			}
+			return class_name;
+		}
+		else if (expression instanceof OpString)
+		{
+			return expression.value;
+		}
+		return "";
+	}
+	
+	
+	/**
+	 * Load model op code
+	 */
+	async void loadModel()
+	{
+		if (not await fs::exists(this.model_file_name)) return;
+		
+		this.model = null;
+		try
+		{
+			string content = await fs::readFile(this.model_file_name);
+			ParserBay parser = new ParserBay();
+			parser.setContent(content);
+			this.model = parser.parse();
+		}
+		catch (RuntimeException e)
+		{
+		}
+	}
+	
+	
+	/**
+	 * Load component op code
+	 */
+	async void loadComponent()
+	{
+		if (not this.model) return;
+		
+		/* Get component name */
+		if (this.component_name == "")
+		{
+			OpAssignValue component = this.model.findClass().findVariable("component");
+			this.component_name = static::getStringValue(this.model, component);
+		}
+		
+		/* Find file path */
+		string file_path = this.module.resolveClassName(this.component_name);
+		if (not await fs::exists(file_path)) return;
+		
+		this.component = null;
+		this.component_file_name = file_path;
+		try
+		{
+			string content = await fs::readFile(this.component_file_name);
+			ParserBay parser = new ParserBay();
+			parser.setContent(content);
+			this.component = parser.parse();
+		}
+		catch (RuntimeException e)
+		{
+		}
+	}
+}
