@@ -15,17 +15,15 @@
 		"Frontend/Code/TreeWidget.bay",
 		"Frontend/Editor/EditorPage.bay",
 		"Frontend/Editor/EditorPageModel.bay",
-		"Frontend/ModuleDescription.bay"
+		"Frontend/ModuleDescription.bay",
+		"WidgetPage/WidgetPage.bay",
+		"WidgetPage/WidgetPageModel.bay"
 	],
 	"groups": [
 		"baylang"
 	],
 	"modules":
 	[
-		{
-			"src": "bay/WidgetPage",
-			"type": "module"
-		}
 	],
 	"src": "./bay",
 	"dest":
@@ -37,9 +35,5 @@
 	"allow":
 	[
 		"\\.bay$"
-	],
-	"exclude":
-	[
-		"^widget"
 	]
 }
