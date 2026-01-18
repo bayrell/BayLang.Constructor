@@ -16,9 +16,15 @@
 		"Frontend/Editor/Manager/CodeManager.bay",
 		"Frontend/Editor/EditorPage.bay",
 		"Frontend/Editor/EditorPageModel.bay",
+		"Frontend/Editor/Widget/Widget.bay",
+		"Frontend/Editor/Widget/WidgetTag.bay",
+		"Frontend/Editor/Widget/WidgetText.bay",
+		"Frontend/Editor/Widget/WidgetComponent.bay",
 		"Frontend/ModuleDescription.bay",
+		"WidgetPage/Hooks/LayoutHook.bay",
 		"WidgetPage/WidgetPage.bay",
-		"WidgetPage/WidgetPageModel.bay"
+		"WidgetPage/WidgetPageModel.bay",
+		"WidgetPage/ModuleDescription.bay"
 	],
 	"groups": [
 		"baylang"

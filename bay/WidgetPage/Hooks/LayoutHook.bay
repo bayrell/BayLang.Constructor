@@ -20,6 +20,7 @@ namespace BayLang.Constructor.WidgetPage.Hooks;
 
 use Runtime.BaseLayout;
 use Runtime.Hooks.BaseHook;
+use Runtime.Hooks.RuntimeHook;
 use Runtime.Web.Hooks.AppHook;
 use Runtime.Web.RenderContainer;
 use BayLang.Constructor.WidgetPage.WidgetPageModel;
@@ -32,9 +33,43 @@ class LayoutHook extends BaseHook
 	 */
 	void register_hooks()
 	{
+		this.register(RuntimeHook::CREATE_APP, "createApp");
+		
+		#ifdef BACKEND then
 		this.register(AppHook::ROUTE_AFTER, "routeAfter");
+		#endif
 	}
 	
+	
+	/**
+	 * Create frontend app
+	 */
+	void createApp(Map params)
+	{
+		fn registerComponent = void ()
+		{
+			#ifcode JAVASCRIPT then
+			const mixin = {
+				mounted: function (){
+					this.$el.component = this;
+				},
+				updated: function (){
+					this.$el.component = this;
+				},
+			};
+			return {
+				install: (app) => {
+					app.mixin(mixin);
+				},
+			};
+			#endif
+		};
+		var app = params.get("app");
+		app.use(registerComponent());
+	}
+	
+	
+	#ifdef BACKEND then
 	
 	/**
 	 * Route after
@@ -49,4 +84,6 @@ class LayoutHook extends BaseHook
 			"page_model": layout.current_page_model,
 		});
 	}
+	
+	#endif
 }

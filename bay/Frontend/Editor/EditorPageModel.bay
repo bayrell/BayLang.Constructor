@@ -23,15 +23,20 @@ use Runtime.BaseModel;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpCodeType;
 use BayLang.Constructor.Frontend.Editor.Manager.CodeManager;
+use BayLang.Constructor.Frontend.Editor.Widget.Widget;
+use BayLang.Constructor.Frontend.Editor.Widget.WidgetTag;
+use BayLang.Constructor.Frontend.Editor.EditorPage;
 use BayLang.Constructor.WidgetPage.WidgetPageModel;
-use BayLang.Constructor.WidgetPage.Widget.Widget;
 
 
 class EditorPageModel extends BaseModel
 {
+	string component = classof EditorPage;
 	string page_model = "";
 	WidgetPageModel page_widget = null;
-	Widget root = null;
+	Widget widget = null;
+	Vector selected_path = null;
+	Widget selected_widget = null;
 	BaseOpCode code_model = new CodeManager();
 	BaseOpCode code_component = new CodeManager();
 	
@@ -64,6 +69,21 @@ class EditorPageModel extends BaseModel
 		{
 			this.code_model.assign(result.data.get("model"));
 			this.code_component.assign(result.data.get("component"));
+			if (this.code_component.isLoaded())
+			{
+				this.widget = new WidgetTag(this);
+				this.widget.setOpCode(this.code_component.op_render);
+			}
 		}
+	}
+	
+	
+	/**
+	 * Select item
+	 */
+	void selectItem(Vector path)
+	{
+		this.selected_path = path;
+		this.selected_widget = this.widget ? this.widget.get(path) : null;
 	}
 }

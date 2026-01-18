@@ -28,12 +28,31 @@
 <use name="BayLang.OpCodes.OpHtmlContent" />
 <use name="BayLang.OpCodes.OpString" />
 
+<style>
+.selected_box{
+	position: absolute;
+	border: 1px #5050ff solid;
+	pointer-events: none;
+	.admin-bar &{
+		margin-top: 32px;
+	}
+}
+</style>
+
+<template name="renderSelected">
+	%if (this.model.editor.selected_widget)
+	{
+		<div class="selected_box" style={{ this.selectedStyle }}></div>
+	}
+</template>
+
 <template name="renderComponent">
 	%set BaseOpCode op_render = this.model.editor.code_component.op_render;
 	%if (op_render)
 	{
 		%render this.renderItems(op_render.content);
 	}
+	%render this.renderSelected();
 </template>
 
 <template>
@@ -49,15 +68,33 @@
 	%else
 	{
 		%render this.renderComponent();
+		%render this.renderWidget(this.model.editor);
 	}
 </template>
 
 <script>
 
+var selected_elem = null;
+
+
 /**
  * Returns true if is loaded
  */
 computed bool isLoaded() => this.model.editor.code_component.isLoaded();
+
+
+/**
+ * Returns selected style
+ */
+computed string selectedStyle()
+{
+	Vector arr = [];
+	arr.push("left: " ~ this.selected_elem.offsetLeft);
+	arr.push("top: " ~ this.selected_elem.offsetTop);
+	arr.push("width: " ~ this.selected_elem.offsetWidth);
+	arr.push("height: " ~ this.selected_elem.offsetHeight);
+	return rs::join(";", arr);
+}
 
 
 /**
@@ -78,9 +115,23 @@ async void mounted()
 
 
 /**
+ * Returns element by path
+ */
+var getElementByPath(Vector path)
+{
+	string elem_path = "element_" ~ rs::join(".", path);
+	var elem = this.getRef(elem_path);
+	#ifcode JAVASCRIPT then
+	if (!(elem instanceof HTMLElement)) elem = elem.$el;
+	#endif
+	return elem;
+}
+
+
+/**
  * Create virtual DOM by html tag
  */
-VirtualDom createTag(OpHtmlTag item)
+VirtualDom createTag(OpHtmlTag item, Vector path)
 {
 	/* Create vdom */
 	VirtualDom vdom = new VirtualDom(this.getRef("component"));
@@ -111,19 +162,32 @@ VirtualDom createTag(OpHtmlTag item)
 		}
 	}
 	
+	/* Add events */
+	vdom.attrs.set("ref", "element_" ~ rs::join(".", path));
+	vdom.attrs.set("onclick", void (var e){
+		
+		/* Stop event */
+		e.preventDefault();
+		e.stopPropagation();
+		
+		/* Send click */
+		this.selected_elem = this.getElementByPath(path);
+		this.model.editor.selectItem(path);
+	});
+	
 	/* Render items */
 	if (item.is_component)
 	{
 		vdom.slot("default", VirtualDom (){
 			var component = this.getRef("component");
 			VirtualDom slot = new VirtualDom(component);
-			slot.items = this.renderItems(item.content);
+			slot.items = this.renderItems(item.content, path);
 			return slot;
 		});
 	}
 	else
 	{
-		vdom.items = this.renderItems(item.content);
+		vdom.items = this.renderItems(item.content, path);
 	}
 	
 	return vdom;
@@ -142,13 +206,13 @@ string createText(OpHtmlTag item)
 /**
  * Render items
  */
-Vector<VirtualDom> renderItems(OpItems content)
+Vector<VirtualDom> renderItems(OpItems content, Vector path = [])
 {
 	Vector result = [];
 	for (int i=0; i<content.count(); i++)
 	{
 		BaseOpCode item = content.items.get(i);
-		if (item instanceof OpHtmlTag) result.push(this.createTag(item));
+		if (item instanceof OpHtmlTag) result.push(this.createTag(item, path.slice().concat([i])));
 		else if (item instanceof OpHtmlContent) result.push(this.createText(item));
 	}
 	return result;

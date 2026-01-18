@@ -1,7 +1,7 @@
-<!--
+/*!
  *  BayLang Technology
  *
- *  (c) Copyright 2016-2026 "Ildar Bikmamatov" <support@bayrell.org>
+ *  (c) Copyright 2016-2024 "Ildar Bikmamatov" <support@bayrell.org>
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -14,21 +14,13 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
--->
+ */
 
-<class name="BayLang.Constructor.Frontend.Editor.EditorPage">
+namespace BayLang.Constructor.Frontend.Editor.Widget;
 
-<style>
-.editor_page{
+use BayLang.Constructor.Frontend.Editor.Widget.WidgetTag;
+
+
+class WidgetComponent extends WidgetTag
+{
 }
-</style>
-
-<template>
-	<div class="editor_page">
-	</div>
-</template>
-
-<script>
-</script>
-
-</class>
