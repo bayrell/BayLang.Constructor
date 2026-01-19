@@ -23,6 +23,7 @@ use Runtime.BaseModel;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpCodeType;
 use BayLang.Constructor.Frontend.Editor.Manager.CodeManager;
+use BayLang.Constructor.Frontend.Editor.Settings.WidgetDialogModel;
 use BayLang.Constructor.Frontend.Editor.Widget.Widget;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetTag;
 use BayLang.Constructor.Frontend.Editor.EditorPage;
@@ -39,6 +40,7 @@ class EditorPageModel extends BaseModel
 	Widget selected_widget = null;
 	BaseOpCode code_model = new CodeManager();
 	BaseOpCode code_component = new CodeManager();
+	WidgetDialogModel widget_settings = null;
 	
 	
 	/**
@@ -51,6 +53,23 @@ class EditorPageModel extends BaseModel
 		if (params.has("page_model")) this.page_model = params.get("page_model");
 		if (params.has("page_widget")) this.page_widget = params.get("page_widget");
 	}
+	
+	
+	/**
+	 * Init widget
+	 */
+	void initWidget(Map params)
+	{
+		parent(params);
+		
+		this.widget_settings = this.createWidget(classof WidgetDialogModel, {});
+	}
+	
+	
+	/**
+	 * Returns true if is loaded
+	 */
+	bool isLoaded() => this.widget != null;
 	
 	
 	/**
@@ -85,5 +104,14 @@ class EditorPageModel extends BaseModel
 	{
 		this.selected_path = path;
 		this.selected_widget = this.widget ? this.widget.get(path) : null;
+	}
+	
+	
+	/**
+	 * Show settings
+	 */
+	void showSettings()
+	{
+		this.widget_settings.show();
 	}
 }

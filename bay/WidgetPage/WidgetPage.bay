@@ -53,6 +53,7 @@
 		%render this.renderItems(op_render.content);
 	}
 	%render this.renderSelected();
+	%render this.renderWidget(this.model.contextmenu);
 </template>
 
 <template>
@@ -80,7 +81,7 @@ var selected_elem = null;
 /**
  * Returns true if is loaded
  */
-computed bool isLoaded() => this.model.editor.code_component.isLoaded();
+computed bool isLoaded() => this.model.editor.isLoaded();
 
 
 /**
@@ -100,7 +101,7 @@ computed string selectedStyle()
 /**
  * Component mounted
  */
-async void mounted()
+void mounted()
 {
 	BaseModel page_model = this.model.getPageModel();
 	string component = page_model.component;
@@ -110,7 +111,28 @@ async void mounted()
 	if (not is_constructor.exists() and not is_constructor.apply()) return;
 	
 	/* Load component code */
-	await this.model.editor.loadCode();
+	this.model.editor.loadCode();
+	
+	/* Document events */
+	document.addEventListener("click", this.onDocumentClick);
+}
+
+
+/**
+ * Component unmount
+ */
+void unmounted()
+{
+	document.removeEventListener("click", this.onDocumentClick);
+}
+
+
+/**
+ * Document click
+ */
+void onDocumentClick(var e)
+{
+	this.model.contextmenu.hide();
 }
 
 
@@ -166,13 +188,29 @@ VirtualDom createTag(OpHtmlTag item, Vector path)
 	vdom.attrs.set("ref", "element_" ~ rs::join(".", path));
 	vdom.attrs.set("onclick", void (var e){
 		
-		/* Stop event */
 		e.preventDefault();
 		e.stopPropagation();
 		
-		/* Send click */
+		/* Select item */
 		this.selected_elem = this.getElementByPath(path);
 		this.model.editor.selectItem(path);
+		
+		/* Hide menu */
+		this.model.contextmenu.hide();
+	});
+	
+	/* Contextmenu */
+	vdom.attrs.set("oncontextmenu", void (var e){
+		
+		e.preventDefault();
+		e.stopPropagation();
+		
+		/* Select item */
+		this.selected_elem = this.getElementByPath(path);
+		this.model.editor.selectItem(path);
+		
+		/* Show context menu */
+		this.model.contextmenu.show(e.clientX, e.clientY);
 	});
 	
 	/* Render items */

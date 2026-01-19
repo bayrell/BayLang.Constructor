@@ -1,0 +1,256 @@
+<!--
+ *  BayLang Technology
+ *
+ *  (c) Copyright 2016-2024 "Ildar Bikmamatov" <support@bayrell.org>
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+-->
+
+<class name="BayLang.Constructor.Frontend.Editor.Dialog.Dialog">
+
+<style>
+.dialog{
+	display: none;
+	position: absolute;
+	z-index: 9999;
+	background-color: var(--color-background);
+	border: 1px var(--color-border) solid;
+	border-radius: var(--border-radius);
+	&__title{
+		position: relative;
+		font-weight: bold;
+		text-align: center;
+		cursor: pointer;
+		user-select: none;
+		padding: var(--space) calc(var(--space) * 2);
+		&_close{
+			display: inline-block;
+			position: absolute;
+			right: 9px;
+		}
+	}
+	&__content{
+		padding: var(--space) calc(var(--space) * 2);
+		height: calc(100% - 39px);
+	}
+	&__footer_resize{
+		position: absolute;
+		right: 0; bottom: 0;
+		width: 16px;
+		height: 16px;
+		cursor: nwse-resize;
+	}
+	&.open{
+		display: block;
+	}
+}
+</style>
+
+<template name="renderTitle">
+	%if (this.slot("title"))
+	{
+		<div class="dialog__title" @event:mousedown="this.onTitleClick(event)">
+			<span class="dialog__title_content">%render this.renderSlot("title");</span>
+			<span class="dialog__title_close" @event:click="this.model.hide()">
+				<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path d="M12 4L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+					<path d="M4 4L12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+				</svg>
+			</span>
+		</div>
+	}
+</template>
+
+<template name="renderContent">
+	%if (this.slot("content"))
+	{
+		<div class="dialog__content">
+			%render this.renderSlot("content");
+		</div>
+	}
+</template>
+
+<template name="renderButtons">
+	%if (this.slot("buttons"))
+	{
+		<div class="dialog__buttons">
+			%render this.renderSlot("buttons");
+		</div>
+	}
+</template>
+
+<template name="renderFooter">
+	<div class="dialog__footer_resize" @event:mousedown="this.onResizeClick(event);"></div>
+</template>
+
+<template>
+	<div class="dialog"
+		class={{ this.model.is_open ? "open" : "" }}
+		style={{ this.dialogStyle }}
+		ref="dialog"
+	>
+		%if (this.model.is_open)
+		{
+			%render this.renderTitle();
+			%render this.renderContent();
+			%render this.renderButtons();
+			%render this.renderFooter();
+		}
+	</div>
+</template>
+
+<script>
+
+bool is_init = false;
+bool is_drag = 0;
+string drag_kind = "";
+int mouse_x = 0;
+int mouse_y = 0;
+int dialog_x = 0;
+int dialog_y = 0;
+int dialog_width = 0;
+int dialog_height = 0;
+
+
+/**
+ * Returns dialog style
+ */
+computed string dialogStyle()
+{
+	Vector arr = [];
+	arr.push("left: " ~ this.model.x);
+	arr.push("top: " ~ this.model.y);
+	if (this.model.width > 0) arr.push("width: " ~ this.model.width);
+	if (this.model.height > 0) arr.push("height: " ~ this.model.height);
+	return rs::join(";", arr);
+}
+
+
+/**
+ * Dialog mount
+ */
+void mounted()
+{
+	document.addEventListener("mousemove", this.onMouseMove);
+	document.addEventListener("mouseup", this.onMouseUp);
+}
+
+
+/**
+ * Dialog unmount
+ */
+void unmounted()
+{
+	document.removeEventListener("mousemove", this.onMouseMove);
+	document.removeEventListener("mouseup", this.onMouseUp);
+}
+
+
+/**
+ * Update dialog
+ */
+void updated()
+{
+	if (this.model.is_open and not this.is_init)
+	{
+		this.is_init = true;
+		this.nextTick(void (){
+			var dialog = this.getRef("dialog");
+			this.model.initSize(dialog);
+		});
+	}
+}
+
+
+/**
+ * On title click
+ */
+void onTitleClick(var event)
+{
+	event.preventDefault();
+	
+	if (this.is_drag)
+	{
+		this.is_drag = false;
+		return;
+	}
+	
+	var dialog = this.getRef("dialog");
+	this.is_drag = true;
+	this.drag_kind = "move";
+	this.mouse_x = event.clientX;
+	this.mouse_y = event.clientY;
+	this.dialog_x = dialog.offsetLeft;
+	this.dialog_y = dialog.offsetTop;
+}
+
+
+/**
+ * On resize click
+ */
+void onResizeClick(var event)
+{
+	event.preventDefault();
+	
+	if (this.is_drag)
+	{
+		this.is_drag = false;
+		return;
+	}
+	
+	var dialog = this.getRef("dialog");
+	this.is_drag = true;
+	this.drag_kind = "resize";
+	this.mouse_x = event.clientX;
+	this.mouse_y = event.clientY;
+	this.dialog_width = dialog.clientWidth;
+	this.dialog_height = dialog.clientHeight;
+}
+
+
+/**
+ * Mouse move
+ */
+void onMouseMove(var event)
+{
+	if (not this.is_drag) return;
+	
+	event.preventDefault();
+	event.stopPropagation();
+	
+	if (this.drag_kind == "resize")
+	{
+		this.model.width = this.dialog_width + event.clientX - this.mouse_x;
+		this.model.height = this.dialog_height + event.clientY - this.mouse_y;
+	}
+	else if (this.drag_kind == "move")
+	{
+		this.model.x = this.dialog_x + event.clientX - this.mouse_x;
+		this.model.y = this.dialog_y + event.clientY - this.mouse_y;
+	}
+	
+	this.model.updateSize(this.getRef("dialog"));
+}
+
+
+/**
+ * Mouse up
+ */
+void onMouseUp()
+{
+	this.is_drag = false;
+}
+
+</script>
+
+</class>

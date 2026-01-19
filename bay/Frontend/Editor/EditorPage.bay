@@ -25,6 +25,7 @@
 
 <template>
 	<div class="editor_page">
+		%render this.renderWidget(this.model.widget_settings);
 	</div>
 </template>
 
