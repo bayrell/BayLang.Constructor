@@ -16,24 +16,17 @@
  *  limitations under the License.
  */
 
-namespace BayLang.Constructor.Frontend.Editor.Widget;
+namespace BayLang.Constructor.Frontend.Editor.Parameters;
 
-use BayLang.Constructor.Frontend.Editor.Parameters.ParameterContent;
-use BayLang.Constructor.Frontend.Editor.Widget.Widget;
+use BayLang.Constructor.Frontend.Editor.Parameters.Parameter;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpHtmlContent;
 use BayLang.OpCodes.OpHtmlTag;
 
 
-class WidgetText extends Widget
+class ParameterContent<WidgetText> extends Parameter
 {
-	/**
-	 * Set op code
-	 */
-	void setOpCode(BaseOpCode op_code)
-	{
-		parent(op_code);
-	}
+	string label = "Content";
 	
 	
 	/**
@@ -41,34 +34,15 @@ class WidgetText extends Widget
 	 */
 	string getValue()
 	{
-		BaseOpCode op_code = this.op_code;
-		if (op_code instanceof OpHtmlTag) op_code = op_code.content.items.first();
-		if (op_code instanceof OpHtmlContent) return op_code.value;
-		return "";
+		return this.widget.getValue();
 	}
 	
 	
 	/**
-	 * Set new value
+	 * Set value
 	 */
 	void setValue(string content)
 	{
-		BaseOpCode op_code = this.op_code;
-		if (op_code instanceof OpHtmlTag) op_code = op_code.content.items.first();
-		if (op_code instanceof OpHtmlContent) op_code.value = content;
-	}
-	
-	
-	/**
-	 * On select widget
-	 */
-	void onSelect()
-	{
-		if (this.params) return;
-		
-		this.params = [];
-		this.params.push(new ParameterContent{
-			"widget": this
-		});
+		this.widget.setValue(content);
 	}
 }

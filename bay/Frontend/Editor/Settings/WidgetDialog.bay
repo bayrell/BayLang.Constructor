@@ -19,8 +19,51 @@
 <class name="BayLang.Constructor.Frontend.Editor.Settings.WidgetDialog">
 
 <use name="BayLang.Constructor.Frontend.Editor.Dialog.Dialog" component="true" />
+<use name="BayLang.Constructor.Frontend.Editor.Parameters.Parameter" />
+<use name="BayLang.Constructor.Frontend.Editor.Parameters.ParameterContent" />
 <use name="BayLang.Constructor.Frontend.Editor.Widget.Widget" />
 <use name="BayLang.Constructor.Frontend.Editor.Widget.WidgetTag" />
+<use name="BayLang.OpCodes.OpHtmlTag" />
+<use name="Runtime.Widget.TextArea" component="true" />
+
+<style>
+.current_widget{
+	margin-bottom: var(--space);
+}
+.parameter{
+	&__label{
+		margin-bottom: calc(var(--space) * 0.5);
+	}
+	&__content{
+	}
+}
+</style>
+
+<template name="renderParameterContent" args="Parameter param">
+	%if (param instanceof ParameterContent)
+	{
+		<TextArea value={{ param.getValue() }} @event:valueChange="param.setValue(event.value)" />
+	}
+</template>
+
+<template name="renderParameter" args="Parameter param">
+	<div class="parameter">
+		<div class="parameter__label">{{ param.label }}</div>
+		<div class="parameter__content">
+			%render this.renderParameterContent(param);
+		</div>
+	</div>
+</template>
+
+<template name="renderParameters">
+	%if (this.parameters)
+	{
+		%for (int i=0; i<this.parameters.count(); i++)
+		{
+			%render this.renderParameter(this.parameters.get(i));
+		}
+	}
+</template>
 
 <template>
 	<Dialog model={{ this.model }}>
@@ -28,12 +71,26 @@
 			Widget settings
 		</slot>
 		<slot name="content">
-			Current widget: {{ this.currentWidget }}
+			<div class="current_widget">Current widget: {{ this.currentWidget }}</div>
+			<div class="current_settings">
+				%render this.renderParameters();
+			</div>
 		</slot>
 	</Dialog>
 </template>
 
 <script>
+
+/**
+ * Returns current widget parameters
+ */
+computed Vector parameters()
+{
+	Widget widget = this.model.parent_widget.selected_widget;
+	if (not widget) return null;
+	else return widget.params;
+}
+
 
 /**
  * Returns current widget
@@ -43,7 +100,7 @@ computed string currentWidget()
 	Widget widget = this.model.parent_widget.selected_widget;
 	if (not widget) return "";
 	
-	if (widget instanceof WidgetTag) return widget.op_code.tag_name;
+	if (widget.op_code instanceof OpHtmlTag) return widget.op_code.tag_name;
 	return "";
 }
 

@@ -22,10 +22,14 @@ use Runtime.ApiResult;
 use Runtime.BaseModel;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpCodeType;
+use BayLang.OpCodes.OpHtmlContent;
+use BayLang.OpCodes.OpHtmlTag;
 use BayLang.Constructor.Frontend.Editor.Manager.CodeManager;
 use BayLang.Constructor.Frontend.Editor.Settings.WidgetDialogModel;
 use BayLang.Constructor.Frontend.Editor.Widget.Widget;
+use BayLang.Constructor.Frontend.Editor.Widget.WidgetComponent;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetTag;
+use BayLang.Constructor.Frontend.Editor.Widget.WidgetText;
 use BayLang.Constructor.Frontend.Editor.EditorPage;
 use BayLang.Constructor.WidgetPage.WidgetPageModel;
 
@@ -104,6 +108,10 @@ class EditorPageModel extends BaseModel
 	{
 		this.selected_path = path;
 		this.selected_widget = this.widget ? this.widget.get(path) : null;
+		if (this.selected_widget)
+		{
+			this.selected_widget.onSelect();
+		}
 	}
 	
 	
@@ -113,5 +121,25 @@ class EditorPageModel extends BaseModel
 	void showSettings()
 	{
 		this.widget_settings.show();
+	}
+	
+	
+	/**
+	 * Returns widget name by op code
+	 */
+	string getWidgetName(BaseOpCode item)
+	{
+		if (item instanceof OpHtmlTag)
+		{
+			if (item.is_component) return classof WidgetComponent;
+			
+			BaseOpCode first_item = item.content.get(0);
+			if (item.content.count() == 1 and first_item instanceof OpHtmlContent)
+			{
+				return classof WidgetText;
+			}
+			return classof WidgetTag;
+		}
+		else if (item instanceof OpHtmlContent) return classof WidgetText;
 	}
 }

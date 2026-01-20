@@ -16,6 +16,8 @@
 		"Frontend/Editor/Dialog/Dialog.bay",
 		"Frontend/Editor/Dialog/DialogModel.bay",
 		"Frontend/Editor/Manager/CodeManager.bay",
+		"Frontend/Editor/Parameters/Parameter.bay",
+		"Frontend/Editor/Parameters/ParameterContent.bay",
 		"Frontend/Editor/Settings/WidgetDialog.bay",
 		"Frontend/Editor/Settings/WidgetDialogModel.bay",
 		"Frontend/Editor/EditorPage.bay",

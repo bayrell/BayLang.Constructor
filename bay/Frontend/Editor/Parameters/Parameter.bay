@@ -16,43 +16,42 @@
  *  limitations under the License.
  */
 
-namespace BayLang.Constructor.Frontend.Editor.Widget;
+namespace BayLang.Constructor.Frontend.Editor.Parameters;
 
+use Runtime.BaseObject;
 use BayLang.Constructor.Frontend.Editor.Widget.Widget;
-use BayLang.OpCodes.BaseOpCode;
 
 
-class WidgetTag extends Widget
+class Parameter<Widget> extends BaseObject
 {
-	Vector<Widget> items = [];
+	Widget widget = null;
+	string label = "";
 	
 	
 	/**
-	 * Returns item
+	 * Create parameter
 	 */
-	Widget get(Vector path)
+	void constructor(Map params)
 	{
-		if (path.count() == 0) return this;
-		
-		int pos = path.first();
-		Widget item = this.items.get(pos);
-		if (item) return item.get(path.slice(1));
-		return null;
+		parent();
+		this.initParams(params);
 	}
 	
 	
 	/**
-	 * Init widget
+	 * Init params
 	 */
-	void init()
+	void initParams(Map params)
 	{
-		this.items = [];
-		for (int i=0; i<this.op_code.content.count(); i++)
-		{
-			BaseOpCode item = this.op_code.content.get(i);
-			Widget widget = this.createWidget(item);
-			widget.setOpCode(item);
-			this.items.push(widget);
-		}
+		if (params.has("widget")) this.widget = params.get("widget");
+		if (params.has("label")) this.label = params.get("label");
+	}
+	
+	
+	/**
+	 * Set new value
+	 */
+	void setValue(var value)
+	{
 	}
 }

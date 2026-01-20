@@ -33,6 +33,17 @@ class Widget extends BaseObject
 	BaseOpCode op_code = null;
 	Widget parent_widget = null;
 	EditorPageModel page_model = null;
+	Vector params = null;
+	
+	
+	/**
+	 * Returns widget by path
+	 */
+	Widget get(Vector path)
+	{
+		if (path.count() == 0) return this;
+		return null;
+	}
 	
 	
 	/**
@@ -40,22 +51,23 @@ class Widget extends BaseObject
 	 */
 	Widget createWidget(BaseOpCode item)
 	{
-		if (item instanceof OpHtmlTag)
+		string widget_name = this.page_model.getWidgetName(item);
+		if (widget_name)
 		{
-			if (item.is_component) return new WidgetComponent(this.page_model);
-			else return new WidgetTag(this.page_model);
+			return rtl::newInstance(widget_name, [this]);
 		}
-		else if (item instanceof OpHtmlContent) return new WidgetText(this.page_model);
+		return null;
 	}
 	
 	
 	/**
 	 * Create widget
 	 */
-	void constructor(EditorPageModel page_model)
+	void constructor(Widget widget)
 	{
 		parent();
-		this.page_model = page_model;
+		this.parent_widget = widget;
+		this.page_model = widget instanceof Widget ? widget.page_model : widget;
 	}
 	
 	
@@ -73,6 +85,14 @@ class Widget extends BaseObject
 	 * Init widget
 	 */
 	void init()
+	{
+	}
+	
+	
+	/**
+	 * On select widget
+	 */
+	void onSelect()
 	{
 	}
 }
