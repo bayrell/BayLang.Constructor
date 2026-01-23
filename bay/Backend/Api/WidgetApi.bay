@@ -22,6 +22,7 @@ use Runtime.fs;
 use Runtime.Exceptions.ApiError;
 use Runtime.Exceptions.ItemNotFound;
 use Runtime.Exceptions.RuntimeException;
+use Runtime.Serializer.JsonType;
 use Runtime.Serializer.MapType;
 use Runtime.Serializer.StringType;
 use Runtime.Web.BaseApi;
@@ -30,6 +31,7 @@ use BayLang.Constructor.Backend.ApiHook;
 use BayLang.Constructor.Backend.Api.Widget;
 use BayLang.Constructor.Backend.Service.WidgetService;
 use BayLang.OpCodes.BaseOpCode;
+use BayLang.OpCodes.OpCodeType;
 use BayLang.Helper.Module;
 use BayLang.Helper.Project;
 
@@ -48,6 +50,8 @@ class WidgetApi extends BaseApi
 	void getDataRules(MapType rules)
 	{
 		rules.addType("widget_name", new StringType());
+		rules.addType("code_model", new JsonType(new OpCodeType()));
+		rules.addType("code_component", new JsonType(new OpCodeType()));
 	}
 	
 	
@@ -99,9 +103,47 @@ class WidgetApi extends BaseApi
 	/**
 	 * Save widget
 	 */
-	@ApiMethod
+	@ApiMethod{ "name": "save" }
 	async void save()
 	{
+		/* Filter data */
+		this.filterData();
+		
+		/* Get code */
+		BaseOpCode code_model = this.data.get("code_model");
+		BaseOpCode code_component = this.data.get("code_component");
+		if (not code_component)
+		{
+			throw new ApiError(new ItemNotFound("code_component"));
+		}
+		
+		/* Get project */
+		Project project = ApiHook::getProject();
+		if (not project)
+		{
+			throw new ApiError(new ItemNotFound("project"))
+		}
+		
+		/* Find widget */
+		string widget_name = this.data.get("widget_name");
+		Widget widget = await Widget::findWidget(project, widget_name);
+		if (widget == null)
+		{
+			throw new ApiError(new ItemNotFound(widget_name, "widget"));
+		}
+		
+		/* Load opcode */
+		await widget.loadModel();
+		await widget.loadComponent();
+		
+		/* Save component */
+		await widget.saveComponent(code_component);
+		
+		/* Success */
+		this.success();
+		
+		return ;
+		
 		WidgetService service = new WidgetService();
 		string project_id = this.post_data.get("project_id");
 		string current_widget = this.post_data.get("current_widget");

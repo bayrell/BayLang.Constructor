@@ -47,12 +47,15 @@ class WidgetTag extends Widget
 	void init()
 	{
 		this.items = [];
-		for (int i=0; i<this.op_code.content.count(); i++)
+		if (this.op_code and this.op_code.content)
 		{
-			BaseOpCode item = this.op_code.content.get(i);
-			Widget widget = this.createWidget(item);
-			widget.setOpCode(item);
-			this.items.push(widget);
+			for (int i=0; i<this.op_code.content.count(); i++)
+			{
+				BaseOpCode item = this.op_code.content.get(i);
+				Widget widget = this.createWidget(item);
+				widget.setOpCode(item);
+				this.items.push(widget);
+			}
 		}
 	}
 }

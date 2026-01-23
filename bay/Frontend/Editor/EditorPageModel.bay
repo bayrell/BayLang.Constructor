@@ -24,6 +24,7 @@ use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpCodeType;
 use BayLang.OpCodes.OpHtmlContent;
 use BayLang.OpCodes.OpHtmlTag;
+use BayLang.Constructor.Frontend.Editor.Dialog.SaveDialogModel;
 use BayLang.Constructor.Frontend.Editor.Manager.CodeManager;
 use BayLang.Constructor.Frontend.Editor.Settings.WidgetDialogModel;
 use BayLang.Constructor.Frontend.Editor.Widget.Widget;
@@ -44,6 +45,7 @@ class EditorPageModel extends BaseModel
 	Widget selected_widget = null;
 	BaseOpCode code_model = new CodeManager();
 	BaseOpCode code_component = new CodeManager();
+	SaveDialogModel save_dialog = null;
 	WidgetDialogModel widget_settings = null;
 	
 	
@@ -66,6 +68,7 @@ class EditorPageModel extends BaseModel
 	{
 		parent(params);
 		
+		this.save_dialog = this.createWidget(classof SaveDialogModel);
 		this.widget_settings = this.createWidget(classof WidgetDialogModel, {});
 	}
 	
@@ -98,6 +101,27 @@ class EditorPageModel extends BaseModel
 				this.widget.setOpCode(this.code_component.op_render);
 			}
 		}
+	}
+	
+	
+	/**
+	 * Save
+	 */
+	async void save()
+	{
+		this.save_dialog.setStatus(SaveDialogModel::STATUS_SAVING);
+		this.save_dialog.show();
+		
+		ApiResult result = await this.layout.sendApi({
+			"api_name": "baylang.constructor.widget",
+			"method_name": "save",
+			"data": {
+				"widget_name": this.page_model,
+				"code_model": rtl::jsonEncode(rtl::serialize(this.code_model.code)),
+				"code_component": rtl::jsonEncode(rtl::serialize(this.code_component.code)),
+			}
+		});
+		this.save_dialog.setApiResult(result);
 	}
 	
 	

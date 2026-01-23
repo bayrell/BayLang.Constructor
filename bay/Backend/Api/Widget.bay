@@ -24,6 +24,7 @@ use Runtime.Exceptions.RuntimeException;
 use BayLang.Compiler.Module;
 use BayLang.Compiler.Project;
 use BayLang.LangBay.ParserBay;
+use BayLang.LangBay.TranslatorBay;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpAssignValue;
 use BayLang.OpCodes.OpClassOf;
@@ -150,6 +151,29 @@ class Widget extends BaseObject
 			ParserBay parser = new ParserBay();
 			parser.setContent(content);
 			this.component = parser.parse();
+		}
+		catch (RuntimeException e)
+		{
+		}
+	}
+	
+	
+	/**
+	 * Save component
+	 */
+	async void saveComponent(BaseOpCode code)
+	{
+		TranslatorBay translator = new TranslatorBay();
+		string content = translator.translate(code);
+		try
+		{
+			/* Save file */
+			await fs::saveFile(this.component_file_name, content);
+			
+			/* Compile */
+			string src_file_path = this.module.getRelativeSourcePath(this.component_file_name);
+			await this.module.compile(src_file_path);
+			await this.module.updateAssets();
 		}
 		catch (RuntimeException e)
 		{
