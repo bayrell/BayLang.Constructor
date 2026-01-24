@@ -19,6 +19,7 @@
 namespace BayLang.Constructor.Frontend.Editor.Widget;
 
 use Runtime.BaseObject;
+use BayLang.Constructor.Frontend.Editor.Styles.Style;
 use BayLang.Constructor.Frontend.Editor.Widget.Widget;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpHtmlAttribute;
@@ -75,5 +76,26 @@ class WidgetStyle extends BaseObject
 		if (not (class_name.expression instanceof OpString)) return;
 		
 		class_name.expression.value = rs::join(" ", this.items);
+	}
+	
+	
+	/**
+	 * Update current style
+	 */
+	void updateCurrentStyle(string content)
+	{
+		Style item = this.widget.page_model.styles.findStyle(this.current_style);
+		if (item)
+		{
+			item.setContent(content);
+		}
+		else if (this.current_style != "")
+		{
+			Style item = new Style();
+			item.setSelector("." ~ this.current_style);
+			item.setContent(content);
+			this.widget.page_model.styles.items.set(item.selector, item);
+		}
+		window.setTimeout(void(){ this.widget.page_model.page_widget.updateSelectedBox(); }, 1);
 	}
 }

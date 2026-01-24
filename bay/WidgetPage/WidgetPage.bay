@@ -21,6 +21,8 @@
 <use name="Runtime.BaseModel" />
 <use name="Runtime.Method" />
 <use name="Runtime.VirtualDom" />
+<use name="BayLang.Constructor.Frontend.Editor.Styles.Style" />
+<use name="BayLang.Constructor.Frontend.Editor.Styles.StyleManager" />
 <use name="BayLang.OpCodes.BaseOpCode" />
 <use name="BayLang.OpCodes.OpItems" />
 <use name="BayLang.OpCodes.OpHtmlAttribute" />
@@ -39,10 +41,14 @@
 }
 </style>
 
+<template name="renderStyle">
+	<style class="editor_style">{{ this.pageStyle }}</style>
+</template>
+
 <template name="renderSelected">
 	%if (this.model.editor.selected_widget)
 	{
-		<div class="selected_box" style={{ this.selectedStyle }}></div>
+		<div class="selected_box" style={{ this.model.selected_style }}></div>
 	}
 </template>
 
@@ -53,7 +59,6 @@
 		%render this.renderItems(op_render.content);
 	}
 	%render this.renderSelected();
-	%render this.renderWidget(this.model.contextmenu);
 </template>
 
 <template>
@@ -68,15 +73,14 @@
 	}
 	%else
 	{
+		%render this.renderStyle();
 		%render this.renderComponent();
 		%render this.renderWidget(this.model.editor);
+		%render this.renderWidget(this.model.contextmenu);
 	}
 </template>
 
 <script>
-
-var selected_elem = null;
-
 
 /**
  * Returns true if is loaded
@@ -85,16 +89,12 @@ computed bool isLoaded() => this.model.editor.isLoaded();
 
 
 /**
- * Returns selected style
+ * Returns page style
  */
-computed string selectedStyle()
+computed string pageStyle()
 {
-	Vector arr = [];
-	arr.push("left: " ~ this.selected_elem.offsetLeft);
-	arr.push("top: " ~ this.selected_elem.offsetTop);
-	arr.push("width: " ~ this.selected_elem.offsetWidth);
-	arr.push("height: " ~ this.selected_elem.offsetHeight);
-	return rs::join(";", arr);
+	StyleManager manager = this.model.editor.styles;
+	return rs::join("", manager.items.transition(string (Style item) => item.getStyle()));
 }
 
 
@@ -192,7 +192,7 @@ VirtualDom createTag(OpHtmlTag item, Vector path)
 		e.stopPropagation();
 		
 		/* Select item */
-		this.selected_elem = this.getElementByPath(path);
+		this.model.selectElement(this.getElementByPath(path));
 		this.model.editor.selectItem(path);
 		
 		/* Hide menu */
@@ -206,7 +206,7 @@ VirtualDom createTag(OpHtmlTag item, Vector path)
 		e.stopPropagation();
 		
 		/* Select item */
-		this.selected_elem = this.getElementByPath(path);
+		this.model.selectElement(this.getElementByPath(path));
 		this.model.editor.selectItem(path);
 		
 		/* Show context menu */

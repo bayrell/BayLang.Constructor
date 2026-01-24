@@ -1,0 +1,88 @@
+/*!
+ *  BayLang Technology
+ *
+ *  (c) Copyright 2016-2024 "Ildar Bikmamatov" <support@bayrell.org>
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
+namespace BayLang.Constructor.Frontend.Editor.Styles;
+
+use BayLang.Constructor.Frontend.Editor.Styles.Style;
+use BayLang.Constructor.Frontend.Editor.EditorPageModel;
+use BayLang.OpCodes.BaseOpCode;
+use BayLang.OpCodes.OpHtmlCSS;
+use BayLang.OpCodes.OpHtmlStyle;
+use Runtime.BaseObject;
+
+
+class StyleManager extends BaseObject
+{
+	EditorPageModel page_model = null;
+	OpHtmlStyle op_code_style = null;
+	Map<Style> items = {};
+	
+	
+	/**
+	 * Create object
+	 */
+	void constructor(EditorPageModel page_model)
+	{
+		parent();
+		this.page_model = page_model;
+	}
+	
+	
+	/**
+	 * Init styles
+	 */
+	void init()
+	{
+		if (not this.page_model.code_component.isLoaded()) return;
+		
+		/* Find style */
+		this.op_code_style = this.page_model.code_component.op_class.content.items.find(
+			bool (BaseOpCode op_code) => op_code instanceof OpHtmlStyle
+		);
+		if (not this.op_code_style) return;
+		
+		/* Add styles */
+		for (int i=0; i<this.op_code_style.content.count(); i++)
+		{
+			OpHtmlCSS op_code_css = this.op_code_style.content.get(i);
+			this.addStyle(op_code_css);
+		}
+	}
+	
+	
+	/**
+	 * Add style
+	 */
+	void addStyle(OpHtmlCSS op_code)
+	{
+		Style item = new Style();
+		item.setSelector(op_code.selector);
+		item.setOpCode(op_code);
+		this.items.set(item.selector, item);
+	}
+	
+	
+	/**
+	 * Find style by class name
+	 */
+	Style findStyle(string class_name)
+	{
+		Style item = this.items.get("." ~ class_name);
+		return item ? item : null;
+	}
+}

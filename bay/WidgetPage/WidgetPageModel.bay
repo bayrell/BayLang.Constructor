@@ -33,6 +33,8 @@ class WidgetPageModel extends BaseModel
 	string page_model = "";
 	EditorPageModel editor = null;
 	ContextMenuModel contextmenu = null;
+	var selected_elem = null;
+	string selected_style = "";
 	
 	
 	/**
@@ -112,5 +114,34 @@ class WidgetPageModel extends BaseModel
 	async void save()
 	{
 		await this.editor.save();
+	}
+	
+	
+	/**
+	 * Selected element
+	 */
+	void selectElement(var elem)
+	{
+		this.selected_elem = elem;
+		this.updateSelectedBox();
+	}
+	
+	
+	/**
+	 * Update selected box
+	 */
+	void updateSelectedBox()
+	{
+		if (not this.selected_elem)
+		{
+			this.selected_style = "";
+			return;
+		}
+		Vector arr = [];
+		arr.push("left: " ~ this.selected_elem.offsetLeft);
+		arr.push("top: " ~ this.selected_elem.offsetTop);
+		arr.push("width: " ~ this.selected_elem.offsetWidth);
+		arr.push("height: " ~ this.selected_elem.offsetHeight);
+		this.selected_style = rs::join(";", arr);
 	}
 }

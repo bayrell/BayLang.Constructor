@@ -22,13 +22,15 @@
 <use name="BayLang.Constructor.Frontend.Editor.Parameters.Parameter" />
 <use name="BayLang.Constructor.Frontend.Editor.Parameters.ParameterContent" />
 <use name="BayLang.Constructor.Frontend.Editor.Settings.WidgetDialogModel" />
+<use name="BayLang.Constructor.Frontend.Editor.Styles.Style" />
+<use name="BayLang.Constructor.Frontend.Editor.Styles.StyleManager" />
 <use name="BayLang.Constructor.Frontend.Editor.Widget.Widget" />
 <use name="BayLang.Constructor.Frontend.Editor.Widget.WidgetTag" />
 <use name="BayLang.OpCodes.OpHtmlTag" />
 <use name="Runtime.Widget.Button" component="true" />
 <use name="Runtime.Widget.RowButtons" component="true" />
 <use name="Runtime.Widget.Select" component="true" />
-<use name="Runtime.Widget.TextArea" component="true" />
+<use name="Runtime.Widget.TextEditable" component="true" />
 
 <style>
 .dialog--widget{
@@ -76,6 +78,9 @@
 	&__content{
 	}
 }
+.widget_styles{
+	margin-bottom: var(--space);
+}
 .widget_content{
 	width: 100%;
 	resize: vertical;
@@ -102,6 +107,10 @@
 				value={{ this.widget.class_name.current_style }}
 				@event:valueChange="this.widget.class_name.current_style = event.value"
 			/>
+			<TextEditable class="widget_content"
+				value={{ this.currentStyle ? this.currentStyle.content : "" }}
+				@event:valueChange="this.widget.class_name.updateCurrentStyle(event.value)"
+			/>
 		}
 	</div>
 </template>
@@ -109,7 +118,7 @@
 <template name="renderParameterContent" args="Parameter param">
 	%if (param instanceof ParameterContent)
 	{
-		<TextArea class="widget_content"
+		<TextEditable class="widget_content"
 			value={{ param.getValue() }} @event:valueChange="param.setValue(event.value)" />
 	}
 </template>
@@ -193,6 +202,16 @@ computed string currentName()
 	
 	if (widget.op_code instanceof OpHtmlTag) return widget.op_code.tag_name;
 	return "";
+}
+
+
+/**
+ * Returns current style
+ */
+computed Style currentStyle()
+{
+	if (not (this.widget instanceof WidgetTag)) return null;
+	return this.widget.page_model.styles.findStyle(this.widget.class_name.current_style);
 }
 
 

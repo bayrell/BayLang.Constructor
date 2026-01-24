@@ -22,6 +22,8 @@
 		"Frontend/Editor/Parameters/ParameterContent.bay",
 		"Frontend/Editor/Settings/WidgetDialog.bay",
 		"Frontend/Editor/Settings/WidgetDialogModel.bay",
+		"Frontend/Editor/Styles/Style.bay",
+		"Frontend/Editor/Styles/StyleManager.bay",
 		"Frontend/Editor/EditorPage.bay",
 		"Frontend/Editor/EditorPageModel.bay",
 		"Frontend/Editor/Widget/Widget.bay",

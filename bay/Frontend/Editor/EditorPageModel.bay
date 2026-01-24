@@ -27,6 +27,7 @@ use BayLang.OpCodes.OpHtmlTag;
 use BayLang.Constructor.Frontend.Editor.Dialog.SaveDialogModel;
 use BayLang.Constructor.Frontend.Editor.Manager.CodeManager;
 use BayLang.Constructor.Frontend.Editor.Settings.WidgetDialogModel;
+use BayLang.Constructor.Frontend.Editor.Styles.StyleManager;
 use BayLang.Constructor.Frontend.Editor.Widget.Widget;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetComponent;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetTag;
@@ -47,6 +48,7 @@ class EditorPageModel extends BaseModel
 	BaseOpCode code_component = new CodeManager();
 	SaveDialogModel save_dialog = null;
 	WidgetDialogModel widget_settings = null;
+	StyleManager styles = new StyleManager(this);
 	
 	
 	/**
@@ -100,6 +102,7 @@ class EditorPageModel extends BaseModel
 				this.widget = new WidgetTag(this);
 				this.widget.setOpCode(this.code_component.op_render);
 			}
+			this.styles.init();
 		}
 	}
 	
