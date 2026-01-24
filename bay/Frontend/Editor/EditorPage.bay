@@ -20,6 +20,27 @@
 
 <style>
 .editor_page{
+	--font-family: "Segoe UI";
+	--font-size: 14px;
+	--font-input-size: 14px;
+	--space: 0.5rem;
+	
+	/* Color */
+	--color-background: #ffffff;
+	--color-surface: #f8f9fa;
+	--color-border: #ccc;
+	--color-shadow: rgba(0, 0, 0, 0.1);
+	--color-primary: #337ab7;
+	--color-primary-border: #337ab7;
+	--color-primary-hover: #2563eb;
+	--color-primary-text: #ffffff;
+	
+	/* Border */
+	--border-radius: 4px;
+	--border-width: 1px;
+	
+	font-family: var(--font-family);
+	font-size: var(--font-size);
 }
 </style>
 

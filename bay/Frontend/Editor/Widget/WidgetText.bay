@@ -20,12 +20,13 @@ namespace BayLang.Constructor.Frontend.Editor.Widget;
 
 use BayLang.Constructor.Frontend.Editor.Parameters.ParameterContent;
 use BayLang.Constructor.Frontend.Editor.Widget.Widget;
+use BayLang.Constructor.Frontend.Editor.Widget.WidgetTag;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpHtmlContent;
 use BayLang.OpCodes.OpHtmlTag;
 
 
-class WidgetText extends Widget
+class WidgetText extends WidgetTag
 {
 	/**
 	 * Set op code

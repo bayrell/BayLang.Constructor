@@ -25,6 +25,7 @@
 		"Frontend/Editor/EditorPage.bay",
 		"Frontend/Editor/EditorPageModel.bay",
 		"Frontend/Editor/Widget/Widget.bay",
+		"Frontend/Editor/Widget/WidgetStyle.bay",
 		"Frontend/Editor/Widget/WidgetTag.bay",
 		"Frontend/Editor/Widget/WidgetText.bay",
 		"Frontend/Editor/Widget/WidgetComponent.bay",

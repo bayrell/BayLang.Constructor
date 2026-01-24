@@ -27,6 +27,7 @@
 <use name="BayLang.OpCodes.OpHtmlTag" />
 <use name="Runtime.Widget.Button" component="true" />
 <use name="Runtime.Widget.RowButtons" component="true" />
+<use name="Runtime.Widget.Select" component="true" />
 <use name="Runtime.Widget.TextArea" component="true" />
 
 <style>
@@ -83,7 +84,7 @@
 </style>
 
 <template name="renderWidgetName">
-	<div class="widget_name">Current widget: {{ this.currentWidget }}</div>
+	<div class="widget_name">Current widget: {{ this.currentName }}</div>
 </template>
 
 <template name="renderStyles">
@@ -91,6 +92,17 @@
 		class={{ this.isActive(WidgetDialogModel::TAB_STYLES) }}
 	>
 		%render this.renderWidgetName();
+		%if (this.widget instanceof WidgetTag and this.widget.class_name)
+		{
+			<Select class="widget_styles"
+				options={{ this.widget.class_name.items.map(Map (string name) => {
+					"key": name,
+					"value": name,
+				}) }}
+				value={{ this.widget.class_name.current_style }}
+				@event:valueChange="this.widget.class_name.current_style = event.value"
+			/>
+		}
 	</div>
 </template>
 
@@ -166,9 +178,15 @@ computed Vector parameters()
 
 
 /**
+ * Return current widget
+ */
+computed Widget widget() => this.model.parent_widget.selected_widget;
+
+
+/**
  * Returns current widget
  */
-computed string currentWidget()
+computed string currentName()
 {
 	Widget widget = this.model.parent_widget.selected_widget;
 	if (not widget) return "";

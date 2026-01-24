@@ -19,12 +19,17 @@
 namespace BayLang.Constructor.Frontend.Editor.Widget;
 
 use BayLang.Constructor.Frontend.Editor.Widget.Widget;
+use BayLang.Constructor.Frontend.Editor.Widget.WidgetStyle;
 use BayLang.OpCodes.BaseOpCode;
+use BayLang.OpCodes.OpHtmlAttribute;
+use BayLang.OpCodes.OpHtmlTag;
+use BayLang.OpCodes.OpString;
 
 
 class WidgetTag extends Widget
 {
 	Vector<Widget> items = [];
+	WidgetStyle class_name = new WidgetStyle(this);
 	
 	
 	/**
@@ -42,9 +47,9 @@ class WidgetTag extends Widget
 	
 	
 	/**
-	 * Init widget
+	 * Init items
 	 */
-	void init()
+	void initItems()
 	{
 		this.items = [];
 		if (this.op_code and this.op_code.content)
@@ -57,5 +62,15 @@ class WidgetTag extends Widget
 				this.items.push(widget);
 			}
 		}
+	}
+	
+	
+	/**
+	 * Init widget
+	 */
+	void init()
+	{
+		this.initItems();
+		this.class_name.init();
 	}
 }

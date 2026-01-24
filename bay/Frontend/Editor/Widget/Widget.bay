@@ -66,8 +66,15 @@ class Widget extends BaseObject
 	void constructor(Widget widget)
 	{
 		parent();
-		this.parent_widget = widget;
-		this.page_model = widget instanceof Widget ? widget.page_model : widget;
+		if (widget instanceof Widget)
+		{
+			this.parent_widget = widget;
+			this.page_model = widget.page_model;
+		}
+		else
+		{
+			this.page_model = widget;
+		}
 	}
 	
 	
