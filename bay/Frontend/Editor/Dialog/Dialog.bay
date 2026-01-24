@@ -94,7 +94,7 @@
 </template>
 
 <template>
-	<div class="dialog"
+	<div class={{ "dialog" ~ (this.class ? " " ~ this.class : "") }}
 		class={{ this.model.is_open ? "open" : "" }}
 		style={{ this.dialogStyle }}
 		ref="dialog"
