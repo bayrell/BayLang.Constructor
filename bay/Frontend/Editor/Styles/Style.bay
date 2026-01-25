@@ -33,6 +33,29 @@ class Style extends BaseObject
 	
 	
 	/**
+	 * Copy item
+	 */
+	void copy()
+	{
+		Style item = static::newInstance();
+		item.selector = this.selector;
+		item.op_code = this.op_code ? rtl::copy(this.op_code) : null;
+		item.values = this.values.copy();
+		item.content = this.content;
+		return item;
+	}
+	
+	
+	/**
+	 * Set class name
+	 */
+	void setClassName(string class_name)
+	{
+		this.selector = "." ~ class_name;
+	}
+	
+	
+	/**
 	 * Set selector
 	 */
 	void setSelector(string selector)
@@ -103,8 +126,9 @@ class Style extends BaseObject
 	/**
 	 * Returns style
 	 */
-	void getStyle()
+	void getStyle(string component_name)
 	{
-		return this.selector ~ "{" ~ this.content ~ "}";
+		string component_hash = rs::getComponentHash(component_name);
+		return this.selector ~ "." ~ component_hash ~ "{" ~ rs::replace("\n", "", this.content) ~ "}";
 	}
 }

@@ -31,6 +31,7 @@ class WidgetStyle extends BaseObject
 {
 	Widget widget = null;
 	Vector items = [];
+	OpString class_expression = null;
 	string current_style = "";
 	
 	
@@ -57,6 +58,7 @@ class WidgetStyle extends BaseObject
 		if (not class_name) return;
 		if (not (class_name.expression instanceof OpString)) return;
 		
+		this.class_expression = class_name.expression;
 		this.items = rs::split(" ", class_name.expression.value);
 		this.current_style = this.items.first("");
 	}
@@ -67,15 +69,8 @@ class WidgetStyle extends BaseObject
 	 */
 	void update()
 	{
-		if (not (this.widget.op_code instanceof OpHtmlTag)) return;
-		
-		OpHtmlAttribute class_name = this.widget.op_code.attrs.find(
-			bool (OpHtmlAttribute item) => item.key == "class"
-		);
-		if (not class_name) return;
-		if (not (class_name.expression instanceof OpString)) return;
-		
-		class_name.expression.value = rs::join(" ", this.items);
+		if (not this.class_expression) return;
+		this.class_expression.value = rs::join(" ", this.items);
 	}
 	
 	
@@ -92,10 +87,73 @@ class WidgetStyle extends BaseObject
 		else if (this.current_style != "")
 		{
 			Style item = new Style();
-			item.setSelector("." ~ this.current_style);
+			item.setClassName(this.current_style);
 			item.setContent(content);
-			this.widget.page_model.styles.items.set(item.selector, item);
+			this.widget.page_model.styles.addItem(item);
 		}
 		window.setTimeout(void(){ this.widget.page_model.page_widget.updateSelectedBox(); }, 1);
+	}
+	
+	
+	/**
+	 * Add class
+	 */
+	void add(string class_name)
+	{
+		int index = this.items.indexOf(class_name);
+		if (index != -1) return;
+		
+		Style item = new Style();
+		item.setClassName(class_name);
+		this.widget.page_model.styles.addItem(item);
+		this.items.push(class_name);
+		this.current_style = class_name;
+		
+		/* Update class names */
+		this.update();
+	}
+	
+	
+	/**
+	 * Rename class
+	 */
+	void rename(int index, string new_name)
+	{
+		/* Find style */
+		string old_name = this.items.get(index);
+		if (old_name == new_name) return;
+		
+		/* Check new name */
+		int new_index = this.items.indexOf(new_name);
+		if (new_index != -1) return;
+		
+		/* Copy style */
+		if (not this.widget.page_model.styles.exists(new_name))
+		{
+			this.widget.page_model.styles.copy(old_name, new_name);
+		}
+		
+		/* Rename */
+		this.items.set(index, new_name);
+		if (this.current_style == old_name) this.current_style = new_name;
+		
+		/* Update class names */
+		this.update();
+	}
+	
+	
+	/**
+	 * Remove class
+	 */
+	void remove(int index)
+	{
+		string old_name = this.items.get(index);
+		
+		/* Remove class */
+		if (this.current_style == old_name) this.current_style = "";
+		this.items.remove(index);
+		
+		/* Update class name */
+		this.update();
 	}
 }

@@ -1,0 +1,151 @@
+<!--
+ *  BayLang Technology
+ *
+ *  (c) Copyright 2016-2024 "Ildar Bikmamatov" <support@bayrell.org>
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+-->
+
+<class name="BayLang.Constructor.Frontend.Editor.Components.SelectWidget">
+
+<use name="Runtime.Message" />
+<use name="Runtime.Widget.Messages.ValueChangeMessage" />
+
+<style>
+.select_widget{
+	position: relative;
+	&__label{
+		display: flex;
+		align-items: center;
+		cursor: pointer;
+		.text{
+			flex: 1;
+		}
+	}
+	&__items{
+		display: none;
+		position: absolute;
+		background-color: var(--color-background);
+		border: 1px var(--color-border) solid;
+		width: 100%;
+		&.show{
+			display: block;
+		}
+	}
+	&__item{
+		display: flex;
+		align-items: center;
+		border-bottom: 1px var(--color-border) solid;
+		padding: calc(var(--space) * 0.25) calc(var(--space) * 0.5);
+		cursor: pointer;
+		.text{
+			flex: 1;
+		}
+		&:hover{
+			background-color: var(--color-hover);
+		}
+		&:last-child{
+			border-bottom-width: 0;
+		}
+	}
+}
+</style>
+
+<template>
+	<div class="select_widget" class={{ this.class }}>
+		<div class="select_widget__label" @event:click="this.toggleMenu()">
+			<span class="text">{{ this.label }}</span>
+			<span class="icon">
+				<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+			</span>
+		</div>
+		<div class="select_widget__items" class={{ this.is_open ? "show" : "" }}>
+			%if (this.show_add == "true")
+			{
+				<div class="select_widget__item" @event:click="this.add()">
+					<span class="text">Add item</span>
+				</div>
+			}
+			%for (int i=0; i<this.options.count(); i++)
+			{
+				%set Map item = this.options.get(i);
+				<div class="select_widget__item" @event:click="this.select(item)">
+					<span class="text">{{ item.get("value") }}</span>
+					%if (this.slot("buttons"))
+					{
+						<span class="buttons">
+							%render this.renderSlot("buttons", [item]);
+						</span>
+					}
+				</div>
+			}
+		</div>
+	</div>
+</template>
+
+<script>
+
+props Vector<Map> options = [];
+props string value = "";
+props string show_add = "";
+bool is_open = false;
+
+
+/**
+ * Returns label
+ */
+computed string label() => this.item ? this.item.get("value") : "Select value";
+
+
+/**
+ * Returns item
+ */
+computed Map item() => this.options.find(bool (Map item) => item.get("key") == this.value);
+
+
+/**
+ * Show menu
+ */
+void toggleMenu()
+{
+	this.is_open = not this.is_open;
+}
+
+
+/**
+ * Add item
+ */
+void add()
+{
+	this.is_open = false;
+	this.emit(new Message{
+		"name": "add"
+	});
+}
+
+
+/**
+ * Select item
+ */
+void select(Map item)
+{
+	this.is_open = false;
+	this.emit(new ValueChangeMessage{
+		"value": item.get("key"),
+		"old_value": this.value,
+	});
+}
+
+</script>
+
+</class>

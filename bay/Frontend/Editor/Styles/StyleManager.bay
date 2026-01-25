@@ -73,6 +73,15 @@ class StyleManager extends BaseObject
 		Style item = new Style();
 		item.setSelector(op_code.selector);
 		item.setOpCode(op_code);
+		this.addItem(item);
+	}
+	
+	
+	/**
+	 * Add style item
+	 */
+	void addItem(Style item)
+	{
 		this.items.set(item.selector, item);
 	}
 	
@@ -84,5 +93,27 @@ class StyleManager extends BaseObject
 	{
 		Style item = this.items.get("." ~ class_name);
 		return item ? item : null;
+	}
+	
+	
+	/**
+	 * Returns true if class name is exists
+	 */
+	bool exists(string class_name) => this.findStyle(class_name) != null;
+	
+	
+	/**
+	 * Copy class name
+	 */
+	void copy(string class_name, string new_name)
+	{
+		if (class_name == new_name) return;
+		
+		Style item = this.findStyle(class_name);
+		if (not item) return;
+		
+		Style new_item = item.copy();
+		new_item.setClassName(new_name);
+		this.addItem(new_item);
 	}
 }

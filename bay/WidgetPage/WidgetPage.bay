@@ -94,7 +94,13 @@ computed bool isLoaded() => this.model.editor.isLoaded();
 computed string pageStyle()
 {
 	StyleManager manager = this.model.editor.styles;
-	return rs::join("", manager.items.transition(string (Style item) => item.getStyle()));
+	return rs::join("", manager.items.transition(
+		string (Style item)
+		{
+			BaseModel page_model = this.model.getPageModel();
+			return item.getStyle(page_model.component);
+		}
+	));
 }
 
 

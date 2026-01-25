@@ -1,0 +1,261 @@
+<!--
+ *  BayLang Technology
+ *
+ *  (c) Copyright 2016-2024 "Ildar Bikmamatov" <support@bayrell.org>
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+-->
+
+<class name="BayLang.Constructor.Frontend.Editor.Settings.WidgetStyles">
+
+<use name="BayLang.Constructor.Frontend.Editor.Components.SelectWidget" />
+<use name="BayLang.Constructor.Frontend.Editor.Settings.WidgetDialogModel" />
+<use name="BayLang.Constructor.Frontend.Editor.Styles.Style" />
+<use name="BayLang.Constructor.Frontend.Editor.Widget.Widget" />
+<use name="BayLang.Constructor.Frontend.Editor.Widget.WidgetTag" />
+<use name="BayLang.OpCodes.OpHtmlTag" />
+<use name="Runtime.Widget.Button" component="true" />
+<use name="Runtime.Widget.Input" component="true" />
+<use name="Runtime.Widget.RowButtons" component="true" />
+<use name="Runtime.Widget.TextEditable" component="true" />
+
+<style>
+.widget_styles{
+	margin-bottom: calc(var(--space) * 0.5);
+	.select_widget__item .buttons{
+		display: flex;
+		align-items: center;
+		gap: calc(var(--space) * 0.5);
+	}
+	&__button{
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		img{
+			width: 16px;
+			height: 16px;
+		}
+	}
+}
+.widget_content{
+	width: 100%;
+	resize: vertical;
+	min-height: 100px;
+}
+.widget_edit, .widget_delete{
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	gap: var(--space);
+	padding-top: var(--space);
+	.row_buttons{
+		justify-content: center;
+	}
+}
+</style>
+
+<template name="renderWidgetName">
+	<div class="widget_name">Current widget: {{ this.currentName }}</div>
+</template>
+
+<template name="renderEdit">
+	<div class="widget_edit">
+		<span>Rename class</span>
+		<Input value={{ this.edit_name }} @event:valueChange="this.edit_name = event.value" />
+		<RowButtons>
+			<Button class="button--small" @event:click="this.cancel()">Cancel</Button>
+			<Button class="button--small button--primary" @event:click="this.approve()">
+				{{ this.class_action == "add" ? "Add" : "Rename" }}
+			</Button>
+		</RowButtons>
+	</div>
+</template>
+
+<template name="renderDelete">
+	<div class="widget_delete">
+		<span class="text">Delete {{ this.class_name }}?</span>
+		<RowButtons>
+			<Button class="button--small" @event:click="this.cancel()">Cancel</Button>
+			<Button class="button--small button--danger" @event:click="this.approve()">Delete</Button>
+		</RowButtons>
+	</div>
+</template>
+
+<template>
+	<div class="widget_tab widget_tab--styles"
+		class={{ this.isActive(WidgetDialogModel::TAB_STYLES) }}
+	>
+		%render this.renderWidgetName();
+		%if (this.widget instanceof WidgetTag and this.widget.class_name)
+		{
+			<SelectWidget class="widget_styles" show_add="true"
+				options={{ this.widget.class_name.items.map(Map (string name) => {
+					"key": name,
+					"value": name,
+				}) }}
+				value={{ this.widget.class_name.current_style }}
+				@event:add="this.showClassAdd();"
+				@event:valueChange="this.widget.class_name.current_style = event.value"
+			>
+				<slot name="buttons" args="Map item">
+					<div class="widget_styles__button"
+						@event:click="this.showClassEdit(item.get('key'))"
+					>
+						<img src={{ this.asset("images/edit.svg") }} />
+					</div>
+					<div class="widget_styles__button"
+						@event:click="this.showClassDelete(item.get('key'))"
+					>
+						<img src={{ this.asset("images/delete.svg") }} />
+					</div>
+				</slot>
+			</SelectWidget>
+			%if (this.class_action == "")
+			{
+				<TextEditable class="widget_content"
+					value={{ this.currentStyle ? this.currentStyle.content : "" }}
+					@event:valueChange="this.widget.class_name.updateCurrentStyle(event.value)"
+				/>
+			}
+			%else
+			{
+				%if (this.class_action == "add" or this.class_action == "edit")
+				{
+					%render this.renderEdit();
+				}
+				%if (this.class_action == "delete")
+				{
+					%render this.renderDelete();
+				}
+			}
+		}
+	</div>
+</template>
+
+<script>
+
+string class_action = "";
+string class_name = "";
+string edit_name = "";
+
+
+/**
+ * Returns asset
+ */
+string asset(string name)
+{
+	var assets = this.layout.get("assets");
+	return assets.get("constructor", name);
+}
+
+
+/**
+ * Returns current widget
+ */
+computed string currentName()
+{
+	Widget widget = this.model.parent_widget.selected_widget;
+	if (not widget) return "";
+	
+	if (widget.op_code instanceof OpHtmlTag) return widget.op_code.tag_name;
+	return "";
+}
+
+
+/**
+ * Returns current style
+ */
+computed Style currentStyle()
+{
+	if (not (this.widget instanceof WidgetTag)) return null;
+	return this.widget.page_model.styles.findStyle(this.widget.class_name.current_style);
+}
+
+
+/**
+ * Return current widget
+ */
+computed Widget widget() => this.model.parent_widget.selected_widget;
+
+
+/**
+ * Returns active tab
+ */
+string isActive(string tab_name) => this.model.active_tab == tab_name ? "active" : "";
+
+
+/**
+ * Cancel action
+ */
+void cancel()
+{
+	this.class_action = "";
+}
+
+
+/**
+ * Approve action
+ */
+void approve()
+{
+	int index = this.widget.class_name.items.indexOf(this.class_name);
+	if (this.class_action == "add")
+	{
+		this.widget.class_name.add(this.edit_name);
+	}
+	else if (this.class_action == "edit")
+	{
+		this.widget.class_name.rename(index, this.edit_name);
+	}
+	else if (this.class_action == "delete")
+	{
+		this.widget.class_name.remove(index);
+	}
+	this.class_action = "";
+}
+
+
+/**
+ * Show class add
+ */
+void showClassAdd()
+{
+	this.class_action = "add";
+	this.edit_name = "";
+}
+
+
+/**
+ * Show class edit
+ */
+void showClassEdit(string class_name)
+{
+	this.class_action = "edit";
+	this.class_name = class_name;
+	this.edit_name = class_name;
+}
+
+
+/**
+ * Show class delete
+ */
+void showClassDelete(string class_name)
+{
+	this.class_action = "delete";
+	this.class_name = class_name;
+}
+
+</script>
+
+</class>

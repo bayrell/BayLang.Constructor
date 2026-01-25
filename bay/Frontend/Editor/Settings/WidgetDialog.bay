@@ -18,9 +18,12 @@
 
 <class name="BayLang.Constructor.Frontend.Editor.Settings.WidgetDialog">
 
+<use name="BayLang.Constructor.Frontend.Editor.Components.SelectWidget" component="true" />
 <use name="BayLang.Constructor.Frontend.Editor.Dialog.Dialog" component="true" />
 <use name="BayLang.Constructor.Frontend.Editor.Parameters.Parameter" />
 <use name="BayLang.Constructor.Frontend.Editor.Parameters.ParameterContent" />
+<use name="BayLang.Constructor.Frontend.Editor.Settings.WidgetParams" component="true" />
+<use name="BayLang.Constructor.Frontend.Editor.Settings.WidgetStyles" component="true" />
 <use name="BayLang.Constructor.Frontend.Editor.Settings.WidgetDialogModel" />
 <use name="BayLang.Constructor.Frontend.Editor.Styles.Style" />
 <use name="BayLang.Constructor.Frontend.Editor.Styles.StyleManager" />
@@ -40,113 +43,41 @@
 		flex-direction: column;
 		padding: 0;
 	}
-}
-.widget_buttons{
-	padding: var(--space) calc(var(--space) * 2);
-	.button{
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		padding: 0;
-		width: 32px;
-		height: 32px;
-		transition: 0s;
-		&.active{
-			background-color: var(--color-primary);
-			color: var(--color-primary-text);
-			border-color: var(--color-primary);
+	.widget_buttons{
+		padding: var(--space) calc(var(--space) * 2);
+		.button{
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 0;
+			width: 32px;
+			height: 32px;
+			transition: 0s;
+			&.active{
+				background-color: var(--color-primary);
+				color: var(--color-primary-text);
+				border-color: var(--color-primary);
+			}
 		}
 	}
-}
-.widget_tab{
-	display: none;
-	flex: 1;
-	overflow-y: auto;
-	padding: var(--space) calc(var(--space) * 2);
-	padding-top: 0;
-	&.active{
-		display: block;
+	.widget_tab{
+		display: none;
+		flex: 1;
+		overflow-y: auto;
+		padding: var(--space) calc(var(--space) * 2);
+		padding-top: 0;
+		&.active{
+			display: block;
+		}
 	}
-}
-.widget_name{
-	margin-bottom: var(--space);
-}
-.widget_params{
-	&__label{
-		margin-bottom: calc(var(--space) * 0.5);
+	.widget_name{
+		margin-bottom: var(--space);
 	}
-	&__content{
-	}
-}
-.widget_styles{
-	margin-bottom: var(--space);
-}
-.widget_content{
-	width: 100%;
-	resize: vertical;
-	min-height: 100px;
 }
 </style>
 
 <template name="renderWidgetName">
 	<div class="widget_name">Current widget: {{ this.currentName }}</div>
-</template>
-
-<template name="renderStyles">
-	<div class="widget_tab widget_tab--styles"
-		class={{ this.isActive(WidgetDialogModel::TAB_STYLES) }}
-	>
-		%render this.renderWidgetName();
-		%if (this.widget instanceof WidgetTag and this.widget.class_name)
-		{
-			<Select class="widget_styles"
-				options={{ this.widget.class_name.items.map(Map (string name) => {
-					"key": name,
-					"value": name,
-				}) }}
-				value={{ this.widget.class_name.current_style }}
-				@event:valueChange="this.widget.class_name.current_style = event.value"
-			/>
-			<TextEditable class="widget_content"
-				value={{ this.currentStyle ? this.currentStyle.content : "" }}
-				@event:valueChange="this.widget.class_name.updateCurrentStyle(event.value)"
-			/>
-		}
-	</div>
-</template>
-
-<template name="renderParameterContent" args="Parameter param">
-	%if (param instanceof ParameterContent)
-	{
-		<TextEditable class="widget_content"
-			value={{ param.getValue() }} @event:valueChange="param.setValue(event.value)" />
-	}
-</template>
-
-<template name="renderParameter" args="Parameter param">
-	<div class="widget_params">
-		<div class="widget_params__label">{{ param.label }}</div>
-		<div class="widget_params__content">
-			%render this.renderParameterContent(param);
-		</div>
-	</div>
-</template>
-
-<template name="renderParameters">
-	<div class="widget_tab widget_tab--params"
-		class={{ this.isActive(WidgetDialogModel::TAB_PARAMS) }}
-	>
-		%render this.renderWidgetName();
-		<div class="widget_settings">
-		%if (this.parameters)
-		{
-			%for (int i=0; i<this.parameters.count(); i++)
-			{
-				%render this.renderParameter(this.parameters.get(i));
-			}
-		}
-		</div>
-	</div>
 </template>
 
 <template name="renderButtons">
@@ -167,23 +98,13 @@
 		</slot>
 		<slot name="content">
 			%render this.renderButtons();
-			%render this.renderStyles();
-			%render this.renderParameters();
+			<WidgetStyles model={{ this.model }} />
+			<WidgetParams model={{ this.model }} />
 		</slot>
 	</Dialog>
 </template>
 
 <script>
-
-/**
- * Returns current widget parameters
- */
-computed Vector parameters()
-{
-	Widget widget = this.model.parent_widget.selected_widget;
-	if (not widget) return null;
-	else return widget.params;
-}
 
 
 /**
@@ -206,19 +127,10 @@ computed string currentName()
 
 
 /**
- * Returns current style
- */
-computed Style currentStyle()
-{
-	if (not (this.widget instanceof WidgetTag)) return null;
-	return this.widget.page_model.styles.findStyle(this.widget.class_name.current_style);
-}
-
-
-/**
  * Returns active tab
  */
 string isActive(string tab_name) => this.model.active_tab == tab_name ? "active" : "";
+
 
 </script>
 
