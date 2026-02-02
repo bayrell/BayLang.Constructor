@@ -97,16 +97,16 @@
 		class={{ this.isActive(WidgetDialogModel::TAB_STYLES) }}
 	>
 		%render this.renderWidgetName();
-		%if (this.widget instanceof WidgetTag and this.widget.class_name)
+		%if (this.widget instanceof WidgetTag and this.widget.styles)
 		{
 			<SelectWidget class="widget_styles" show_add="true"
-				options={{ this.widget.class_name.items.map(Map (string name) => {
+				options={{ this.widget.styles.items.map(Map (string name) => {
 					"key": name,
 					"value": name,
 				}) }}
-				value={{ this.widget.class_name.current_style }}
+				value={{ this.widget.styles.current_style }}
 				@event:add="this.showClassAdd();"
-				@event:valueChange="this.widget.class_name.current_style = event.value"
+				@event:valueChange="this.widget.styles.current_style = event.value"
 			>
 				<slot name="buttons" args="Map item">
 					<div class="widget_styles__button"
@@ -125,7 +125,7 @@
 			{
 				<TextEditable class="widget_content"
 					value={{ this.currentStyle ? this.currentStyle.content : "" }}
-					@event:valueChange="this.widget.class_name.updateCurrentStyle(event.value)"
+					@event:valueChange="this.widget.styles.updateCurrentStyle(event.value)"
 				/>
 			}
 			%else
@@ -179,7 +179,7 @@ computed string currentName()
 computed Style currentStyle()
 {
 	if (not (this.widget instanceof WidgetTag)) return null;
-	return this.widget.page_model.styles.findStyle(this.widget.class_name.current_style);
+	return this.widget.page_model.styles.findStyle(this.widget.styles.current_style);
 }
 
 
@@ -209,18 +209,18 @@ void cancel()
  */
 void approve()
 {
-	int index = this.widget.class_name.items.indexOf(this.class_name);
+	int index = this.widget.styles.items.indexOf(this.class_name);
 	if (this.class_action == "add")
 	{
-		this.widget.class_name.add(this.edit_name);
+		this.widget.styles.add(this.edit_name);
 	}
 	else if (this.class_action == "edit")
 	{
-		this.widget.class_name.rename(index, this.edit_name);
+		this.widget.styles.rename(index, this.edit_name);
 	}
 	else if (this.class_action == "delete")
 	{
-		this.widget.class_name.remove(index);
+		this.widget.styles.remove(index);
 	}
 	this.class_action = "";
 }

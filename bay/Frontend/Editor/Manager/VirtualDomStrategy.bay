@@ -1,0 +1,119 @@
+/*!
+ *  BayLang Technology
+ *
+ *  (c) Copyright 2016-2024 "Ildar Bikmamatov" <support@bayrell.org>
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
+namespace BayLang.Constructor.Frontend.Editor.Manager;
+
+use Runtime.BaseObject;
+use Runtime.VirtualDom;
+use BayLang.Constructor.Frontend.Editor.Manager.CodeStrategyinterface;
+use BayLang.Constructor.Frontend.Editor.Widget.Widget;
+
+
+class VirtualDomStrategy extends BaseObject implements CodeStrategyinterface
+{
+	VirtualDom op_code = null;
+	
+	
+	/**
+	 * Create object
+	 */
+	void constructor(VirtualDom op_code)
+	{
+		parent();
+		this.op_code = op_code;
+	}
+	
+	
+	/**
+	 * Create code
+	 */
+	static VirtualDom createCode(Widget widget)
+	{
+		return null;
+	}
+	
+	
+	/**
+	 * Set tag name
+	 */
+	void setTagName(string name)
+	{
+		this.op_code.name = name;
+	}
+	
+	
+	/**
+	 * Insert item
+	 */
+	void insert(int index, VirtualDom vdom)
+	{
+		this.op_code.items.insert(index, vdom);
+	}
+	
+	
+	/**
+	 * Remove item
+	 */
+	void remove(int index)
+	{
+		this.op_code.items.remove(index);
+	}
+	
+	
+	/**
+	 * Returns value
+	 */
+	string getValue()
+	{
+		var item = this.op_code.items.first();
+		if (rtl::isString(item)) return item;
+		return "";
+	}
+	
+	
+	/**
+	 * Set value
+	 */
+	void setValue(string content)
+	{
+		this.op_code.items = [content];
+	}
+	
+	
+	/**
+	 * Init style
+	 */
+	void initStyle()
+	{
+	}
+	
+	
+	/**
+	 * Returns class attr name
+	 */
+	string getClassAttrName() => this.op_code.attrs.get("class");
+	
+	
+	/**
+	 * Update class attr value
+	 */
+	void updateClassAttr(string value)
+	{
+		this.op_code.attrs.set("class", value);
+	}
+}

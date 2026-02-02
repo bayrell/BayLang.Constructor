@@ -19,6 +19,7 @@
 namespace BayLang.Constructor.Frontend.Editor.Widget;
 
 use Runtime.BaseObject;
+use Runtime.VirtualDom;
 use BayLang.Constructor.Frontend.Editor.Styles.Style;
 use BayLang.Constructor.Frontend.Editor.Widget.Widget;
 use BayLang.OpCodes.BaseOpCode;
@@ -31,7 +32,6 @@ class WidgetStyle extends BaseObject
 {
 	Widget widget = null;
 	Vector items = [];
-	OpString class_expression = null;
 	string current_style = "";
 	
 	
@@ -50,16 +50,8 @@ class WidgetStyle extends BaseObject
 	 */
 	void init()
 	{
-		if (not (this.widget.op_code instanceof OpHtmlTag)) return;
-		
-		OpHtmlAttribute class_name = this.widget.op_code.attrs.find(
-			bool (OpHtmlAttribute item) => item.key == "class"
-		);
-		if (not class_name) return;
-		if (not (class_name.expression instanceof OpString)) return;
-		
-		this.class_expression = class_name.expression;
-		this.items = rs::split(" ", class_name.expression.value);
+		this.widget.code_strategy.initStyle();
+		this.items = rs::split(" ", this.widget.code_strategy.getClassAttrName());
 		this.current_style = this.items.first("");
 	}
 	
@@ -69,8 +61,7 @@ class WidgetStyle extends BaseObject
 	 */
 	void update()
 	{
-		if (not this.class_expression) return;
-		this.class_expression.value = rs::join(" ", this.items);
+		this.widget.code_strategy.updateClassAttr(rs::join(" ", this.items));
 	}
 	
 	
@@ -91,7 +82,7 @@ class WidgetStyle extends BaseObject
 			item.setContent(content);
 			this.widget.page_model.styles.addItem(item);
 		}
-		window.setTimeout(void(){ this.widget.page_model.page_widget.updateSelectedBox(); }, 1);
+		this.widget.page_model.updateSelectedBox();
 	}
 	
 	

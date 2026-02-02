@@ -18,10 +18,12 @@
 
 namespace BayLang.Constructor.Frontend.Editor.Widget;
 
+use Runtime.VirtualDom;
 use BayLang.Constructor.Frontend.Editor.Widget.Widget;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetStyle;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpHtmlAttribute;
+use BayLang.OpCodes.OpHtmlItems;
 use BayLang.OpCodes.OpHtmlTag;
 use BayLang.OpCodes.OpString;
 
@@ -29,7 +31,7 @@ use BayLang.OpCodes.OpString;
 class WidgetTag extends Widget
 {
 	Vector<Widget> items = [];
-	WidgetStyle class_name = new WidgetStyle(this);
+	WidgetStyle styles = new WidgetStyle(this);
 	
 	
 	/**
@@ -58,8 +60,7 @@ class WidgetTag extends Widget
 			{
 				BaseOpCode item = this.op_code.content.get(i);
 				Widget widget = this.createWidget(item);
-				widget.setOpCode(item);
-				this.items.push(widget);
+				if (widget) this.items.push(widget);
 			}
 		}
 	}
@@ -71,6 +72,40 @@ class WidgetTag extends Widget
 	void init()
 	{
 		this.initItems();
-		this.class_name.init();
+		this.styles.init();
+	}
+	
+	
+	/**
+	 * Set tag name
+	 */
+	void setTagName(string value)
+	{
+		this.code_strategy.setTagName(value);
+	}
+	
+	
+	/**
+	 * Insert widget
+	 */
+	void insert(string index, Widget widget)
+	{
+		this.code_strategy.insert(index, widget.op_code);
+		this.items.insert(index, widget);
+	}
+	
+	
+	/**
+	 * Remove item
+	 */
+	void removeItem(int index)
+	{
+		this.code_strategy.remove(index);
+		this.items.remove(index);
+		if (this.page_model.selected_widget == this)
+		{
+			this.page_model.selectItem(null);
+		}
+		this.page_model.updateSelectedBox();
 	}
 }

@@ -24,6 +24,8 @@ use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpCodeType;
 use BayLang.OpCodes.OpHtmlContent;
 use BayLang.OpCodes.OpHtmlTag;
+use BayLang.Constructor.Frontend.Editor.Dialog.AddDialogModel;
+use BayLang.Constructor.Frontend.Editor.Dialog.RemoveDialogModel;
 use BayLang.Constructor.Frontend.Editor.Dialog.SaveDialogModel;
 use BayLang.Constructor.Frontend.Editor.Manager.CodeManager;
 use BayLang.Constructor.Frontend.Editor.Settings.WidgetDialogModel;
@@ -46,6 +48,8 @@ class EditorPageModel extends BaseModel
 	Widget selected_widget = null;
 	BaseOpCode code_model = new CodeManager();
 	BaseOpCode code_component = new CodeManager();
+	AddDialogModel add_dialog = null;
+	RemoveDialogModel remove_dialog = null;
 	SaveDialogModel save_dialog = null;
 	WidgetDialogModel widget_settings = null;
 	StyleManager styles = new StyleManager(this);
@@ -70,6 +74,8 @@ class EditorPageModel extends BaseModel
 	{
 		parent(params);
 		
+		this.add_dialog = this.createWidget(classof AddDialogModel);
+		this.remove_dialog = this.createWidget(classof RemoveDialogModel);
 		this.save_dialog = this.createWidget(classof SaveDialogModel);
 		this.widget_settings = this.createWidget(classof WidgetDialogModel, {});
 	}
@@ -100,7 +106,7 @@ class EditorPageModel extends BaseModel
 			if (this.code_component.isLoaded())
 			{
 				this.widget = new WidgetTag(this);
-				this.widget.setOpCode(this.code_component.op_render);
+				this.widget.setCode(this.code_component.op_render);
 			}
 			this.styles.init();
 		}
@@ -139,6 +145,34 @@ class EditorPageModel extends BaseModel
 		{
 			this.selected_widget.onSelect();
 		}
+		if (path == null) this.parent_widget.selected_elem = null;
+	}
+	
+	
+	/**
+	 * Update select box
+	 */
+	void updateSelectedBox()
+	{
+		window.setTimeout(void (){ this.parent_widget.updateSelectedBox(); }, 1);
+	}
+	
+	
+	/**
+	 * Show add widget
+	 */
+	void showAddWidget()
+	{
+		this.add_dialog.show();
+	}
+	
+	
+	/**
+	 * Show remove widget
+	 */
+	void showRemoveWidget()
+	{
+		this.remove_dialog.show();
 	}
 	
 	
@@ -148,25 +182,5 @@ class EditorPageModel extends BaseModel
 	void showSettings()
 	{
 		this.widget_settings.show();
-	}
-	
-	
-	/**
-	 * Returns widget name by op code
-	 */
-	string getWidgetName(BaseOpCode item)
-	{
-		if (item instanceof OpHtmlTag)
-		{
-			if (item.is_component) return classof WidgetComponent;
-			
-			BaseOpCode first_item = item.content.get(0);
-			if (item.content.count() == 1 and first_item instanceof OpHtmlContent)
-			{
-				return classof WidgetText;
-			}
-			return classof WidgetTag;
-		}
-		else if (item instanceof OpHtmlContent) return classof WidgetText;
 	}
 }

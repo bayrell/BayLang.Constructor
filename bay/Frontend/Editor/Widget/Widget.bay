@@ -19,18 +19,23 @@
 namespace BayLang.Constructor.Frontend.Editor.Widget;
 
 use Runtime.BaseObject;
+use Runtime.VirtualDom;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpHtmlTag;
 use BayLang.OpCodes.OpHtmlContent;
-use BayLang.Constructor.Frontend.Editor.EditorPageModel;
+use BayLang.Constructor.Frontend.Editor.Manager.CodeStrategyInterface;
+use BayLang.Constructor.Frontend.Editor.Manager.OpCodeStrategy;
+use BayLang.Constructor.Frontend.Editor.Manager.VirtualDomStrategy;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetComponent;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetTag;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetText;
+use BayLang.Constructor.Frontend.Editor.EditorPageModel;
 
 
 class Widget extends BaseObject
 {
-	BaseOpCode op_code = null;
+	var op_code = null;
+	CodeStrategyInterface code_strategy = null;
 	Widget parent_widget = null;
 	EditorPageModel page_model = null;
 	Vector params = null;
@@ -47,15 +52,39 @@ class Widget extends BaseObject
 	
 	
 	/**
-	 * Create widget
+	 * Returns widget name by op code
 	 */
-	Widget createWidget(BaseOpCode item)
+	static string getWidgetName(var op_code)
 	{
-		string widget_name = this.page_model.getWidgetName(item);
-		if (widget_name)
+		if (op_code instanceof OpHtmlTag)
 		{
-			return rtl::newInstance(widget_name, [this]);
+			if (op_code.is_component) return classof WidgetComponent;
+			
+			BaseOpCode first_item = op_code.content.get(0);
+			if (op_code.content.count() == 1 and first_item instanceof OpHtmlContent)
+			{
+				return classof WidgetText;
+			}
+			return classof WidgetTag;
 		}
+		else if (op_code instanceof VirtualDom)
+		{
+			var item = op_code.items.fisrt();
+			if (rtl::isString(item)) return classof WidgetText;
+			if (VirtualDom::isComponent(op_code.name)) return classof WidgetComponent;
+			return classof WidgetTag;
+		}
+		return "";
+	}
+	
+	
+	/**
+	 * Create strategy
+	 */
+	static CodeStrategyInterface createStrategy(var op_code)
+	{
+		if (op_code instanceof BaseOpCode) return new OpCodeStrategy(op_code);
+		if (op_code instanceof VirtualDom) return new VirtualDomStrategy(op_code);
 		return null;
 	}
 	
@@ -63,9 +92,24 @@ class Widget extends BaseObject
 	/**
 	 * Create widget
 	 */
-	void constructor(Widget widget)
+	Widget createWidget(var op_code)
 	{
-		parent();
+		Widget widget = null;
+		string widget_name = static::getWidgetName(op_code);
+		if (widget_name)
+		{
+			widget = rtl::newInstance(widget_name, [this]);
+			widget.setCode(op_code);
+		}
+		return widget;
+	}
+	
+	
+	/**
+	 * Set parent widget
+	 */
+	void setParentWidget(Widget widget)
+	{
 		if (widget instanceof Widget)
 		{
 			this.parent_widget = widget;
@@ -79,11 +123,22 @@ class Widget extends BaseObject
 	
 	
 	/**
+	 * Create widget
+	 */
+	void constructor(Widget widget = null)
+	{
+		parent();
+		this.setParentWidget(widget);
+	}
+	
+	
+	/**
 	 * Set op code
 	 */
-	void setOpCode(BaseOpCode op_code)
+	void setCode(var op_code)
 	{
 		this.op_code = op_code;
+		this.code_strategy = static::createStrategy(op_code);
 		this.init();
 	}
 	
@@ -100,6 +155,24 @@ class Widget extends BaseObject
 	 * On select widget
 	 */
 	void onSelect()
+	{
+	}
+	
+	
+	/**
+	 * Remove widget
+	 */
+	void remove()
+	{
+		int index = this.parent_widget.items.findIndex(bool (Widget item) => item == this);
+		if (index >= 0) this.parent_widget.removeItem(index);
+	}
+	
+	
+	/**
+	 * Remove item
+	 */
+	void removeItem(int index)
 	{
 	}
 }

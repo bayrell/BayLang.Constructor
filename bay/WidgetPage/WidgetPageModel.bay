@@ -69,9 +69,17 @@ class WidgetPageModel extends BaseModel
 		this.contextmenu = this.createWidget(classof ContextMenuModel, {
 			"items": [
 				{
+					"label": "Add",
+					"key": "add",
+				},
+				{
+					"label": "Remove",
+					"key": "remove",
+				},
+				/*{
 					"label": "Settings",
 					"key": "settings",
-				}
+				}*/
 			]
 		});
 		this.contextmenu.addEventListener("clickItem", method this.onContextMenuClick);
@@ -101,7 +109,15 @@ class WidgetPageModel extends BaseModel
 		this.contextmenu.hide();
 		
 		string key = message.item.get("key");
-		if (key == "settings")
+		if (key == "add")
+		{
+			this.editor.showAddWidget();
+		}
+		else if (key == "remove")
+		{
+			this.editor.showRemoveWidget();
+		}
+		else if (key == "settings")
 		{
 			this.editor.showSettings();
 		}

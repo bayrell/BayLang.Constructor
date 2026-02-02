@@ -1,0 +1,163 @@
+/*!
+ *  BayLang Technology
+ *
+ *  (c) Copyright 2016-2024 "Ildar Bikmamatov" <support@bayrell.org>
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
+namespace BayLang.Constructor.Frontend.Editor.Manager;
+
+use Runtime.BaseObject;
+use BayLang.Constructor.Frontend.Editor.Manager.CodeStrategyinterface;
+use BayLang.Constructor.Frontend.Editor.Widget.Widget;
+use BayLang.Constructor.Frontend.Editor.Widget.WidgetTag;
+use BayLang.Constructor.Frontend.Editor.Widget.WidgetText;
+use BayLang.OpCodes.BaseOpCode;
+use BayLang.OpCodes.OpHtmlAttribute;
+use BayLang.OpCodes.OpHtmlContent;
+use BayLang.OpCodes.OpHtmlItems;
+use BayLang.OpCodes.OpHtmlTag;
+use BayLang.OpCodes.OpString;
+
+
+class OpCodeStrategy extends BaseObject implements CodeStrategyinterface
+{
+	BaseOpCode op_code = null;
+	OpString class_expression = null;
+	
+	
+	/**
+	 * Create object
+	 */
+	void constructor(BaseOpCode op_code)
+	{
+		parent();
+		this.op_code = op_code;
+	}
+	
+	
+	/**
+	 * Create code
+	 */
+	static BaseOpCode createCode(Widget widget)
+	{
+		if (widget instanceof WidgetText)
+		{
+			return new OpHtmlTag{
+				"attrs": [],
+				"content": new OpHtmlItems{
+					"items": [
+						new OpHtmlContent()
+					]
+				}
+			};
+		}
+		else if (widget instanceof WidgetTag)
+		{
+			return new OpHtmlTag{
+				"attrs": [],
+				"content": new OpHtmlItems{
+					"items": [],
+				}
+			};
+		}
+	}
+	
+	
+	/**
+	 * Set tag name
+	 */
+	void setTagName(string name)
+	{
+		this.op_code.tag_name = name;
+	}
+	
+	
+	/**
+	 * Insert item
+	 */
+	void insert(int index, BaseOpCode op_code)
+	{
+		this.op_code.content.items.insert(index, op_code);
+	}
+	
+	
+	/**
+	 * Remove
+	 */
+	void remove(int index)
+	{
+		this.op_code.content.items.remove(index);
+	}
+	
+	
+	/**
+	 * Returns value
+	 */
+	string getValue()
+	{
+		BaseOpCode op_code = this.op_code;
+		if (op_code instanceof OpHtmlTag) op_code = op_code.content.items.first();
+		if (op_code instanceof OpHtmlContent) return op_code.value;
+		return "";
+	}
+	
+	
+	/**
+	 * Set value
+	 */
+	void setValue(string content)
+	{
+		BaseOpCode op_code = this.op_code;
+		if (op_code instanceof OpHtmlTag) op_code = op_code.content.items.first();
+		if (op_code instanceof OpHtmlContent) op_code.value = content;
+	}
+	
+	
+	/**
+	 * Init style
+	 */
+	void initStyle()
+	{
+		if (not (this.op_code instanceof OpHtmlTag)) return;
+		
+		OpHtmlAttribute class_name_op_code = this.op_code.attrs.find(
+			bool (OpHtmlAttribute item) => item.key == "class"
+		);
+		if (not class_name_op_code) return;
+		if (not (class_name_op_code.expression instanceof OpString)) return;
+		
+		this.class_expression = class_name_op_code.expression;
+	}
+	
+	
+	/**
+	 * Returns class attr name
+	 */
+	string getClassAttrName()
+	{
+		if (not this.class_expression) return "";
+		return this.class_expression.value;
+	}
+	
+	
+	/**
+	 * Update class attr value
+	 */
+	void updateClassAttr(string value)
+	{
+		if (not this.class_expression) return;
+		this.class_expression.value = value;
+	}
+}

@@ -18,35 +18,22 @@
 
 namespace BayLang.Constructor.Frontend.Editor.Widget;
 
+use Runtime.VirtualDom;
 use BayLang.Constructor.Frontend.Editor.Parameters.ParameterContent;
 use BayLang.Constructor.Frontend.Editor.Widget.Widget;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetTag;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpHtmlContent;
+use BayLang.OpCodes.OpHtmlItems;
 use BayLang.OpCodes.OpHtmlTag;
 
 
 class WidgetText extends WidgetTag
 {
 	/**
-	 * Set op code
-	 */
-	void setOpCode(BaseOpCode op_code)
-	{
-		parent(op_code);
-	}
-	
-	
-	/**
 	 * Returns value
 	 */
-	string getValue()
-	{
-		BaseOpCode op_code = this.op_code;
-		if (op_code instanceof OpHtmlTag) op_code = op_code.content.items.first();
-		if (op_code instanceof OpHtmlContent) return op_code.value;
-		return "";
-	}
+	string getValue() => this.code_strategy.getValue();
 	
 	
 	/**
@@ -54,9 +41,7 @@ class WidgetText extends WidgetTag
 	 */
 	void setValue(string content)
 	{
-		BaseOpCode op_code = this.op_code;
-		if (op_code instanceof OpHtmlTag) op_code = op_code.content.items.first();
-		if (op_code instanceof OpHtmlContent) op_code.value = content;
+		this.code_strategy.setValue(content);
 	}
 	
 	
