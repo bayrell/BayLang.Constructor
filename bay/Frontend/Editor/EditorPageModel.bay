@@ -145,7 +145,10 @@ class EditorPageModel extends BaseModel
 		{
 			this.selected_widget.onSelect();
 		}
-		if (path == null) this.parent_widget.selected_elem = null;
+		if (path == null)
+		{
+			this.parent_widget.selected_elem = null;
+		}
 	}
 	
 	

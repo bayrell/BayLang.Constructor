@@ -18,6 +18,61 @@
 
 namespace BayLang.Constructor.Frontend.Editor.Manager;
 
+use BayLang.Constructor.Frontend.Editor.Widget.Widget;
+
+
 interface CodeStrategyInterface
 {
+	/**
+	 * Create code
+	 */
+	static var createCode(Widget widget);
+	
+	
+	/**
+	 * Set tag name
+	 */
+	void setTagName(string name);
+	
+	
+	/**
+	 * Insert item
+	 */
+	void insert(int index, var op_code);
+	
+	
+	/**
+	 * Remove
+	 */
+	void remove(int index);
+	
+	
+	/**
+	 * Returns value
+	 */
+	string getValue();
+	
+	
+	/**
+	 * Set value
+	 */
+	void setValue(string content);
+	
+	
+	/**
+	 * Init style
+	 */
+	void initStyle();
+	
+	
+	/**
+	 * Returns class attr name
+	 */
+	string getClassAttrName();
+	
+	
+	/**
+	 * Update class attr value
+	 */
+	void updateClassAttr(string value);
 }

@@ -19,7 +19,7 @@
 namespace BayLang.Constructor.Frontend.Editor.Manager;
 
 use Runtime.BaseObject;
-use BayLang.Constructor.Frontend.Editor.Manager.CodeStrategyinterface;
+use BayLang.Constructor.Frontend.Editor.Manager.CodeStrategyInterface;
 use BayLang.Constructor.Frontend.Editor.Widget.Widget;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetTag;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetText;
@@ -31,7 +31,7 @@ use BayLang.OpCodes.OpHtmlTag;
 use BayLang.OpCodes.OpString;
 
 
-class OpCodeStrategy extends BaseObject implements CodeStrategyinterface
+class OpCodeStrategy extends BaseObject implements CodeStrategyInterface
 {
 	BaseOpCode op_code = null;
 	OpString class_expression = null;

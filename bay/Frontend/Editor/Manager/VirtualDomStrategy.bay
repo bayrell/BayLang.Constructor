@@ -20,11 +20,11 @@ namespace BayLang.Constructor.Frontend.Editor.Manager;
 
 use Runtime.BaseObject;
 use Runtime.VirtualDom;
-use BayLang.Constructor.Frontend.Editor.Manager.CodeStrategyinterface;
+use BayLang.Constructor.Frontend.Editor.Manager.CodeStrategyInterface;
 use BayLang.Constructor.Frontend.Editor.Widget.Widget;
 
 
-class VirtualDomStrategy extends BaseObject implements CodeStrategyinterface
+class VirtualDomStrategy extends BaseObject implements CodeStrategyInterface
 {
 	VirtualDom op_code = null;
 	
