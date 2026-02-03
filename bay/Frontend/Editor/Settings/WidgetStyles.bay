@@ -106,7 +106,7 @@
 				}) }}
 				value={{ this.widget.styles.current_style }}
 				@event:add="this.showClassAdd();"
-				@event:valueChange="this.widget.styles.current_style = event.value"
+				@event:valueChange="this.widget.styles.selectStyle(event.value)"
 			>
 				<slot name="buttons" args="Map item">
 					<div class="widget_styles__button"

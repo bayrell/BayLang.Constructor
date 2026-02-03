@@ -39,6 +39,7 @@ class AddDialogModel extends DialogModel
 		new_widget.setCode(code_strategy::createCode(new_widget));
 		new_widget.setTagName("div");
 		new_widget.setValue("Text");
+		new_widget.updateTreeLabel();
 		Vector path = this.parent_widget.selected_path.slice(0, -1);
 		int index = this.parent_widget.selected_path.last();
 		WidgetTag widget = this.parent_widget.widget.get(path);

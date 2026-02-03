@@ -49,6 +49,12 @@ class VirtualDomStrategy extends BaseObject implements CodeStrategyInterface
 	
 	
 	/**
+	 * Returns tag name
+	 */
+	string getTagName() => this.op_code.name;
+	
+	
+	/**
 	 * Set tag name
 	 */
 	void setTagName(string name)

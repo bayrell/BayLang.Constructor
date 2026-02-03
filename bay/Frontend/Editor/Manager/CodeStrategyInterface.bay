@@ -30,6 +30,12 @@ interface CodeStrategyInterface
 	
 	
 	/**
+	 * Returns tag name
+	 */
+	string getTagName();
+	
+	
+	/**
 	 * Set tag name
 	 */
 	void setTagName(string name);

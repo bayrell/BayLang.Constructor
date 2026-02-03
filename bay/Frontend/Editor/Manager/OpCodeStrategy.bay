@@ -76,6 +76,12 @@ class OpCodeStrategy extends BaseObject implements CodeStrategyInterface
 	
 	
 	/**
+	 * Returns tag name
+	 */
+	string getTagName() => this.op_code.tag_name;
+	
+	
+	/**
 	 * Set tag name
 	 */
 	void setTagName(string name)
@@ -157,7 +163,16 @@ class OpCodeStrategy extends BaseObject implements CodeStrategyInterface
 	 */
 	void updateClassAttr(string value)
 	{
-		if (not this.class_expression) return;
+		if (not this.class_expression)
+		{
+			this.class_expression = new OpString{
+				"value": "",
+			};
+			this.op_code.attrs.push(new OpHtmlAttribute{
+				"key": "class",
+				"expression": this.class_expression,
+			});
+		}
 		this.class_expression.value = value;
 	}
 }

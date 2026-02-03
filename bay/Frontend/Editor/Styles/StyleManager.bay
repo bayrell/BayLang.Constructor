@@ -91,6 +91,9 @@ class StyleManager extends BaseObject
 	 */
 	Style findStyle(string class_name)
 	{
+		if (not class_name) return null;
+		
+		/* Returns style */
 		Style item = this.items.get("." ~ class_name);
 		return item ? item : null;
 	}

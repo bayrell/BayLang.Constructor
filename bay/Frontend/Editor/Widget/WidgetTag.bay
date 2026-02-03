@@ -63,6 +63,30 @@ class WidgetTag extends Widget
 				if (widget) this.items.push(widget);
 			}
 		}
+		
+		/* Init tree items */
+		this.tree_item.items = [];
+		for (int i=0; i<this.items.count(); i++)
+		{
+			Widget widget = this.items.get(i);
+			this.tree_item.items.push(widget.tree_item);
+		}
+	}
+	
+	
+	/**
+	 * Update tree label
+	 */
+	void updateTreeLabel()
+	{
+		this.tree_item.label = this.code_strategy.getTagName();
+		
+		/* Add class name */
+		string class_name = rs::join(".", this.styles.items);
+		if (class_name)
+		{
+			this.tree_item.label ~= "." ~ class_name;
+		}
 	}
 	
 	
@@ -73,6 +97,9 @@ class WidgetTag extends Widget
 	{
 		this.initItems();
 		this.styles.init();
+		
+		/* Init label */
+		this.updateTreeLabel();
 	}
 	
 	
@@ -90,8 +117,12 @@ class WidgetTag extends Widget
 	 */
 	void insert(string index, Widget widget)
 	{
+		/* Insert code */
 		this.code_strategy.insert(index, widget.op_code);
+		
+		/* Insert item */
 		this.items.insert(index, widget);
+		this.tree_item.items.insert(index, widget.tree_item);
 	}
 	
 	
@@ -102,6 +133,7 @@ class WidgetTag extends Widget
 	{
 		this.code_strategy.remove(index);
 		this.items.remove(index);
+		this.tree_item.items.remove(index);
 		if (this.page_model.selected_widget == this)
 		{
 			this.page_model.selectItem(null);

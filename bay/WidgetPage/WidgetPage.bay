@@ -82,6 +82,8 @@
 
 <script>
 
+Vector selected_path = [];
+
 /**
  * Returns true if is loaded
  */
@@ -127,6 +129,21 @@ void mounted()
 void unmounted()
 {
 	document.removeEventListener("click", this.onDocumentClick);
+}
+
+
+/**
+ * Model updated
+ */
+void updated()
+{
+	string selected_path_editor = rs::join(".", this.model.editor.selected_path);
+	string selected_path_component = rs::join(".", this.selected_path);
+	if (selected_path_editor != selected_path_component)
+	{
+		this.selected_path = this.model.editor.selected_path.slice();
+		this.model.selectElement(this.getElementByPath(this.selected_path));
+	}
 }
 
 
@@ -195,7 +212,6 @@ VirtualDom createTag(OpHtmlTag item, Vector path)
 		e.stopPropagation();
 		
 		/* Select item */
-		this.model.selectElement(this.getElementByPath(path));
 		this.model.editor.selectItem(path);
 		
 		/* Hide menu */
@@ -209,7 +225,6 @@ VirtualDom createTag(OpHtmlTag item, Vector path)
 		e.stopPropagation();
 		
 		/* Select item */
-		this.model.selectElement(this.getElementByPath(path));
 		this.model.editor.selectItem(path);
 		
 		/* Show context menu */

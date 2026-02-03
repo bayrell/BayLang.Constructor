@@ -20,6 +20,8 @@ namespace BayLang.Constructor.Frontend.Editor;
 
 use Runtime.ApiResult;
 use Runtime.BaseModel;
+use Runtime.Widget.Tree.TreeMessage;
+use Runtime.Widget.Tree.TreeModel;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpCodeType;
 use BayLang.OpCodes.OpHtmlContent;
@@ -52,6 +54,7 @@ class EditorPageModel extends BaseModel
 	RemoveDialogModel remove_dialog = null;
 	SaveDialogModel save_dialog = null;
 	WidgetDialogModel widget_settings = null;
+	TreeModel widget_tree = null;
 	StyleManager styles = new StyleManager(this);
 	
 	
@@ -78,6 +81,12 @@ class EditorPageModel extends BaseModel
 		this.remove_dialog = this.createWidget(classof RemoveDialogModel);
 		this.save_dialog = this.createWidget(classof SaveDialogModel);
 		this.widget_settings = this.createWidget(classof WidgetDialogModel, {});
+		this.widget_tree = this.createWidget(classof TreeModel, {
+			"autoselect": false,
+		});
+		
+		/* Add events */
+		this.widget_tree.addEventListener("selectItem", method this.onTreeSelectItem);
 	}
 	
 	
@@ -107,6 +116,7 @@ class EditorPageModel extends BaseModel
 			{
 				this.widget = new WidgetTag(this);
 				this.widget.setCode(this.code_component.op_render);
+				this.widget_tree.root = this.widget.tree_item;
 			}
 			this.styles.init();
 		}
@@ -141,6 +151,7 @@ class EditorPageModel extends BaseModel
 	{
 		this.selected_path = path;
 		this.selected_widget = this.widget ? this.widget.get(path) : null;
+		this.widget_tree.selectItem(path);
 		if (this.selected_widget)
 		{
 			this.selected_widget.onSelect();
@@ -149,6 +160,15 @@ class EditorPageModel extends BaseModel
 		{
 			this.parent_widget.selected_elem = null;
 		}
+	}
+	
+	
+	/**
+	 * Tree select item
+	 */
+	void onTreeSelectItem(TreeMessage message)
+	{
+		this.selectItem(message.path);
 	}
 	
 	

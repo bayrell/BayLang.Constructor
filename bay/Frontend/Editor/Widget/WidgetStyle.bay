@@ -52,7 +52,9 @@ class WidgetStyle extends BaseObject
 	{
 		this.widget.code_strategy.initStyle();
 		this.items = rs::split(" ", this.widget.code_strategy.getClassAttrName());
-		this.current_style = this.items.first("");
+		this.items = this.items.filter(bool (string item) => item != "");
+		this.current_style = this.items.first();
+		if (not this.current_style) this.current_style = "";
 	}
 	
 	
@@ -62,6 +64,7 @@ class WidgetStyle extends BaseObject
 	void update()
 	{
 		this.widget.code_strategy.updateClassAttr(rs::join(" ", this.items));
+		this.widget.updateTreeLabel();
 	}
 	
 	
@@ -83,6 +86,16 @@ class WidgetStyle extends BaseObject
 			this.widget.page_model.styles.addItem(item);
 		}
 		this.widget.page_model.updateSelectedBox();
+	}
+	
+	
+	/**
+	 * Select style
+	 */
+	void selectStyle(string class_name)
+	{
+		if (class_name) this.current_style = class_name;
+		else this.current_style = "";
 	}
 	
 	

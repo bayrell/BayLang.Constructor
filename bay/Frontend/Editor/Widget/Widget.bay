@@ -26,6 +26,7 @@ use BayLang.OpCodes.OpHtmlContent;
 use BayLang.Constructor.Frontend.Editor.Manager.CodeStrategyInterface;
 use BayLang.Constructor.Frontend.Editor.Manager.OpCodeStrategy;
 use BayLang.Constructor.Frontend.Editor.Manager.VirtualDomStrategy;
+use BayLang.Constructor.Frontend.Editor.Widget.TreeItem;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetComponent;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetTag;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetText;
@@ -39,6 +40,7 @@ class Widget extends BaseObject
 	Widget parent_widget = null;
 	EditorPageModel page_model = null;
 	Vector params = null;
+	TreeItem tree_item = null;
 	
 	
 	/**
@@ -129,6 +131,10 @@ class Widget extends BaseObject
 	{
 		parent();
 		this.setParentWidget(widget);
+		
+		/* Create tree item */
+		this.tree_item = new TreeItem();
+		this.tree_item.widget = this;
 	}
 	
 	
