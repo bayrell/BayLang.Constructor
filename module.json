@@ -37,6 +37,7 @@
 		"Frontend/Editor/Styles/StyleManager.bay",
 		"Frontend/Editor/EditorPage.bay",
 		"Frontend/Editor/EditorPageModel.bay",
+		"Frontend/Editor/Widget/Dnd.bay",
 		"Frontend/Editor/Widget/TreeItem.bay",
 		"Frontend/Editor/Widget/Widget.bay",
 		"Frontend/Editor/Widget/WidgetStyle.bay",

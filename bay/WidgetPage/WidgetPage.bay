@@ -164,6 +164,7 @@ var getElementByPath(Vector path)
 	string elem_path = "element_" ~ rs::join(".", path);
 	var elem = this.getRef(elem_path);
 	#ifcode JAVASCRIPT then
+	if (!elem) return null;
 	if (!(elem instanceof HTMLElement)) elem = elem.$el;
 	#endif
 	return elem;

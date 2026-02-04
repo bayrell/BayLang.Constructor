@@ -19,11 +19,22 @@
 namespace BayLang.Constructor.Frontend.Editor.Widget;
 
 use Runtime.Widget.Tree.TreeItem as BaseTreeItem;
-use BayLang.Constructor.Frontend.Editor.Widget.Widget
+use BayLang.Constructor.Frontend.Editor.Widget.Widget;
+use BayLang.Constructor.Frontend.Editor.Widget.WidgetText;
 
 
 class TreeItem extends BaseTreeItem
 {
 	bool open = true;
 	Widget widget = null;
+	
+	
+	/**
+	 * Returns true if can drag inside
+	 */
+	bool canDragInside()
+	{
+		if (this.widget instanceof WidgetText) return false;
+		return true;
+	}
 }

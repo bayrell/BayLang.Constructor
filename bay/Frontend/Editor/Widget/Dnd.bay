@@ -1,0 +1,78 @@
+/*!
+ *  BayLang Technology
+ *
+ *  (c) Copyright 2016-2024 "Ildar Bikmamatov" <support@bayrell.org>
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
+namespace BayLang.Constructor.Frontend.Editor.Widget;
+
+use Runtime.Widget.Tree.Dnd as BaseDnd;
+use BayLang.Constructor.Frontend.Widget.Widget;
+use BayLang.Constructor.Frontend.Editor.EditorPageModel;
+
+
+class Dnd extends BaseDnd
+{
+	EditorPageModel editor = null;
+	
+	
+	/**
+	 * Returns true if can drag
+	 */
+	bool canDrag(Vector src_path, Vector dest_path, string kind)
+	{
+		return true;
+	}
+	
+	
+	/**
+	 * Drag element
+	 */
+	void dragElement(Vector src_path, Vector dest_path, string kind)
+	{
+		/* Get widget */
+		Widget src_widget = this.editor.widget.get(src_path);
+		Widget dest_widget = dest_path ? this.editor.widget.get(dest_path) : null;
+		
+		/* Remove src widget */
+		int index = src_path.last();
+		Vector src_parent_path = src_path.slice(0, -1);
+		Widget src_parent = this.editor.widget.get(src_parent_path);
+		src_parent.removeItem(index);
+		
+		/* Move src to dest */
+		int count = this.editor.widget.items.count();
+		dest_path = dest_widget ? dest_widget.getCurrentPath() : [count - 1];
+		if (kind == static::DRAG_INTO)
+		{
+			Widget dest_parent = this.editor.widget.get(dest_path);
+			dest_parent.insert(0, src_widget);
+		}
+		else
+		{
+			Vector dest_parent_path = dest_path.slice(0, -1);
+			Widget dest_parent = this.editor.widget.get(dest_parent_path);
+			int dest_index = dest_path.last();
+			if (kind == static::DRAG_AFTER) dest_index += 1;
+			dest_parent.insert(dest_index, src_widget);
+		}
+		
+		/* Select widget */
+		if (this.editor.selected_widget == src_widget)
+		{
+			this.editor.selectItem(src_widget.getCurrentPath());
+		}
+	}
+}

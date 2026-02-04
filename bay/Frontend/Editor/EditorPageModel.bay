@@ -32,6 +32,7 @@ use BayLang.Constructor.Frontend.Editor.Dialog.SaveDialogModel;
 use BayLang.Constructor.Frontend.Editor.Manager.CodeManager;
 use BayLang.Constructor.Frontend.Editor.Settings.WidgetDialogModel;
 use BayLang.Constructor.Frontend.Editor.Styles.StyleManager;
+use BayLang.Constructor.Frontend.Editor.Widget.Dnd;
 use BayLang.Constructor.Frontend.Editor.Widget.Widget;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetComponent;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetTag;
@@ -83,7 +84,9 @@ class EditorPageModel extends BaseModel
 		this.widget_settings = this.createWidget(classof WidgetDialogModel, {});
 		this.widget_tree = this.createWidget(classof TreeModel, {
 			"autoselect": false,
+			"dnd": new Dnd(),
 		});
+		this.widget_tree.dnd.editor = this;
 		
 		/* Add events */
 		this.widget_tree.addEventListener("selectItem", method this.onTreeSelectItem);

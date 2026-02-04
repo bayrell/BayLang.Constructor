@@ -49,6 +49,26 @@ class WidgetTag extends Widget
 	
 	
 	/**
+	 * Returns current path
+	 */
+	Vector getCurrentPath()
+	{
+		Vector path = [];
+		Widget widget = this;
+		while (widget != null)
+		{
+			if (widget.parent_widget instanceof WidgetTag)
+			{
+				int index = widget.parent_widget.items.findIndex(bool (Widget item) => item == widget);
+				path.push(index);
+			}
+			widget = widget.parent_widget;
+		}
+		return path.reverse();
+	}
+	
+	
+	/**
 	 * Init items
 	 */
 	void initItems()
@@ -123,6 +143,7 @@ class WidgetTag extends Widget
 		/* Insert item */
 		this.items.insert(index, widget);
 		this.tree_item.items.insert(index, widget.tree_item);
+		widget.setParentWidget(this);
 	}
 	
 	
