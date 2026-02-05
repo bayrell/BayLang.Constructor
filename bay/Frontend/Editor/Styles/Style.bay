@@ -18,17 +18,18 @@
 
 namespace BayLang.Constructor.Frontend.Editor.Styles;
 
+use BayLang.Exceptions.ParserError;
+use BayLang.LangBay.ParserBay;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpHtmlCSSAttribute;
 use BayLang.OpCodes.OpHtmlCSS;
+use BayLang.TokenReader;
 use Runtime.BaseObject;
 
 
 class Style extends BaseObject
 {
 	string selector = "";
-	OpHtmlCSS op_code = null;
-	Map<string> values = {};
 	string content = "";
 	
 	
@@ -39,8 +40,6 @@ class Style extends BaseObject
 	{
 		Style item = static::newInstance();
 		item.selector = this.selector;
-		item.op_code = this.op_code ? rtl::copy(this.op_code) : null;
-		item.values = this.values.copy();
 		item.content = this.content;
 		return item;
 	}
@@ -69,9 +68,46 @@ class Style extends BaseObject
 	 */
 	void setOpCode(OpHtmlCSS op_code)
 	{
-		this.op_code = op_code;
-		this.initValues();
-		this.updateContent();
+		/* Init values */
+		Map values = {};
+		for (int i=0; i<op_code.items.count(); i++)
+		{
+			BaseOpCode item = op_code.items.get(i);
+			if (not (item instanceof OpHtmlCSSAttribute)) continue;
+			values.set(item.key, {
+				"op_code": item,
+				"value": item.value,
+			});
+		}
+		
+		/* Build content */
+		Vector<string> content = values.transition(
+			string (Map item, string key) => key ~ ": " ~ item.get("value")
+		);
+		this.content = rs::join(";\n", content);
+	}
+	
+	
+	/**
+	 * Build op code
+	 */
+	OpHtmlCSS buildOpCode()
+	{
+		OpHtmlCSS op_code = new OpHtmlCSS();
+		string content = this.selector ~ "{" ~ this.content ~ "}";
+		
+		try
+		{
+			ParserBay parser = new ParserBay();
+			parser.setContent(content);
+			TokenReader reader = parser.createReader();
+			op_code = parser.parser_html.readCSS(reader);
+		}
+		catch (ParserError e)
+		{
+		}
+		
+		return op_code;
 	}
 	
 	
@@ -90,27 +126,6 @@ class Style extends BaseObject
 				"value": item.value,
 			});
 		}
-	}
-	
-	
-	/**
-	 * Build content
-	 */
-	void buildContent()
-	{
-		Vector<string> content = this.values.transition(
-			string (Map item, string key) => key ~ ": " ~ item.get("value")
-		);
-		return rs::join(";\n", content);
-	}
-	
-	
-	/**
-	 * Update content
-	 */
-	void updateContent()
-	{
-		this.content = this.buildContent();
 	}
 	
 	

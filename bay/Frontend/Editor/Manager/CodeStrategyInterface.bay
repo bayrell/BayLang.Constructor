@@ -19,6 +19,7 @@
 namespace BayLang.Constructor.Frontend.Editor.Manager;
 
 use BayLang.Constructor.Frontend.Editor.Widget.Widget;
+use BayLang.OpCodes.OpHtmlCSS;
 
 
 interface CodeStrategyInterface
@@ -69,6 +70,18 @@ interface CodeStrategyInterface
 	 * Init style
 	 */
 	void initStyle();
+	
+	
+	/**
+	 * Returns CSS
+	 */
+	Vector<OpHtmlCSS> getCSS();
+	
+	
+	/**
+	 * Update CSS
+	 */
+	void updateCSS(Vector<OpHtmlCSS> items);
 	
 	
 	/**

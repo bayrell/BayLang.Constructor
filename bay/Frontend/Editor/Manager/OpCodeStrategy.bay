@@ -24,9 +24,12 @@ use BayLang.Constructor.Frontend.Editor.Widget.Widget;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetTag;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetText;
 use BayLang.OpCodes.BaseOpCode;
+use BayLang.OpCodes.OpDeclareClass;
 use BayLang.OpCodes.OpHtmlAttribute;
 use BayLang.OpCodes.OpHtmlContent;
+use BayLang.OpCodes.OpHtmlCSS;
 use BayLang.OpCodes.OpHtmlItems;
+use BayLang.OpCodes.OpHtmlStyle;
 use BayLang.OpCodes.OpHtmlTag;
 use BayLang.OpCodes.OpString;
 
@@ -145,6 +148,40 @@ class OpCodeStrategy extends BaseObject implements CodeStrategyInterface
 		if (not (class_name_op_code.expression instanceof OpString)) return;
 		
 		this.class_expression = class_name_op_code.expression;
+	}
+	
+	
+	/**
+	 * Returns CSS
+	 */
+	Vector<OpHtmlCSS> getCSS()
+	{
+		OpDeclareClass op_class = this.op_code.findClass();
+		
+		/* Find style */
+		OpHtmlStyle op_code_style = op_class.content.items.find(
+			bool (BaseOpCode op_code) => op_code instanceof OpHtmlStyle
+		);
+		if (not op_code_style) return [];
+		return op_code_style.content.items;
+	}
+	
+	
+	/**
+	 * Update CSS
+	 */
+	void updateCSS(Vector<OpHtmlCSS> items)
+	{
+		OpDeclareClass op_class = this.op_code.findClass();
+		
+		/* Find style */
+		OpHtmlStyle op_code_style = op_class.content.items.find(
+			bool (BaseOpCode op_code) => op_code instanceof OpHtmlStyle
+		);
+		if (not op_code_style) return;
+		
+		/* Setup css */
+		op_code_style.content.items = items;
 	}
 	
 	

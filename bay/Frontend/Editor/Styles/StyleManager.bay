@@ -18,7 +18,11 @@
 
 namespace BayLang.Constructor.Frontend.Editor.Styles;
 
+use BayLang.Constructor.Frontend.Editor.Manager.CodeStrategryInterface;
+use BayLang.Constructor.Frontend.Editor.Manager.OpCodeStrategy;
 use BayLang.Constructor.Frontend.Editor.Styles.Style;
+use BayLang.Constructor.Frontend.Editor.Widget.Widget;
+use BayLang.Constructor.Frontend.Editor.Widget.WidgetTag;
 use BayLang.Constructor.Frontend.Editor.EditorPageModel;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpHtmlCSS;
@@ -29,8 +33,9 @@ use Runtime.BaseObject;
 class StyleManager extends BaseObject
 {
 	EditorPageModel page_model = null;
-	OpHtmlStyle op_code_style = null;
+	CodeStrategryInterface code_strategy = null;
 	Map<Style> items = {};
+	Vector styles = [];
 	
 	
 	/**
@@ -51,17 +56,72 @@ class StyleManager extends BaseObject
 		if (not this.page_model.code_component.isLoaded()) return;
 		
 		/* Find style */
-		this.op_code_style = this.page_model.code_component.op_class.content.items.find(
-			bool (BaseOpCode op_code) => op_code instanceof OpHtmlStyle
-		);
-		if (not this.op_code_style) return;
+		this.code_strategy = new OpCodeStrategy(this.page_model.code_component.code);
 		
 		/* Add styles */
-		for (int i=0; i<this.op_code_style.content.count(); i++)
+		Vector<OpHtmlCSS> items = this.code_strategy.getCSS();
+		for (int i=0; i<items.count(); i++)
 		{
-			OpHtmlCSS op_code_css = this.op_code_style.content.get(i);
+			OpHtmlCSS op_code_css = items.get(i);
 			this.addStyle(op_code_css);
 		}
+	}
+	
+	
+	/**
+	 * Add widget
+	 */
+	void addWidget(Widget widget, Map hash)
+	{
+		if (not (widget instanceof WidgetTag)) return;
+		
+		/* Add style */
+		for (int i=0; i<widget.styles.items.count(); i++)
+		{
+			string class_name = widget.styles.items.get(i);
+			if (hash.has(class_name)) continue;
+			hash.set(class_name, true);
+			this.styles.push(class_name);
+		}
+		
+		/* Add widget */
+		for (int i=0; i<widget.items.count(); i++)
+		{
+			this.addWidget(widget.items.get(i), hash);
+		}
+	}
+	
+	
+	/**
+	 * Refresh styles
+	 */
+	void refresh()
+	{
+		this.styles = [];
+		Map hash = {};
+		
+		this.addWidget(this.page_model.widget, hash);
+	}
+	
+	
+	/**
+	 * Update styles op code
+	 */
+	void updateOpCode()
+	{
+		Vector<OpHtmlCSS> items = [];
+		for (int i=0; i<this.styles.count(); i++)
+		{
+			string class_name = this.styles.get(i);
+			Style item = this.findStyle(class_name);
+			if (not item) continue;
+			if (rs::trim(item.content) == "") continue;
+			
+			OpHtmlCSS op_code = item.buildOpCode();
+			items.push(op_code);
+		}
+		
+		this.code_strategy.updateCSS(items);
 	}
 	
 	

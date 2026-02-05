@@ -22,6 +22,7 @@ use Runtime.BaseObject;
 use Runtime.VirtualDom;
 use BayLang.Constructor.Frontend.Editor.Manager.CodeStrategyInterface;
 use BayLang.Constructor.Frontend.Editor.Widget.Widget;
+use BayLang.OpCodes.OpHtmlCSS;
 
 
 class VirtualDomStrategy extends BaseObject implements CodeStrategyInterface
@@ -105,6 +106,22 @@ class VirtualDomStrategy extends BaseObject implements CodeStrategyInterface
 	 * Init style
 	 */
 	void initStyle()
+	{
+	}
+	
+	
+	/**
+	 * Returns CSS
+	 */
+	Vector<OpHtmlCSS> getCSS()
+	{
+	}
+	
+	
+	/**
+	 * Update CSS
+	 */
+	void updateCSS(Vector<OpHtmlCSS> items)
 	{
 	}
 	

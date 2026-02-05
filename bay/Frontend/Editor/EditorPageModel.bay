@@ -131,6 +131,9 @@ class EditorPageModel extends BaseModel
 	 */
 	async void save()
 	{
+		this.styles.refresh();
+		this.styles.updateOpCode();
+		
 		this.save_dialog.setStatus(SaveDialogModel::STATUS_SAVING);
 		this.save_dialog.show();
 		
