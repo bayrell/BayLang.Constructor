@@ -75,9 +75,9 @@
 	{
 		%render this.renderStyle();
 		%render this.renderComponent();
-		%render this.renderWidget(this.model.editor);
-		%render this.renderWidget(this.model.contextmenu);
 	}
+	%render this.renderWidget(this.model.editor);
+	%render this.renderWidget(this.model.contextmenu);
 </template>
 
 <script>

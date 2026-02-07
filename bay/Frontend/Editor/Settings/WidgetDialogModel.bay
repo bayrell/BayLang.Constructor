@@ -31,6 +31,21 @@ class WidgetDialogModel extends DialogModel
 	
 	string component = classof WidgetDialog;
 	string active_tab = static::TAB_STYLES;
+	bool is_open = true;
+	
+	
+	/**
+	 * Init widget
+	 */
+	void initWidget(Map params)
+	{
+		parent(params);
+		
+		if (this.is_open)
+		{
+			this.layout.body_class.push("open_widget_settings");
+		}
+	}
 	
 	
 	/**

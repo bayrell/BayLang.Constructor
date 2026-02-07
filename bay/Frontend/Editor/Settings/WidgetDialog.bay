@@ -43,12 +43,9 @@
 	top: 0;
 	width: 250px;
 	height: calc(100vh - 32px);
-	flex-direction: column;
+	border-radius: 0;
 	.admin-bar &{
 		margin-top: 32px;
-	}
-	&.open{
-		display: flex;
 	}
 	.dialog__content{
 		position: relative;
@@ -92,7 +89,10 @@
 		margin-bottom: var(--space);
 	}
 }
-.open_widget_settings{
+</style>
+
+<style global="true">
+body.open_widget_settings .root_container{
 	padding-right: 250px;
 }
 </style>
@@ -140,12 +140,6 @@
 computed string dialogStyle()
 {
 	return "";
-	Vector arr = [];
-	arr.push("right: 0;");
-	arr.push("top: 0;");
-	arr.push("width: " ~ this.model.width ~ "px");
-	arr.push("height: " ~ this.model.height ~ "px");
-	return rs::join(";", arr);
 }
 
 
@@ -179,18 +173,11 @@ string isActive(string tab_name) => this.model.active_tab == tab_name ? "active"
  */
 void onShow()
 {
-	var root_container = document.querySelector(".root_container");
-	Vector<string> css_hash = rs::split(" ", rs::getComponentHash(this.getClassName()));
-	for (int i=0; i<css_hash.count(); i++)
+	var body = document.querySelector("body");
+	if (not body.classList.contains("open_widget_settings"))
 	{
-		string css_name = css_hash.get(i);
-		if (not root_container.classList.contains(css_name))
-		{
-			root_container.classList.add(css_name);
-		}
+		body.classList.add("open_widget_settings");
 	}
-	
-	root_container.classList.add("open_widget_settings");
 }
 
 
@@ -199,8 +186,11 @@ void onShow()
  */
 void onHide()
 {
-	var root_container = document.querySelector(".root_container");
-	root_container.classList.remove("open_widget_settings");
+	var body = document.querySelector("body");
+	if (body.classList.contains("open_widget_settings"))
+	{
+		body.classList.remove("open_widget_settings");
+	}
 }
 
 
