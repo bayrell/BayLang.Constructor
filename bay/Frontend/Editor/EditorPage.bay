@@ -55,11 +55,6 @@
 
 <script>
 
-void mounted()
-{
-	this.model.widget_settings.show();
-}
-
 </script>
 
 </class>

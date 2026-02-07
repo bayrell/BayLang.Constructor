@@ -30,20 +30,7 @@ class WidgetDialogModel extends DialogModel
 	const string TAB_ADD = "add";
 	
 	string component = classof WidgetDialog;
-	string active_tab = "tree";
-	
-	
-	/**
-	 * Init size
-	 */
-	void initSize(var dialog)
-	{
-		parent(dialog);
-		this.width = 250;
-		if (this.height < 290) this.height = rtl::round(window.innerHeight * 0.7);
-		this.y = 76;
-		this.x = window.innerWidth - this.width - rtl::round((window.innerWidth - 1260) / 2);
-	}
+	string active_tab = static::TAB_STYLES;
 	
 	
 	/**
@@ -62,5 +49,7 @@ class WidgetDialogModel extends DialogModel
 	{
 		if (!this.is_open) this.show();
 		else this.hide();
+		
+		this.parent_widget.updateSelectedBox();
 	}
 }

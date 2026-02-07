@@ -56,19 +56,23 @@
 }
 </style>
 
-<template name="renderTitle">
+<template name="renderTitleContent">
 	%if (this.slot("title"))
 	{
-		<div class="dialog__title" @event:mousedown="this.onTitleClick(event)">
-			<span class="dialog__title_content">%render this.renderSlot("title");</span>
-			<span class="dialog__title_close" @event:click="this.model.hide()">
-				<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-					<path d="M12 4L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-					<path d="M4 4L12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-				</svg>
-			</span>
-		</div>
+		%render this.renderSlot("title");
 	}
+</template>
+
+<template name="renderTitle">
+	<div class="dialog__title" @event:mousedown="this.onTitleClick(event)">
+		<span class="dialog__title_content">%render this.renderTitleContent();</span>
+		<span class="dialog__title_close" @event:click="this.model.hide()">
+			<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<path d="M12 4L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+				<path d="M4 4L12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+			</svg>
+		</span>
+	</div>
 </template>
 
 <template name="renderContent">
@@ -111,7 +115,7 @@
 
 <script>
 
-bool is_init = false;
+bool is_open = false;
 bool is_drag = 0;
 string drag_kind = "";
 int mouse_x = 0;
@@ -141,6 +145,8 @@ computed string dialogStyle()
  */
 void mounted()
 {
+	this.init();
+	window.addEventListener("resize", this.onResize);
 	document.addEventListener("mousemove", this.onMouseMove);
 	document.addEventListener("mouseup", this.onMouseUp);
 }
@@ -151,6 +157,7 @@ void mounted()
  */
 void unmounted()
 {
+	window.removeEventListener("resize", this.onResize);
 	document.removeEventListener("mousemove", this.onMouseMove);
 	document.removeEventListener("mouseup", this.onMouseUp);
 }
@@ -161,14 +168,54 @@ void unmounted()
  */
 void updated()
 {
-	if (this.model.is_open and not this.is_init)
+	this.init();
+}
+
+
+/**
+ * Init dialog
+ */
+void init()
+{
+	if (this.model.is_open != this.is_open)
 	{
-		this.is_init = true;
-		this.nextTick(void (){
-			var dialog = this.getRef("dialog");
-			this.model.initSize(dialog);
-		});
+		this.is_open = this.model.is_open;
+		if (this.is_open) this.onShow();
+		else this.onHide();
 	}
+}
+
+
+/**
+ * Resize
+ */
+void onResize()
+{
+	if (this.model.is_open)
+	{
+		this.initSize();
+	}
+}
+
+
+/**
+ * Show event
+ */
+void onShow()
+{
+	this.initSize();
+}
+
+
+/**
+ * Init size
+ */
+void initSize()
+{
+	this.nextTick(void (){
+		var dialog = this.getRef("dialog");
+		this.model.initSize(dialog);
+	});
 }
 
 
