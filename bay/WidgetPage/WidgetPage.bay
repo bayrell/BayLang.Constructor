@@ -77,7 +77,6 @@
 		%render this.renderComponent();
 	}
 	%render this.renderWidget(this.model.editor);
-	%render this.renderWidget(this.model.contextmenu);
 </template>
 
 <script>
@@ -152,7 +151,7 @@ void updated()
  */
 void onDocumentClick(var e)
 {
-	this.model.contextmenu.hide();
+	this.model.editor.contextmenu.hide();
 }
 
 
@@ -216,7 +215,7 @@ VirtualDom createTag(OpHtmlTag item, Vector path)
 		this.model.editor.selectItem(path);
 		
 		/* Hide menu */
-		this.model.contextmenu.hide();
+		this.model.editor.contextmenu.hide();
 	});
 	
 	/* Contextmenu */
@@ -229,7 +228,7 @@ VirtualDom createTag(OpHtmlTag item, Vector path)
 		this.model.editor.selectItem(path);
 		
 		/* Show context menu */
-		this.model.contextmenu.show(e.clientX, e.clientY);
+		this.model.editor.contextmenu.show(e.clientX, e.clientY);
 	});
 	
 	/* Render items */

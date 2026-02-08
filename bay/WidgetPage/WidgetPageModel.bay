@@ -21,8 +21,6 @@ namespace BayLang.Constructor.WidgetPage;
 use Runtime.BaseModel;
 use Runtime.Serializer.ObjectType;
 use Runtime.Serializer.StringType;
-use Runtime.Widget.ContextMenu.ContextMenuMessage;
-use Runtime.Widget.ContextMenu.ContextMenuModel;
 use BayLang.Constructor.Frontend.Editor.EditorPageModel;
 use BayLang.Constructor.WidgetPage.WidgetPage;
 
@@ -32,7 +30,6 @@ class WidgetPageModel extends BaseModel
 	string component = classof WidgetPage;
 	string page_model = "";
 	EditorPageModel editor = null;
-	ContextMenuModel contextmenu = null;
 	var selected_elem = null;
 	string selected_style = "";
 	
@@ -65,25 +62,6 @@ class WidgetPageModel extends BaseModel
 	{
 		parent(params);
 		
-		/* Contextmenu */
-		this.contextmenu = this.createWidget(classof ContextMenuModel, {
-			"items": [
-				{
-					"label": "Add",
-					"key": "add",
-				},
-				{
-					"label": "Remove",
-					"key": "remove",
-				},
-				/*{
-					"label": "Settings",
-					"key": "settings",
-				}*/
-			]
-		});
-		this.contextmenu.addEventListener("clickItem", method this.onContextMenuClick);
-		
 		/* Editor */
 		this.editor = this.createWidget(classof EditorPageModel, {
 			"page_model": this.page_model,
@@ -98,29 +76,6 @@ class WidgetPageModel extends BaseModel
 	BaseModel getPageModel()
 	{
 		return this.layout.pages.get(this.page_model);
-	}
-	
-	
-	/**
-	 * Context menu click
-	 */
-	async void onContextMenuClick(ContextMenuMessage message)
-	{
-		this.contextmenu.hide();
-		
-		string key = message.item.get("key");
-		if (key == "add")
-		{
-			this.editor.showAddWidget();
-		}
-		else if (key == "remove")
-		{
-			this.editor.showRemoveWidget();
-		}
-		else if (key == "settings")
-		{
-			this.editor.showSettings();
-		}
 	}
 	
 	

@@ -20,6 +20,8 @@ namespace BayLang.Constructor.Frontend.Editor;
 
 use Runtime.ApiResult;
 use Runtime.BaseModel;
+use Runtime.Widget.ContextMenu.ContextMenuMessage;
+use Runtime.Widget.ContextMenu.ContextMenuModel;
 use Runtime.Widget.Tree.TreeMessage;
 use Runtime.Widget.Tree.TreeModel;
 use BayLang.OpCodes.BaseOpCode;
@@ -54,6 +56,7 @@ class EditorPageModel extends BaseModel
 	AddDialogModel add_dialog = null;
 	RemoveDialogModel remove_dialog = null;
 	SaveDialogModel save_dialog = null;
+	ContextMenuModel contextmenu = null;
 	WidgetDialogModel widget_settings = null;
 	TreeModel widget_tree = null;
 	StyleManager styles = new StyleManager(this);
@@ -87,6 +90,25 @@ class EditorPageModel extends BaseModel
 			"dnd": new Dnd(),
 		});
 		this.widget_tree.dnd.editor = this;
+		
+		/* Contextmenu */
+		this.contextmenu = this.createWidget(classof ContextMenuModel, {
+			"items": [
+				{
+					"label": "Add",
+					"key": "add",
+				},
+				{
+					"label": "Remove",
+					"key": "remove",
+				},
+				/*{
+					"label": "Settings",
+					"key": "settings",
+				}*/
+			]
+		});
+		this.contextmenu.addEventListener("clickItem", method this.onContextMenuClick);
 		
 		/* Add events */
 		this.widget_tree.addEventListener("selectItem", method this.onTreeSelectItem);
@@ -165,6 +187,29 @@ class EditorPageModel extends BaseModel
 		if (path == null)
 		{
 			this.parent_widget.selected_elem = null;
+		}
+	}
+	
+	
+	/**
+	 * Context menu click
+	 */
+	async void onContextMenuClick(ContextMenuMessage message)
+	{
+		this.contextmenu.hide();
+		
+		string key = message.item.get("key");
+		if (key == "add")
+		{
+			this.showAddWidget();
+		}
+		else if (key == "remove")
+		{
+			this.showRemoveWidget();
+		}
+		else if (key == "settings")
+		{
+			this.showSettings();
 		}
 	}
 	
