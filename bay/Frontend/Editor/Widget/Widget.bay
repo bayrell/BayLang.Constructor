@@ -26,6 +26,7 @@ use BayLang.OpCodes.OpHtmlContent;
 use BayLang.Constructor.Frontend.Editor.Manager.CodeStrategyInterface;
 use BayLang.Constructor.Frontend.Editor.Manager.OpCodeStrategy;
 use BayLang.Constructor.Frontend.Editor.Manager.VirtualDomStrategy;
+use BayLang.Constructor.Frontend.Editor.Parameters.Parameter;
 use BayLang.Constructor.Frontend.Editor.Widget.TreeItem;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetComponent;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetTag;
@@ -38,19 +39,10 @@ class Widget extends BaseObject
 	var op_code = null;
 	CodeStrategyInterface code_strategy = null;
 	Widget parent_widget = null;
-	EditorPageModel page_model = null;
-	Vector params = null;
+	EditorPageModel editor = null;
+	Vector<Widget> items = [];
+	Vector<Parameter> params = null;
 	TreeItem tree_item = null;
-	
-	
-	/**
-	 * Returns widget by path
-	 */
-	Widget get(Vector path)
-	{
-		if (path.count() == 0) return this;
-		return null;
-	}
 	
 	
 	/**
@@ -108,6 +100,40 @@ class Widget extends BaseObject
 	
 	
 	/**
+	 * Returns widget by path
+	 */
+	Widget get(Vector path)
+	{
+		if (path.count() == 0) return this;
+		
+		int pos = path.first();
+		Widget item = this.items.get(pos);
+		if (item) return item.get(path.slice(1));
+		return null;
+	}
+	
+	
+	/**
+	 * Returns current path
+	 */
+	Vector getCurrentPath()
+	{
+		Vector path = [];
+		Widget widget = this;
+		while (widget != null)
+		{
+			if (widget.parent_widget)
+			{
+				int index = widget.parent_widget.items.findIndex(bool (Widget item) => item == widget);
+				path.push(index);
+			}
+			widget = widget.parent_widget;
+		}
+		return path.reverse();
+	}
+	
+	
+	/**
 	 * Set parent widget
 	 */
 	void setParentWidget(Widget widget)
@@ -117,7 +143,7 @@ class Widget extends BaseObject
 			this.parent_widget = widget;
 			this.page_model = widget.page_model;
 		}
-		else
+		else if (widget instanceof EditorPageModel)
 		{
 			this.page_model = widget;
 		}
@@ -145,7 +171,6 @@ class Widget extends BaseObject
 	{
 		this.op_code = op_code;
 		this.code_strategy = static::createStrategy(op_code);
-		this.init();
 	}
 	
 	
@@ -166,6 +191,21 @@ class Widget extends BaseObject
 	
 	
 	/**
+	 * Insert widget
+	 */
+	void insert(string index, Widget widget)
+	{
+		/* Insert code */
+		this.code_strategy.insert(index, widget.op_code);
+		
+		/* Insert item */
+		this.items.insert(index, widget);
+		this.tree_item.items.insert(index, widget.tree_item);
+		widget.setParentWidget(this);
+	}
+	
+	
+	/**
 	 * Remove widget
 	 */
 	void remove()
@@ -180,5 +220,13 @@ class Widget extends BaseObject
 	 */
 	void removeItem(int index)
 	{
+		this.code_strategy.remove(index);
+		this.items.remove(index);
+		this.tree_item.items.remove(index);
+		if (this.page_model.selected_widget == this)
+		{
+			this.page_model.selectItem(null);
+		}
+		this.page_model.updateSelectedBox();
 	}
 }

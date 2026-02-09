@@ -19,14 +19,16 @@
 <class name="BayLang.Constructor.Frontend.Editor.Settings.WidgetParams">
 
 <use name="BayLang.Constructor.Frontend.Editor.Parameters.Parameter" />
+<use name="BayLang.Constructor.Frontend.Editor.Parameters.ParameterWidget" />
 <use name="BayLang.Constructor.Frontend.Editor.Parameters.ParameterContent" />
 <use name="BayLang.Constructor.Frontend.Editor.Settings.WidgetDialogModel" />
 <use name="BayLang.Constructor.Frontend.Editor.Widget.Widget" />
-<use name="BayLang.OpCodes.OpHtmlTag" />
+<use name="BayLang.Constructor.Frontend.Editor.Widget.WidgetTag" />
 <use name="Runtime.Widget.TextEditable" component="true" />
 
 <style>
 .widget_params{
+	margin-bottom: var(--space);
 	&__label{
 		margin-bottom: calc(var(--space) * 0.5);
 	}
@@ -49,6 +51,14 @@
 	{
 		<TextEditable class="widget_content"
 			value={{ param.getValue() }} @event:valueChange="param.setValue(event.value)" />
+	}
+	%else if (param instanceof ParameterWidget)
+	{
+		%set string component = param.component;
+		%set Map props = param.props;
+		<{component} name={{ param.name }} value={{ param.getValue() }}
+			@event:valueChange="param.setValue(event.value); this.updateSelectedBox();" ...props
+		/>
 	}
 </template>
 
@@ -99,7 +109,7 @@ computed string currentName()
 	Widget widget = this.model.parent_widget.selected_widget;
 	if (not widget) return "";
 	
-	if (widget.op_code instanceof OpHtmlTag) return widget.op_code.tag_name;
+	if (widget instanceof WidgetTag) return widget.getTagName();
 	return "";
 }
 
@@ -114,6 +124,15 @@ computed Widget widget() => this.model.parent_widget.selected_widget;
  * Returns active tab
  */
 string isActive(string tab_name) => this.model.active_tab == tab_name ? "active" : "";
+
+
+/**
+ * Update selected box
+ */
+void updateSelectedBox()
+{
+	this.model.parent_widget.updateSelectedBox();
+}
 
 </script>
 

@@ -20,6 +20,7 @@ namespace BayLang.Constructor.Frontend.Editor;
 
 use Runtime.ApiResult;
 use Runtime.BaseModel;
+use Runtime.Method;
 use Runtime.Widget.ContextMenu.ContextMenuMessage;
 use Runtime.Widget.ContextMenu.ContextMenuModel;
 use Runtime.Widget.Tree.TreeMessage;
@@ -142,6 +143,7 @@ class EditorPageModel extends BaseModel
 				this.widget = new WidgetTag(this);
 				this.widget.setCode(this.code_component.op_render);
 				this.widget_tree.root = this.widget.tree_item;
+				this.widget.init();
 			}
 			this.styles.init();
 		}
@@ -169,6 +171,28 @@ class EditorPageModel extends BaseModel
 			}
 		});
 		this.save_dialog.setApiResult(result);
+	}
+	
+	
+	/**
+	 * Returns params by class name
+	 */
+	Vector<Map> getClassNameParams(string class_name)
+	{
+		/* Get widget params method */
+		Method widget_params = null;
+		if (rtl::isImplements(class_name, classof WidgetInterface))
+		{
+			widget_params = new Method(class_name, "widgetParams");
+		}
+		if (rtl::isInstanceOf(class_name, "Runtime.Component"))
+		{
+			widget_params = new Method(class_name, "widgetParams");
+		}
+		
+		/* Get widget parameters */
+		if (not widget_params.exists()) return;
+		return widget_params.apply();
 	}
 	
 	

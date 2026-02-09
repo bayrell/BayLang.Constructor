@@ -90,6 +90,7 @@ class OpCodeStrategy extends BaseObject implements CodeStrategyInterface
 	void setTagName(string name)
 	{
 		this.op_code.tag_name = name;
+		this.op_code.is_component = rs::upper(rs::charAt(name, 0)) == rs::charAt(name, 0);
 	}
 	
 	
@@ -131,6 +132,56 @@ class OpCodeStrategy extends BaseObject implements CodeStrategyInterface
 		BaseOpCode op_code = this.op_code;
 		if (op_code instanceof OpHtmlTag) op_code = op_code.content.items.first();
 		if (op_code instanceof OpHtmlContent) op_code.value = content;
+	}
+	
+	
+	/**
+	 * Remove attribute
+	 */
+	void removeAttr(string name)
+	{
+		int index = this.op_code.attrs.findIndex(
+			bool (OpHtmlAttribute item) => item.key == name
+		);
+		if (index >= 0) this.op_code.attrs.remove(index);
+	}
+	
+	
+	/**
+	 * Returns attr value
+	 */
+	string getAttrValue(string name)
+	{
+		OpHtmlAttribute op_code_attr = this.op_code.attrs.find(
+			bool (OpHtmlAttribute item) => item.key == name
+		);
+		if (not op_code_attr) return "";
+		if (not (op_code_attr.expression instanceof OpString)) return "";
+		
+		return op_code_attr.expression.value;
+	}
+	
+	
+	/**
+	 * Set attr value
+	 */
+	void setAttrValue(string name, string value)
+	{
+		OpHtmlAttribute op_code_attr = this.op_code.attrs.find(
+			bool (OpHtmlAttribute item) => item.key == name
+		);
+		if (not op_code_attr)
+		{
+			op_code_attr = new OpHtmlAttribute
+			{
+				"key": name,
+				"expression": new OpString(),
+			};
+			this.op_code.attrs.push(op_code_attr);
+		}
+		if (not (op_code_attr.expression instanceof OpString)) return;
+		
+		op_code_attr.expression.value = value;
 	}
 	
 	

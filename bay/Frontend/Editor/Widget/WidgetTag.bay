@@ -18,8 +18,11 @@
 
 namespace BayLang.Constructor.Frontend.Editor.Widget;
 
+use Runtime.Method;
 use Runtime.VirtualDom;
+use BayLang.Constructor.Frontend.Editor.Parameters.Parameter;
 use BayLang.Constructor.Frontend.Editor.Widget.Widget;
+use BayLang.Constructor.Frontend.Editor.Widget.WidgetProvider;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetStyle;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpHtmlAttribute;
@@ -30,42 +33,7 @@ use BayLang.OpCodes.OpString;
 
 class WidgetTag extends Widget
 {
-	Vector<Widget> items = [];
 	WidgetStyle styles = new WidgetStyle(this);
-	
-	
-	/**
-	 * Returns item
-	 */
-	Widget get(Vector path)
-	{
-		if (path.count() == 0) return this;
-		
-		int pos = path.first();
-		Widget item = this.items.get(pos);
-		if (item) return item.get(path.slice(1));
-		return null;
-	}
-	
-	
-	/**
-	 * Returns current path
-	 */
-	Vector getCurrentPath()
-	{
-		Vector path = [];
-		Widget widget = this;
-		while (widget != null)
-		{
-			if (widget.parent_widget instanceof WidgetTag)
-			{
-				int index = widget.parent_widget.items.findIndex(bool (Widget item) => item == widget);
-				path.push(index);
-			}
-			widget = widget.parent_widget;
-		}
-		return path.reverse();
-	}
 	
 	
 	/**
@@ -80,7 +48,11 @@ class WidgetTag extends Widget
 			{
 				BaseOpCode item = this.op_code.content.get(i);
 				Widget widget = this.createWidget(item);
-				if (widget) this.items.push(widget);
+				if (widget)
+				{
+					widget.init();
+					this.items.push(widget);
+				}
 			}
 		}
 		
@@ -124,6 +96,12 @@ class WidgetTag extends Widget
 	
 	
 	/**
+	 * Returns tag name
+	 */
+	string getTagName() => this.code_strategy.getTagName();
+	
+	
+	/**
 	 * Set tag name
 	 */
 	void setTagName(string value)
@@ -133,32 +111,16 @@ class WidgetTag extends Widget
 	
 	
 	/**
-	 * Insert widget
+	 * Returns attr value
 	 */
-	void insert(string index, Widget widget)
-	{
-		/* Insert code */
-		this.code_strategy.insert(index, widget.op_code);
-		
-		/* Insert item */
-		this.items.insert(index, widget);
-		this.tree_item.items.insert(index, widget.tree_item);
-		widget.setParentWidget(this);
-	}
+	string getAttrValue(string name) => this.code_strategy.getAttrValue(name);
 	
 	
 	/**
-	 * Remove item
+	 * Set attr value
 	 */
-	void removeItem(int index)
+	void setAttrValue(string name, var value)
 	{
-		this.code_strategy.remove(index);
-		this.items.remove(index);
-		this.tree_item.items.remove(index);
-		if (this.page_model.selected_widget == this)
-		{
-			this.page_model.selectItem(null);
-		}
-		this.page_model.updateSelectedBox();
+		this.code_strategy.setAttrValue(name, value);
 	}
 }

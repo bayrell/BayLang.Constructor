@@ -77,6 +77,32 @@ class CodeManager extends BaseObject
 	
 	
 	/**
+	 * Add component
+	 */
+	string addComponent(string class_name)
+	{
+		Vector arr = rs::split(".", class_name);
+		string alias_name = arr.last();
+		this.modules.set(alias_name, class_name);
+		return alias_name;
+	}
+	
+	
+	/**
+	 * Find component
+	 */
+	string findComponent(string component)
+	{
+		for (string key in this.modules.keys())
+		{
+			string class_name = this.modules.get(key);
+			if (class_name == component) return key;
+		}
+		return "";
+	}
+	
+	
+	/**
 	 * Find module
 	 */
 	string findModule(string name) => this.modules.has(name) ? this.modules.get(name) : "";

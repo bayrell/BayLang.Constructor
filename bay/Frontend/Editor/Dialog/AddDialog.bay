@@ -20,6 +20,7 @@
 
 <use name="Runtime.Widget.Button" component="true" />
 <use name="Runtime.Widget.Dialog.Dialog" component="true" />
+<use name="BayLang.Constructor.Frontend.Editor.Widget.WidgetProvider" />
 
 <style>
 .add_widget_dialog{
@@ -49,9 +50,13 @@
 		</slot>
 		<slot name="content">
 			<div class="widget_items">
-				<div class="widget_item" @event:click="this.model.add('text')">
-					Text
-				</div>
+				%for (int i=0; i<this.widgets.count(); i++)
+				{
+					%set Map widget = this.widgets.get(i);
+					<div class="widget_item" @event:click="this.model.add(widget.get('name'))">
+						{{ widget.get("label") }}
+					</div>
+				}
 			</div>
 		</slot>
 		<slot name="footer">
@@ -59,5 +64,17 @@
 		</slot>
 	</Dialog>
 </template>
+
+<script>
+
+computed Vector<Map> widgets()
+{
+	WidgetProvider provider = @.provider(classof WidgetProvider);
+	return provider.widgets.sort(
+		rtl::compare(string (Map item) => item.get("label"))
+	);
+}
+
+</script>
 
 </class>

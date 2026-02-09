@@ -18,25 +18,16 @@
 
 namespace BayLang.Constructor.Frontend.Editor.Parameters;
 
-use Runtime.BaseObject;
-use BayLang.Constructor.Frontend.Editor.Parameters.ParameterWidget;
-use BayLang.Constructor.Frontend.Editor.Widget.Widget;
+use BayLang.Constructor.Frontend.Editor.Parameters.Parameter;
 
 
-class Parameter<Widget> extends BaseObject
+class ParameterWidget extends Parameter
 {
-	Widget widget = null;
+	string name = "";
 	string label = "";
-	
-	
-	/**
-	 * Create parameter
-	 */
-	void constructor(Map params)
-	{
-		parent();
-		this.initParams(params);
-	}
+	string component = "";
+	string default_value = "";
+	Map props = {};
 	
 	
 	/**
@@ -44,15 +35,23 @@ class Parameter<Widget> extends BaseObject
 	 */
 	void initParams(Map params)
 	{
-		if (params.has("widget")) this.widget = params.get("widget");
+		parent(params);
+		if (params.has("name")) this.name = params.get("name");
 		if (params.has("label")) this.label = params.get("label");
+		if (params.has("component")) this.component = params.get("component");
+		if (params.has("props")) this.props = params.get("props");
+		if (params.has("default")) this.default_value = params.get("default");
 	}
 	
 	
 	/**
 	 * Returns value
 	 */
-	var getValue() => "";
+	string getValue()
+	{
+		string value = this.widget.getAttrValue(this.name);
+		return value ? value : this.default_value;
+	}
 	
 	
 	/**
@@ -60,13 +59,13 @@ class Parameter<Widget> extends BaseObject
 	 */
 	void setValue(var value)
 	{
-	}
-	
-	
-	/**
-	 * Init parameter
-	 */
-	void init()
-	{
+		if (value == "" or value == this.default_value)
+		{
+			this.widget.code_strategy.removeAttr(this.name);
+		}
+		else
+		{
+			this.widget.setAttrValue(this.name, value);
+		}
 	}
 }

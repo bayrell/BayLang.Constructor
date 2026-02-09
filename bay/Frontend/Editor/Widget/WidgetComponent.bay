@@ -18,9 +18,64 @@
 
 namespace BayLang.Constructor.Frontend.Editor.Widget;
 
+use BayLang.Constructor.Frontend.Editor.Parameters.Parameter;
+use BayLang.Constructor.Frontend.Editor.Widget.WidgetProvider;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetTag;
 
 
 class WidgetComponent extends WidgetTag
 {
+	/**
+	 * On select widget
+	 */
+	void onSelect()
+	{
+		if (this.params) return;
+		this.updateParams();
+	}
+	
+	
+	/**
+	 * Refresh params
+	 */
+	void refreshParams()
+	{
+		this.params = null;
+		this.onSelect();
+	}
+	
+	
+	/**
+	 * Update params
+	 */
+	void updateParams()
+	{
+		/* Read params */
+		this.params = [];
+		
+		/* Get tag name */
+		string tag_name = this.getTagName();
+		string full_tag_name = this.page_model.code_component.findModule(tag_name);
+		
+		/* Get widget parameters */
+		Vector params = this.page_model.getClassNameParams(full_tag_name);
+		
+		/* Update params */
+		WidgetProvider provider = @.provider(classof WidgetProvider);
+		for (int i=0; i<params.count(); i++)
+		{
+			Map param = params.get(i);
+			this.params.push(provider.create(this, param));
+		}
+		
+		/* Filter null */
+		this.params = this.params.filter(bool (Parameter item) => item != null);
+		
+		/* Init params */
+		for (int i=0; i<this.params.count(); i++)
+		{
+			Parameter param = this.params.get(i);
+			param.init();
+		}
+	}
 }

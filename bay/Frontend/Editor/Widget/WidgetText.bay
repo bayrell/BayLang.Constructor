@@ -22,6 +22,7 @@ use Runtime.VirtualDom;
 use BayLang.Constructor.Frontend.Editor.Parameters.ParameterContent;
 use BayLang.Constructor.Frontend.Editor.Widget.Widget;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetTag;
+use BayLang.Constructor.Frontend.Editor.Widget.WidgetStyle;
 use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpHtmlContent;
 use BayLang.OpCodes.OpHtmlItems;
@@ -42,6 +43,16 @@ class WidgetText extends WidgetTag
 	void setValue(string content)
 	{
 		this.code_strategy.setValue(content);
+	}
+	
+	
+	/**
+	 * Init widget
+	 */
+	void init()
+	{
+		this.styles.init();
+		this.updateTreeLabel();
 	}
 	
 	

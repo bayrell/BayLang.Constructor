@@ -103,6 +103,34 @@ class VirtualDomStrategy extends BaseObject implements CodeStrategyInterface
 	
 	
 	/**
+	 * Remove attribute
+	 */
+	void removeAttr(string name)
+	{
+		if (this.op_code.attrs.has(name))
+		{
+			this.op_code.attrs.remove(name);
+		}
+	}
+	
+	
+	/**
+	 * Returns attr value
+	 */
+	string getAttrValue(string name) =>
+		this.op_code.attrs.has(name) ? this.op_code.attrs.get(name) : "";
+	
+	
+	/**
+	 * Set attr value
+	 */
+	void setAttrValue(string name, string value)
+	{
+		this.op_code.attrs.set(name, value);
+	}
+	
+	
+	/**
 	 * Init style
 	 */
 	void initStyle()

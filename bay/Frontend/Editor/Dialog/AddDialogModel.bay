@@ -20,6 +20,8 @@ namespace BayLang.Constructor.Frontend.Editor.Dialog;
 
 use Runtime.Widget.Dialog.DialogModel;
 use BayLang.Constructor.Frontend.Editor.Dialog.AddDialog;
+use BayLang.Constructor.Frontend.Editor.Widget.Widget;
+use BayLang.Constructor.Frontend.Editor.Widget.WidgetProvider;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetTag;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetText;
 
@@ -34,17 +36,57 @@ class AddDialogModel extends DialogModel
 	 */
 	void add(string widget_name)
 	{
+		WidgetProvider provider = @.provider(classof WidgetProvider);
+		Map widget_item = provider.findWidget(widget_name);
+		if (not widget_item) return;
+		
+		/* Check class_name */
+		string class_name = widget_item.has("widget") ?
+			widget_item.get("widget") : classof WidgetTag;
+		if (not rtl::isInstanceOf(class_name, classof WidgetTag)) return;
+		
+		/* Get params */
+		Map widget_params = widget_item.has("params") ? widget_item.get("params") : {};
+		
+		/* Create new widget */
 		var code_strategy = this.parent_widget.widget.code_strategy;
-		WidgetTag new_widget = new WidgetText();
+		WidgetTag new_widget = rtl::newInstance(class_name);
+		new_widget.page_model = this.parent_widget;
 		new_widget.setCode(code_strategy::createCode(new_widget));
-		new_widget.setTagName("div");
-		new_widget.setValue("Text");
+		if (widget_params.has("tag_name")) new_widget.setTagName(widget_params.get("tag_name"));
+		if (widget_params.has("value")) new_widget.setValue(widget_params.get("value"));
+		if (widget_item.has("component"))
+		{
+			string component = widget_item.get("component");
+			string alias_name = this.parent_widget.code_component.findComponent(component);
+			if (alias_name == "")
+			{
+				alias_name = this.parent_widget.code_component.addComponent(component);
+			}
+			new_widget.setTagName(alias_name);
+		}
+		if (widget_item.has("props"))
+		{
+			Map props = widget_item.get("props");
+			for (string key in props.keys())
+			{
+				string value = props.get(key);
+				new_widget.setAttrValue(key, value);
+			}
+		}
+		
+		/* Init widget */
+		new_widget.init();
 		new_widget.updateTreeLabel();
+		
+		/* Add widget */
 		Vector path = this.parent_widget.selected_path.slice(0, -1);
 		int index = this.parent_widget.selected_path.last();
 		WidgetTag widget = this.parent_widget.widget.get(path);
 		widget.insert(index + 1, new_widget);
 		new_widget.setParentWidget(widget);
+		
+		/* Hide dialog */
 		this.hide();
 	}
 }

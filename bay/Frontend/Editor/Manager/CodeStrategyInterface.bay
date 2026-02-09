@@ -67,6 +67,24 @@ interface CodeStrategyInterface
 	
 	
 	/**
+	 * Remove attribute
+	 */
+	void removeAttr(string name);
+	
+	
+	/**
+	 * Returns attr value
+	 */
+	string getAttrValue(string name);
+	
+	
+	/**
+	 * Set attr value
+	 */
+	void setAttrValue(string name, string value);
+	
+	
+	/**
 	 * Init style
 	 */
 	void initStyle();
