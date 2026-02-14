@@ -33,7 +33,7 @@ class LayoutHook extends BaseHook
 	 */
 	void register_hooks()
 	{
-		this.register(RuntimeHook::CREATE_APP, "createApp");
+		this.register(RuntimeHook::CREATE_VUE, "createApp");
 		
 		#ifdef BACKEND then
 		this.register(AppHook::ROUTE_AFTER, "routeAfter");

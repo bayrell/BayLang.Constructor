@@ -38,6 +38,11 @@
 	.admin-bar &{
 		margin-top: 32px;
 	}
+	@media (max-width: 782px){
+		.admin-bar &{
+			margin-top: 46px;
+		}
+	}
 }
 </style>
 

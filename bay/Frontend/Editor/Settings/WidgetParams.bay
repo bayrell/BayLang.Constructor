@@ -27,6 +27,13 @@
 <use name="Runtime.Widget.TextEditable" component="true" />
 
 <style>
+.widget_settings{
+	margin-top: var(--space);
+	&__label{
+		text-align: center;
+		font-weight: bold;
+	}
+}
 .widget_params{
 	margin-bottom: var(--space);
 	&__label{
@@ -72,19 +79,15 @@
 </template>
 
 <template>
-	<div class="widget_tab widget_tab--params"
-		class={{ this.isActive(WidgetDialogModel::TAB_PARAMS) }}
-	>
-		%render this.renderWidgetName();
-		<div class="widget_settings">
-		%if (this.parameters)
+	<div class="widget_settings">
+	%if (this.parameters and this.parameters.count() > 0)
+	{
+		<div class="widget_settings__label">Params</div>
+		%for (int i=0; i<this.parameters.count(); i++)
 		{
-			%for (int i=0; i<this.parameters.count(); i++)
-			{
-				%render this.renderParameter(this.parameters.get(i));
-			}
+			%render this.renderParameter(this.parameters.get(i));
 		}
-		</div>
+	}
 	</div>
 </template>
 

@@ -31,7 +31,12 @@
 
 <style>
 .widget_styles{
-	margin-bottom: calc(var(--space) * 0.5);
+	display: flex;
+	flex-direction: column;
+	position: relative;
+	.select_widget{
+		margin-bottom: calc(var(--space) * 0.5);
+	}
 	.select_widget__item .buttons{
 		display: flex;
 		align-items: center;
@@ -49,8 +54,10 @@
 }
 .widget_content{
 	width: 100%;
+	flex: 1;
 	resize: vertical;
 	min-height: 100px;
+	overflow-y: auto;
 }
 .widget_edit, .widget_delete{
 	display: flex;
@@ -93,13 +100,11 @@
 </template>
 
 <template>
-	<div class="widget_tab widget_tab--styles"
-		class={{ this.isActive(WidgetDialogModel::TAB_STYLES) }}
-	>
+	<div class="widget_styles">
 		%render this.renderWidgetName();
 		%if (this.widget instanceof WidgetTag and this.widget.styles)
 		{
-			<SelectWidget class="widget_styles" show_add="true"
+			<SelectWidget class="select_widget" show_add="true"
 				options={{ this.widget.styles.items.map(Map (string name) => {
 					"key": name,
 					"value": name,

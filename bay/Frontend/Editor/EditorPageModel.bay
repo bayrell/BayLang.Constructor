@@ -82,18 +82,7 @@ class EditorPageModel extends BaseModel
 	{
 		parent(params);
 		
-		this.add_dialog = this.createWidget(classof AddDialogModel);
-		this.remove_dialog = this.createWidget(classof RemoveDialogModel);
-		this.save_dialog = this.createWidget(classof SaveDialogModel);
-		this.widget_settings = this.createWidget(classof WidgetDialogModel, {});
-		this.widget_tree = this.createWidget(classof TreeModel, {
-			"autoselect": false,
-			"dnd": new Dnd(),
-		});
-		this.widget_tree.dnd.editor = this;
-		
-		/* Contextmenu */
-		this.contextmenu = this.createWidget(classof ContextMenuModel, {
+		Map contextmenu_options = {
 			"items": [
 				{
 					"label": "Add",
@@ -108,11 +97,26 @@ class EditorPageModel extends BaseModel
 					"key": "settings",
 				}*/
 			]
+		};
+		
+		this.add_dialog = this.createWidget(classof AddDialogModel);
+		this.remove_dialog = this.createWidget(classof RemoveDialogModel);
+		this.save_dialog = this.createWidget(classof SaveDialogModel);
+		this.widget_settings = this.createWidget(classof WidgetDialogModel, {});
+		this.widget_tree = this.createWidget(classof TreeModel, {
+			"autoselect": false,
+			"context_menu": contextmenu_options,
+			"dnd": new Dnd(),
 		});
+		this.widget_tree.dnd.editor = this;
+		
+		/* Contextmenu */
+		this.contextmenu = this.createWidget(classof ContextMenuModel, contextmenu_options);
 		this.contextmenu.addEventListener("clickItem", method this.onContextMenuClick);
 		
 		/* Add events */
 		this.widget_tree.addEventListener("selectItem", method this.onTreeSelectItem);
+		this.widget_tree.context_menu.addEventListener("clickItem", method this.onContextMenuClick);
 	}
 	
 	
@@ -220,7 +224,7 @@ class EditorPageModel extends BaseModel
 	 */
 	async void onContextMenuClick(ContextMenuMessage message)
 	{
-		this.contextmenu.hide();
+		message.model.hide();
 		
 		string key = message.item.get("key");
 		if (key == "add")

@@ -343,6 +343,7 @@ class CodeApi extends BaseApi
 		
 		/* Read file */
 		string content = rtl::toStr(this.request.get("content"));
+		content = rs::replace("\r\n", "\n", content);
 		await fs::saveFile(file_full_path, content);
 		
 		/* Compile file */
