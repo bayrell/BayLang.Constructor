@@ -54,9 +54,8 @@
 }
 .widget_content{
 	width: 100%;
-	flex: 1;
 	resize: vertical;
-	min-height: 100px;
+	min-height: 250px;
 	overflow-y: auto;
 }
 .widget_edit, .widget_delete{

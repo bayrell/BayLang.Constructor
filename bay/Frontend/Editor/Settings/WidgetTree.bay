@@ -22,11 +22,7 @@
 <use name="BayLang.Constructor.Frontend.Editor.Settings.WidgetDialogModel" />
 
 <template>
-	<div class="widget_tab widget_tab--tree"
-		class={{ this.isActive(WidgetDialogModel::TAB_TREE) }}
-	>
-		<TreeWidget model={{ this.model.parent_widget.widget_tree }} />
-	</div>
+	<TreeWidget model={{ this.model.parent_widget.widget_tree }} />
 </template>
 
 <script>
