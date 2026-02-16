@@ -46,6 +46,15 @@ class Style extends BaseObject
 	
 	
 	/**
+	 * Returns class name
+	 */
+	string getClassName()
+	{
+		return rs::substr(this.selector, 1);
+	}
+	
+	
+	/**
 	 * Set class name
 	 */
 	void setClassName(string class_name)

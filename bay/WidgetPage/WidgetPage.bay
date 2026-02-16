@@ -213,7 +213,7 @@ VirtualDom createTag(OpHtmlTag item, Vector path)
 	
 	/* Add events */
 	vdom.attrs.set("ref", "element_" ~ rs::join(".", path));
-	vdom.attrs.set("onclick", void (var e){
+	vdom.attrs.set("onmousedown", void (var e){
 		
 		e.preventDefault();
 		e.stopPropagation();

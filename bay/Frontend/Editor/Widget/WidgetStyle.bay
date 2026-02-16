@@ -69,6 +69,12 @@ class WidgetStyle extends BaseObject
 	
 	
 	/**
+	 * Returns styles
+	 */
+	Vector<string> getStyles() => this.items;
+	
+	
+	/**
 	 * Update current style
 	 */
 	void updateCurrentStyle(string content)
@@ -107,9 +113,17 @@ class WidgetStyle extends BaseObject
 		int index = this.items.indexOf(class_name);
 		if (index != -1) return;
 		
-		Style item = new Style();
-		item.setClassName(class_name);
-		this.widget.page_model.styles.addItem(item);
+		Style item = this.widget.page_model.styles.findStyle(class_name);
+		if (not item)
+		{
+			/* Create style*/
+			Style item = new Style();
+			item.setClassName(class_name);
+			
+			/* Add style */
+			this.widget.page_model.styles.addItem(item);
+		}
+		
 		this.items.push(class_name);
 		this.current_style = class_name;
 		
@@ -132,6 +146,7 @@ class WidgetStyle extends BaseObject
 		if (new_index != -1) return;
 		
 		/* Copy style */
+		if (this.widget.page_model.styles.exists(new_name)) return;
 		if (not this.widget.page_model.styles.exists(new_name))
 		{
 			this.widget.page_model.styles.copy(old_name, new_name);

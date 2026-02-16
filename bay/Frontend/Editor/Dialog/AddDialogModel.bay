@@ -20,6 +20,7 @@ namespace BayLang.Constructor.Frontend.Editor.Dialog;
 
 use Runtime.Widget.Dialog.DialogModel;
 use BayLang.Constructor.Frontend.Editor.Dialog.AddDialog;
+use BayLang.Constructor.Frontend.Editor.Styles.Style;
 use BayLang.Constructor.Frontend.Editor.Widget.Widget;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetProvider;
 use BayLang.Constructor.Frontend.Editor.Widget.WidgetTag;
@@ -74,6 +75,10 @@ class AddDialogModel extends DialogModel
 				new_widget.setAttrValue(key, value);
 			}
 		}
+		
+		/* Create unique widget class name */
+		string widget_class_name = this.parent_widget.styles.generateWidgetClassName(widget_name);
+		new_widget.styles.add(widget_class_name);
 		
 		/* Init widget */
 		new_widget.init();

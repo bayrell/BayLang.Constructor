@@ -28,6 +28,7 @@ use BayLang.OpCodes.BaseOpCode;
 use BayLang.OpCodes.OpHtmlCSS;
 use BayLang.OpCodes.OpHtmlStyle;
 use Runtime.BaseObject;
+use Runtime.DateTime;
 
 
 class StyleManager extends BaseObject
@@ -36,6 +37,7 @@ class StyleManager extends BaseObject
 	CodeStrategryInterface code_strategy = null;
 	Map<Style> items = {};
 	Vector styles = [];
+	int style_number = 0;
 	
 	
 	/**
@@ -142,7 +144,7 @@ class StyleManager extends BaseObject
 	 */
 	void addItem(Style item)
 	{
-		this.items.set(item.selector, item);
+		this.items.set(item.getClassName(), item);
 	}
 	
 	
@@ -154,7 +156,7 @@ class StyleManager extends BaseObject
 		if (not class_name) return null;
 		
 		/* Returns style */
-		Style item = this.items.get("." ~ class_name);
+		Style item = this.items.get(class_name);
 		return item ? item : null;
 	}
 	
@@ -178,5 +180,70 @@ class StyleManager extends BaseObject
 		Style new_item = item.copy();
 		new_item.setClassName(new_name);
 		this.addItem(new_item);
+	}
+	
+	
+	/**
+	 * Init style number
+	 */
+	void initStyleNumber(Widget widget)
+	{
+		Vector arr = [widget];
+		while (arr.count() != 0)
+		{
+			Widget item = arr.first();
+			arr.remove(0);
+			
+			if (item instanceof WidgetTag)
+			{
+				Vector<string> styles = item.styles.getStyles();
+				for (int i=0; i<styles.count(); i++)
+				{
+					string class_name = styles.get(i);
+					Vector class_name_arr = rs::split("-", class_name);
+					if (class_name_arr.count() != 2) continue;
+					
+					/* Detect integer */
+					int number = rtl::toInt(class_name_arr.last());
+					if (number == 0) continue;
+					
+					/* Set number */
+					if (number > this.style_number)
+					{
+						this.style_number = number;
+					}
+				}
+			}
+			
+			arr.appendItems(item.items);
+		}
+	}
+	
+	
+	/**
+	 * Generate widget class name
+	 */
+	string generateWidgetClassName(string widget_name)
+	{
+		this.style_number = this.style_number + 1;
+		return widget_name ~ "-" ~ this.style_number;
+	}
+	
+	
+	/**
+	 * Generate unique class name
+	 */
+	string generateUniqueClassName(string widget_name)
+	{
+		int number = DateTime::now().timestamp() + rtl::random(1000, 9999);
+		string widget_class_name = widget_name ~ "-" ~ rs::getCssHash(number);
+		Style item = this.findStyle(widget_class_name);
+		while (item != null)
+		{
+			number = number + 1;
+			widget_class_name = widget_name ~ "-" ~ rs::getCssHash(number);
+			item = this.findStyle(widget_class_name);
+		}
+		return widget_class_name;
 	}
 }

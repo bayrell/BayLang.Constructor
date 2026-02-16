@@ -86,11 +86,11 @@ class Widget extends BaseObject
 				if (item instanceof OpUse)
 				{
 					Vector arr = rs::split(".", item.name);
-					if (class_name == item.alias_name and item.alias_name != null or 
+					if (class_name == item.alias and item.alias != null or
 						class_name == arr.last()
 					)
 					{
-						return item.alias_name ? item.alias_name : item.name;
+						return item.name;
 					}
 				}
 			}

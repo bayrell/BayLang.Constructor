@@ -153,6 +153,7 @@ class EditorPageModel extends BaseModel
 				this.widget.setCode(this.code_component.op_render);
 				this.widget_tree.root = this.widget.tree_item;
 				this.widget.init();
+				this.styles.initStyleNumber(this.widget);
 			}
 			this.styles.init();
 		}
