@@ -143,10 +143,12 @@ void updated()
 {
 	string selected_path_editor = rs::join(".", this.model.editor.selected_path);
 	string selected_path_component = rs::join(".", this.selected_path);
-	if (selected_path_editor != selected_path_component)
+	if (selected_path_editor != selected_path_component or this.model.update_selected_box)
 	{
 		this.selected_path = this.model.editor.selected_path.slice();
-		this.model.selectElement(this.getElementByPath(this.selected_path));
+		this.nextTick(void(){
+			this.model.selectElement(this.getElementByPath(this.selected_path));
+		})
 	}
 }
 

@@ -1,0 +1,157 @@
+/*!
+ *  BayLang Technology
+ *
+ *  (c) Copyright 2016-2024 "Ildar Bikmamatov" <support@bayrell.org>
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
+namespace BayLang.Constructor.Frontend.Editor.Dialog;
+
+use Runtime.ApiResult;
+use Runtime.RenderContainer;
+use Runtime.Serializer.ObjectType;
+use Runtime.Widget.Dialog.DialogMessage;
+use Runtime.Widget.Dialog.DialogModel;
+use BayLang.Constructor.Frontend.Editor.Dialog.SelectImageDialog;
+
+
+class SelectImageDialogModel extends DialogModel
+{
+	string component = classof SelectImageDialog;
+	Vector<Map> items = [];
+	string selected_item = "";
+	
+	
+	/**
+	 * Serialize object
+	 */
+	static void seralize(ObjectType rules)
+	{
+		parent(rules);
+	}
+	
+	
+	/**
+	 * Load data
+	 */
+	async void loadData(RenderContainer container)
+	{
+		parent(container);
+		this.reload();
+	}
+	
+	
+	/**
+	 * Reload items
+	 */
+	async void reload()
+	{
+		ApiResult result = await this.layout.sendApi({
+			"api_name": "baylang.constructor.assets",
+			"method_name": "files",
+		});
+		if (result.isSuccess())
+		{
+			this.items = result.data.get("items");
+		}
+	}
+	
+	
+	/**
+	 * Upload file
+	 */
+	async void uploadFile(var file)
+	{
+		ApiResult result = await this.layout.sendApi({
+			"api_name": "baylang.constructor.assets",
+			"method_name": "upload",
+			"data":
+			{
+				"file": file,
+			}
+		});
+		if (result.isSuccess())
+		{
+			await this.reload();
+		}
+	}
+	
+	
+	/**
+	 * Delete file
+	 */
+	async void deleteFile(string file_path)
+	{
+		/* Remove file from items */
+		int index = this.items.findIndex(bool (Map item) => item.get("file_path") == file_path);
+		if (index >= 0)
+		{
+			this.items.remove(index);
+		}
+		
+		/* Send remove file api */
+		ApiResult result = await this.layout.sendApi({
+			"api_name": "baylang.constructor.assets",
+			"method_name": "remove",
+			"data":
+			{
+				"file_path": file_path,
+			}
+		});
+		if (result.isSuccess())
+		{
+			await this.reload();
+		}
+	}
+	
+	
+	/**
+	 * Returns selected item
+	 */
+	string getSelectedItem() => this.selected_item;
+	
+	
+	/**
+	 * Select item
+	 */
+	void selectItem(Map image)
+	{
+		this.selected_item = image.get("file_path");
+	}
+	
+	
+	/**
+	 * Select
+	 */
+	void select()
+	{
+		this.listener.emit(new DialogMessage{
+			"name": "confirm",
+		});
+		this.hide();
+	}
+	
+	
+	/**
+	 * Clear image
+	 */
+	void clear()
+	{
+		this.selected_item = "";
+		this.listener.emit(new DialogMessage{
+			"name": "confirm",
+		});
+		this.hide();
+	}
+}

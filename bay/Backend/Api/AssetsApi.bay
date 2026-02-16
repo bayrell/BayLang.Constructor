@@ -23,8 +23,11 @@ use Runtime.File;
 use Runtime.Exceptions.ApiError;
 use Runtime.Exceptions.ItemNotFound;
 use Runtime.Exceptions.RuntimeException;
+use Runtime.Serializer.MapType;
+use Runtime.Serializer.StringType;
 use Runtime.Web.BaseApi;
 use Runtime.Web.Annotations.ApiMethod;
+use BayLang.Compiler.Project;
 use BayLang.Constructor.Backend.ApiHook;
 use BayLang.Constructor.Backend.Service.WidgetService;
 
@@ -40,25 +43,33 @@ class AssetsApi extends BaseApi
 	/**
 	 * Upload file
 	 */
-	@ApiMethod
+	@ApiMethod{ "name": "upload" }
 	async void uploadFile()
 	{
-		WidgetService service = new WidgetService();
-		string project_id = this.post_data.get("project_id");
-		
-		/* Load project */
-		await service.loadProject(project_id);
+		/* Get project */
+		Project project = ApiHook::getProject();
+		if (not project)
+		{
+			throw new ApiError(new ItemNotFound("project"))
+		}
 		
 		/* Get file */
-		File file = this.post_data.get("file");
+		File file = this.request.data.get("file");
 		if (not file)
 		{
 			throw new ApiError(new RuntimeException("File not found"));
 		}
 		
+		/* Filter data */
+		MapType rules = new MapType{
+			"path": new StringType(),
+		};
+		Map post_data = this.filter(this.request.data, rules);
+		
 		/* Get path */
-		string folder_name = this.post_data.get("path");
-		string folder_path = fs::join([service.assets_path, folder_name]);
+		string assets_path = ApiHook::getAssetsPath(project);
+		string folder_name = post_data.get("path");
+		string folder_path = fs::join([assets_path, folder_name]);
 		string file_upload_path = fs::join([folder_path, file.getName()]);
 		
 		/* Create folder */
@@ -84,18 +95,26 @@ class AssetsApi extends BaseApi
 	/**
 	 * Remove file
 	 */
-	@ApiMethod
+	@ApiMethod{ "name": "remove" }
 	async void removeFile()
 	{
-		WidgetService service = new WidgetService();
-		string project_id = this.post_data.get("project_id");
+		/* Get project */
+		Project project = ApiHook::getProject();
+		if (not project)
+		{
+			throw new ApiError(new ItemNotFound("project"))
+		}
 		
-		/* Load project */
-		await service.loadProject(project_id);
+		/* Filter data */
+		MapType rules = new MapType{
+			"file_path": new StringType(),
+		};
+		Map post_data = this.filter(this.request.data, rules);
 		
 		/* Get file path */
-		string file_name = this.post_data.get("file_name");
-		string file_path = fs::join([service.assets_path, "images", file_name]);
+		string assets_path = ApiHook::getAssetsPath(project);
+		string file_name = post_data.get("file_path");
+		string file_path = fs::join([assets_path, file_name]);
 		
 		/* Check file path */
 		if (not await fs::exists(file_path))
@@ -110,7 +129,7 @@ class AssetsApi extends BaseApi
 		this.success({
 			"data":
 			{
-				"file_name": file_name,
+				"file_path": file_path,
 			}
 		});
 	}
@@ -119,19 +138,26 @@ class AssetsApi extends BaseApi
 	/**
 	 * Returns files
 	 */
-	@ApiMethod
+	@ApiMethod{ "name": "files" }
 	async void getFiles()
 	{
-		WidgetService service = new WidgetService();
-		string project_id = this.post_data.get("project_id");
+		/* Get project */
+		Project project = ApiHook::getProject();
+		if (not project)
+		{
+			throw new ApiError(new ItemNotFound("project"))
+		}
 		
-		/* Load project */
-		await service.loadProject(project_id);
+		/* Filter data */
+		MapType rules = new MapType{
+			"path": new StringType(),
+		};
+		Map post_data = this.filter(this.request.data, rules);
 		
 		/* Get assets path */
-		string assets_path = ApiHook::getAssetsPath(service.project);
-		string assets_url_path = ApiHook::getAssetsUrlPath(service.project);
-		string folder_name = this.post_data.get("path");
+		string assets_path = ApiHook::getAssetsPath(project);
+		string assets_url_path = ApiHook::getAssetsUrlPath(project);
+		string folder_name = post_data.get("path");
 		string folder_path = fs::join([assets_path, folder_name]);
 		
 		/* Check file path */
@@ -158,11 +184,13 @@ class AssetsApi extends BaseApi
 			if (await fs::isFile(item_path)) item_kind = "file";
 			else if (await fs::isDir(item_path)) item_kind = "dir";
 			
+			Vector arr = [folder_name, item_name];
+			arr = arr.filter(bool (string item) => item != "");
 			items.push({
 				"kind": item_kind,
 				"file_name": item_name,
-				"file_path": fs::join([folder_name, item_name]),
-				"url": fs::join([assets_url_path, folder_name, item_name]),
+				"file_path": fs::join(arr),
+				"url": assets_url_path ~ "/" ~ rs::join("/", arr),
 			});
 		}
 		

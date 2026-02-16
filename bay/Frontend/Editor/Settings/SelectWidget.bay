@@ -16,7 +16,7 @@
  *  limitations under the License.
 -->
 
-<class name="BayLang.Constructor.Frontend.Editor.Components.SelectWidget">
+<class name="BayLang.Constructor.Frontend.Editor.Settings.SelectWidget">
 
 <use name="Runtime.Message" />
 <use name="Runtime.Widget.Messages.ValueChangeMessage" />

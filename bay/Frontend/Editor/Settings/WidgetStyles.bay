@@ -18,7 +18,7 @@
 
 <class name="BayLang.Constructor.Frontend.Editor.Settings.WidgetStyles">
 
-<use name="BayLang.Constructor.Frontend.Editor.Components.SelectWidget" />
+<use name="BayLang.Constructor.Frontend.Editor.Settings.SelectWidget" component="true" />
 <use name="BayLang.Constructor.Frontend.Editor.Settings.WidgetDialogModel" />
 <use name="BayLang.Constructor.Frontend.Editor.Styles.Style" />
 <use name="BayLang.Constructor.Frontend.Editor.Widget.Widget" />

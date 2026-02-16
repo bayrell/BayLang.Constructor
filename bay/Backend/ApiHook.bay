@@ -44,11 +44,11 @@ class ApiHook extends BaseHook
 	/**
 	 * Returns assets path
 	 */
-	async static string getAssetsPath(Project project)
+	static string getAssetsPath(Project project)
 	{
-		Dict result = await @.callHookAsync(static::GET_ASSETS_PATH, {
+		Dict result = @.hook(static::GET_ASSETS_PATH, {
 			"project": project,
-			"path": fs::join([project.getPath(), "assets"]),
+			"path": fs::join([project.getPath(), "Assets", "images"]),
 		});
 		return result.get("path");
 	}
@@ -57,11 +57,11 @@ class ApiHook extends BaseHook
 	/**
 	 * Returns project assets url path
 	 */
-	async static string getAssetsUrlPath(Project project)
+	static string getAssetsUrlPath(Project project)
 	{
-		Dict result = await @.callHookAsync(static::GET_ASSETS_URL_PATH, {
+		Dict result = @.hook(static::GET_ASSETS_URL_PATH, {
 			"project": project,
-			"path": "/assets",
+			"path": "/Assets/images",
 		});
 		return result.get("path");
 	}

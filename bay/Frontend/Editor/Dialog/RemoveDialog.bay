@@ -22,7 +22,7 @@
 <use name="Runtime.Widget.Dialog.Dialog" component="true" />
 
 <template>
-	<Dialog model={{ this.model }}>
+	<Dialog class="remove_dialog" model={{ this.model }}>
 		<slot name="title">
 			Delete widget
 		</slot>

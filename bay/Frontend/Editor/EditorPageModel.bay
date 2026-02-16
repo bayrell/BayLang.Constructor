@@ -32,6 +32,7 @@ use BayLang.OpCodes.OpHtmlTag;
 use BayLang.Constructor.Frontend.Editor.Dialog.AddDialogModel;
 use BayLang.Constructor.Frontend.Editor.Dialog.RemoveDialogModel;
 use BayLang.Constructor.Frontend.Editor.Dialog.SaveDialogModel;
+use BayLang.Constructor.Frontend.Editor.Dialog.SelectImageDialogModel;
 use BayLang.Constructor.Frontend.Editor.Manager.CodeManager;
 use BayLang.Constructor.Frontend.Editor.Settings.WidgetDialogModel;
 use BayLang.Constructor.Frontend.Editor.Styles.StyleManager;
@@ -59,6 +60,7 @@ class EditorPageModel extends BaseModel
 	SaveDialogModel save_dialog = null;
 	ContextMenuModel contextmenu = null;
 	WidgetDialogModel widget_settings = null;
+	SelectImageDialogModel select_image_dialog = null;
 	TreeModel widget_tree = null;
 	StyleManager styles = new StyleManager(this);
 	
@@ -102,6 +104,7 @@ class EditorPageModel extends BaseModel
 		this.add_dialog = this.createWidget(classof AddDialogModel);
 		this.remove_dialog = this.createWidget(classof RemoveDialogModel);
 		this.save_dialog = this.createWidget(classof SaveDialogModel);
+		this.select_image_dialog = this.createWidget(classof SelectImageDialogModel);
 		this.widget_settings = this.createWidget(classof WidgetDialogModel, {});
 		this.widget_tree = this.createWidget(classof TreeModel, {
 			"autoselect": false,
@@ -131,6 +134,8 @@ class EditorPageModel extends BaseModel
 	 */
 	async void loadCode()
 	{
+		this.select_image_dialog.loadData(null);
+		
 		ApiResult result = await this.layout.sendApi({
 			"api_name": "baylang.constructor.widget",
 			"method_name": "load",
@@ -256,7 +261,7 @@ class EditorPageModel extends BaseModel
 	 */
 	void updateSelectedBox()
 	{
-		window.setTimeout(void (){ this.parent_widget.updateSelectedBox(); }, 1);
+		window.setTimeout(void (){ this.parent_widget.forceUpdateSelectedBox(); }, 1);
 	}
 	
 	

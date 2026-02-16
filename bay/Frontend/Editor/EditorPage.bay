@@ -51,6 +51,7 @@
 		%render this.renderWidget(this.model.add_dialog);
 		%render this.renderWidget(this.model.remove_dialog);
 		%render this.renderWidget(this.model.save_dialog);
+		%render this.renderWidget(this.model.select_image_dialog);
 	</div>
 </template>
 

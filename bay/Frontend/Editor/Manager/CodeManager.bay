@@ -84,6 +84,27 @@ class CodeManager extends BaseObject
 		Vector arr = rs::split(".", class_name);
 		string alias_name = arr.last();
 		this.modules.set(alias_name, class_name);
+		
+		OpUse item = new OpUse
+		{
+			"alias": alias_name,
+			"name": class_name,
+		};
+		int pos = 0;
+		while (pos < this.code.items.count())
+		{
+			BaseOpCode op_code_item = this.code.items.get(pos);
+			if (op_code_item instanceof OpUse)
+			{
+				if (class_name < op_code_item.name) break;
+			}
+			if (op_code_item instanceof OpDeclareClass) break;
+			pos++;
+		}
+		
+		/* Insert item */
+		this.code.items.insert(pos, item);
+		
 		return alias_name;
 	}
 	

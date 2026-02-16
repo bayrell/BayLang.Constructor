@@ -32,6 +32,7 @@ class WidgetPageModel extends BaseModel
 	EditorPageModel editor = null;
 	var selected_elem = null;
 	string selected_style = "";
+	bool update_selected_box = false;
 	
 	
 	/**
@@ -101,6 +102,16 @@ class WidgetPageModel extends BaseModel
 	/**
 	 * Update selected box
 	 */
+	void forceUpdateSelectedBox()
+	{
+		this.selected_style = "";
+		this.update_selected_box = true;
+	}
+	
+	
+	/**
+	 * Update selected box
+	 */
 	void updateSelectedBox()
 	{
 		if (not this.selected_elem)
@@ -114,5 +125,6 @@ class WidgetPageModel extends BaseModel
 		arr.push("width: " ~ this.selected_elem.offsetWidth);
 		arr.push("height: " ~ this.selected_elem.offsetHeight);
 		this.selected_style = rs::join(";", arr);
+		this.update_selected_box = false;
 	}
 }
