@@ -23,6 +23,9 @@
 <use name="Runtime.VirtualDom" />
 <use name="BayLang.Constructor.Frontend.Editor.Styles.Style" />
 <use name="BayLang.Constructor.Frontend.Editor.Styles.StyleManager" />
+<use name="BayLang.Constructor.Frontend.Editor.Widget.Widget" />
+<use name="BayLang.Constructor.Frontend.Editor.Widget.WidgetTag" />
+<use name="BayLang.Constructor.Frontend.Editor.Widget.WidgetText" />
 <use name="BayLang.OpCodes.BaseOpCode" />
 <use name="BayLang.OpCodes.OpItems" />
 <use name="BayLang.OpCodes.OpHtmlAttribute" />
@@ -58,11 +61,7 @@
 </template>
 
 <template name="renderComponent">
-	%set BaseOpCode op_render = this.model.editor.code_component.op_render;
-	%if (op_render)
-	{
-		%render this.renderItems(op_render.content);
-	}
+	%render this.renderItems(this.model.editor.widget);
 	%render this.renderSelected();
 </template>
 
@@ -145,7 +144,8 @@ void updated()
 	string selected_path_component = rs::join(".", this.selected_path);
 	if (selected_path_editor != selected_path_component or this.model.update_selected_box)
 	{
-		this.selected_path = this.model.editor.selected_path.slice();
+		this.selected_path = this.model.editor.selected_path ?
+			this.model.editor.selected_path.slice() : null;
 		this.nextTick(void(){
 			this.model.selectElement(this.getElementByPath(this.selected_path));
 		})
@@ -180,13 +180,14 @@ var getElementByPath(Vector path)
 /**
  * Create virtual DOM by html tag
  */
-VirtualDom createTag(OpHtmlTag item, Vector path)
+VirtualDom createTag(WidgetTag widget, Vector path)
 {
 	/* Create vdom */
 	VirtualDom vdom = new VirtualDom(this.getRef("component"));
-	vdom.setName(item.tag_name);
+	vdom.setName(widget.getTagName());
 	
 	/* If component */
+	OpHtmlTag item = widget.op_code;
 	if (item.is_component)
 	{
 		vdom.setName(this.model.editor.code_component.findModule(item.tag_name));
@@ -212,6 +213,7 @@ VirtualDom createTag(OpHtmlTag item, Vector path)
 	}
 	
 	/* Add events */
+	vdom.attrs.set("key", widget.id);
 	vdom.attrs.set("ref", "element_" ~ rs::join(".", path));
 	vdom.attrs.set("onmousedown", void (var e){
 		
@@ -244,13 +246,13 @@ VirtualDom createTag(OpHtmlTag item, Vector path)
 		vdom.slot("default", VirtualDom (){
 			var component = this.getRef("component");
 			VirtualDom slot = new VirtualDom(component);
-			slot.items = this.renderItems(item.content, path);
+			slot.items = this.renderItems(widget, path);
 			return slot;
 		});
 	}
 	else
 	{
-		vdom.items = this.renderItems(item.content, path);
+		vdom.items = this.renderItems(widget, path);
 	}
 	
 	return vdom;
@@ -258,25 +260,20 @@ VirtualDom createTag(OpHtmlTag item, Vector path)
 
 
 /**
- * Returns text node
- */
-string createText(OpHtmlTag item)
-{
-	return item.value;
-}
-
-
-/**
  * Render items
  */
-Vector<VirtualDom> renderItems(OpItems content, Vector path = [])
+Vector<VirtualDom> renderItems(WidgetTag widget, Vector path = [])
 {
-	Vector result = [];
-	for (int i=0; i<content.count(); i++)
+	if (widget instanceof WidgetText)
 	{
-		BaseOpCode item = content.items.get(i);
-		if (item instanceof OpHtmlTag) result.push(this.createTag(item, path.slice().concat([i])));
-		else if (item instanceof OpHtmlContent) result.push(this.createText(item));
+		return [ widget.getValue() ];
+	}
+	
+	Vector result = [];
+	for (int i=0; i<widget.items.count(); i++)
+	{
+		Widget item = widget.items.get(i);
+		result.push(this.createTag(item, path.slice().concat([i])));
 	}
 	return result;
 }

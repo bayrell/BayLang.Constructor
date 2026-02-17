@@ -35,6 +35,7 @@
 		"Frontend/Editor/Settings/WidgetDialog.bay",
 		"Frontend/Editor/Settings/WidgetDialogModel.bay",
 		"Frontend/Editor/Settings/WidgetParams.bay",
+		"Frontend/Editor/Settings/WidgetParamsModel.bay",
 		"Frontend/Editor/Settings/WidgetStyles.bay",
 		"Frontend/Editor/Settings/WidgetTree.bay",
 		"Frontend/Editor/Styles/Style.bay",

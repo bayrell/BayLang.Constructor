@@ -43,6 +43,7 @@ class WidgetText extends WidgetTag
 	void setValue(string content)
 	{
 		this.code_strategy.setValue(content);
+		this.page_model.updateSelectedBox();
 	}
 	
 	

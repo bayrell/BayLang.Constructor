@@ -35,6 +35,7 @@ use BayLang.Constructor.Frontend.Editor.Dialog.SaveDialogModel;
 use BayLang.Constructor.Frontend.Editor.Dialog.SelectImageDialogModel;
 use BayLang.Constructor.Frontend.Editor.Manager.CodeManager;
 use BayLang.Constructor.Frontend.Editor.Settings.WidgetDialogModel;
+use BayLang.Constructor.Frontend.Editor.Settings.WidgetParamsModel;
 use BayLang.Constructor.Frontend.Editor.Styles.StyleManager;
 use BayLang.Constructor.Frontend.Editor.Widget.Dnd;
 use BayLang.Constructor.Frontend.Editor.Widget.Widget;
@@ -49,6 +50,7 @@ class EditorPageModel extends BaseModel
 {
 	string component = classof EditorPage;
 	string page_model = "";
+	int widget_id = 0;
 	WidgetPageModel page_widget = null;
 	Widget widget = null;
 	Vector selected_path = null;
@@ -59,6 +61,7 @@ class EditorPageModel extends BaseModel
 	RemoveDialogModel remove_dialog = null;
 	SaveDialogModel save_dialog = null;
 	ContextMenuModel contextmenu = null;
+	WidgetParamsModel widget_params = null;
 	WidgetDialogModel widget_settings = null;
 	SelectImageDialogModel select_image_dialog = null;
 	TreeModel widget_tree = null;
@@ -94,10 +97,14 @@ class EditorPageModel extends BaseModel
 					"label": "Remove",
 					"key": "remove",
 				},
-				/*{
+				{
+					"label": "Duplicate",
+					"key": "duplicate",
+				},
+				{
 					"label": "Settings",
 					"key": "settings",
-				}*/
+				}
 			]
 		};
 		
@@ -105,6 +112,7 @@ class EditorPageModel extends BaseModel
 		this.remove_dialog = this.createWidget(classof RemoveDialogModel);
 		this.save_dialog = this.createWidget(classof SaveDialogModel);
 		this.select_image_dialog = this.createWidget(classof SelectImageDialogModel);
+		this.widget_params = this.createWidget(classof WidgetParamsModel);
 		this.widget_settings = this.createWidget(classof WidgetDialogModel, {});
 		this.widget_tree = this.createWidget(classof TreeModel, {
 			"autoselect": false,
@@ -149,7 +157,8 @@ class EditorPageModel extends BaseModel
 			this.code_component.assign(result.data.get("component"));
 			if (this.code_component.isLoaded())
 			{
-				this.widget = new WidgetTag(this);
+				this.widget = new WidgetTag();
+				this.widget.setPageModel(this);
 				this.widget.setCode(this.code_component.op_render);
 				this.widget_tree.root = this.widget.tree_item;
 				this.widget.init();
@@ -241,6 +250,10 @@ class EditorPageModel extends BaseModel
 		{
 			this.showRemoveWidget();
 		}
+		else if (key == "duplicate")
+		{
+			this.duplicateSelected();
+		}
 		else if (key == "settings")
 		{
 			this.showSettings();
@@ -267,6 +280,29 @@ class EditorPageModel extends BaseModel
 	
 	
 	/**
+	 * Duplicate selected widget
+	 */
+	void duplicateSelected()
+	{
+		if (not this.selected_widget) return;
+		
+		/* Create new widget */
+		var op_code = rtl::copy(this.selected_widget.op_code);
+		Widget widget = Widget::createWidget(op_code);
+		Widget parent_widget = this.widget.get(this.selected_path.slice(0, -1));
+		widget.setParentWidget(parent_widget);
+		widget.init();
+		
+		/* Insert widget */
+		int index = this.selected_path.last();
+		parent_widget.insert(index, widget);
+		Vector path = widget.getCurrentPath();
+		path.set(path.count() - 1, index);
+		this.selectItem(path);
+	}
+	
+	
+	/**
 	 * Show add widget
 	 */
 	void showAddWidget()
@@ -289,6 +325,6 @@ class EditorPageModel extends BaseModel
 	 */
 	void showSettings()
 	{
-		this.widget_settings.show();
+		this.widget_params.show();
 	}
 }

@@ -24,9 +24,21 @@
 <use name="BayLang.Constructor.Frontend.Editor.Settings.WidgetDialogModel" />
 <use name="BayLang.Constructor.Frontend.Editor.Widget.Widget" />
 <use name="BayLang.Constructor.Frontend.Editor.Widget.WidgetTag" />
+<use name="Runtime.Widget.Button" component="true" />
+<use name="Runtime.Widget.Dialog.Dialog" component="true" />
 <use name="Runtime.Widget.TextEditable" component="true" />
 
 <style>
+.widget_settings_dialog .dialog__container{
+	.admin-bar &{
+		margin-top: 38px;
+	}
+	@media (max-width: 782px){
+		.admin-bar &{
+			margin-top: 52px;
+		}
+	}
+}
 .widget_settings{
 	margin-top: var(--space);
 	&__label{
@@ -79,16 +91,26 @@
 </template>
 
 <template>
-	<div class="widget_settings">
-	%if (this.parameters and this.parameters.count() > 0)
-	{
-		<div class="widget_settings__label">Params</div>
-		%for (int i=0; i<this.parameters.count(); i++)
-		{
-			%render this.renderParameter(this.parameters.get(i));
-		}
-	}
-	</div>
+	<Dialog class="widget_settings_dialog" model={{ this.model }}>
+		<slot name="title">
+			Settings
+		</slot>
+		<slot name="content">
+			<div class="widget_settings">
+			%if (this.parameters and this.parameters.count() > 0)
+			{
+				<div class="widget_settings__label">Params</div>
+				%for (int i=0; i<this.parameters.count(); i++)
+				{
+					%render this.renderParameter(this.parameters.get(i));
+				}
+			}
+			</div>
+		</slot>
+		<slot name="footer">
+			<Button @event:click="this.model.hide();">Hide</Button>
+		</slot>
+	</Dialog>
 </template>
 
 <script>

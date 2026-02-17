@@ -47,7 +47,8 @@ class WidgetTag extends Widget
 			for (int i=0; i<this.op_code.content.count(); i++)
 			{
 				BaseOpCode item = this.op_code.content.get(i);
-				Widget widget = this.createWidget(item);
+				Widget widget = static::createWidget(item);
+				widget.setParentWidget(this);
 				if (widget)
 				{
 					widget.init();
@@ -87,6 +88,8 @@ class WidgetTag extends Widget
 	 */
 	void init()
 	{
+		parent();
+		
 		this.initItems();
 		this.styles.init();
 		

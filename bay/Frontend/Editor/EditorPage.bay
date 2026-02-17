@@ -47,6 +47,7 @@
 <template>
 	<div class="editor_page">
 		%render this.renderWidget(this.model.contextmenu);
+		%render this.renderWidget(this.model.widget_params);
 		%render this.renderWidget(this.model.widget_settings);
 		%render this.renderWidget(this.model.add_dialog);
 		%render this.renderWidget(this.model.remove_dialog);

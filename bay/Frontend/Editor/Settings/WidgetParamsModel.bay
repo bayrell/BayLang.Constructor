@@ -16,25 +16,13 @@
  *  limitations under the License.
  */
 
-namespace BayLang.Constructor.Frontend.Editor.Dialog;
+namespace BayLang.Constructor.Frontend.Editor.Settings;
 
 use Runtime.Widget.Dialog.DialogModel;
-use BayLang.Constructor.Frontend.Editor.Dialog.RemoveDialog;
+use BayLang.Constructor.Frontend.Editor.Settings.WidgetParams;
 
 
-class RemoveDialogModel extends DialogModel
+class WidgetParamsModel extends DialogModel
 {
-	string component = classof RemoveDialog;
-	
-	
-	/**
-	 * Remove widget
-	 */
-	void removeWidget()
-	{
-		if (not this.parent_widget.selected_widget) return;
-		this.parent_widget.selected_widget.remove();
-		this.parent_widget.selectItem(null);
-		this.hide();
-	}
+	string component = classof WidgetParams;
 }

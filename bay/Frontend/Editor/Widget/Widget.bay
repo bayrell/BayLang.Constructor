@@ -37,9 +37,10 @@ use BayLang.Constructor.Frontend.Editor.EditorPageModel;
 class Widget extends BaseObject
 {
 	var op_code = null;
+	int id = 0;
 	CodeStrategyInterface code_strategy = null;
 	Widget parent_widget = null;
-	EditorPageModel editor = null;
+	EditorPageModel page_model = null;
 	Vector<Widget> items = [];
 	Vector<Parameter> params = null;
 	TreeItem tree_item = null;
@@ -86,7 +87,7 @@ class Widget extends BaseObject
 	/**
 	 * Create widget
 	 */
-	Widget createWidget(var op_code)
+	static Widget createWidget(var op_code)
 	{
 		Widget widget = null;
 		string widget_name = static::getWidgetName(op_code);
@@ -104,6 +105,7 @@ class Widget extends BaseObject
 	 */
 	Widget get(Vector path)
 	{
+		if (not path) return null;
 		if (path.count() == 0) return this;
 		
 		int pos = path.first();
@@ -138,25 +140,26 @@ class Widget extends BaseObject
 	 */
 	void setParentWidget(Widget widget)
 	{
-		if (widget instanceof Widget)
-		{
-			this.parent_widget = widget;
-			this.page_model = widget.page_model;
-		}
-		else if (widget instanceof EditorPageModel)
-		{
-			this.page_model = widget;
-		}
+		this.parent_widget = widget;
+		this.page_model = widget.page_model;
+	}
+	
+	
+	/**
+	 * Set page model
+	 */
+	void setPageModel(EditorPageModel page_model)
+	{
+		this.page_model = page_model;
 	}
 	
 	
 	/**
 	 * Create widget
 	 */
-	void constructor(Widget widget = null)
+	void constructor()
 	{
 		parent();
-		this.setParentWidget(widget);
 		
 		/* Create tree item */
 		this.tree_item = new TreeItem();
@@ -179,6 +182,11 @@ class Widget extends BaseObject
 	 */
 	void init()
 	{
+		this.page_model.widget_id = this.page_model.widget_id + 1;
+		
+		/* Setup id */
+		this.id = this.page_model.widget_id;
+		this.tree_item.key = this.id;
 	}
 	
 	
